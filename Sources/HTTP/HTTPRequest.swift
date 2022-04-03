@@ -8,7 +8,7 @@
 import Concurrency
 import Foundation
 
-public struct HTTPRequest {
+public struct HTTPRequest: Identifiable {
 
     private struct State {
         var method: HTTPMethod = .get

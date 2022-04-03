@@ -9,9 +9,12 @@ import Foundation
 
 public protocol Transport {
 
-    @available(iOS 15.0.0, *)
-    @available(macOS 12.0, *)
     func send(request: URLRequest) async throws -> (Data, URLResponse)
+}
 
-    func send(request: URLRequest, completion: @escaping (Data?, URLResponse?, Error?) -> Void)
+public extension Transport {
+
+    func send(request: URLRequest) -> Task<(Data, URLResponse), Error> {
+        Task { try await send(request: request) }
+    }
 }

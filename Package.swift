@@ -3,7 +3,7 @@
 import PackageDescription
 
 var externals: [Target.Dependency] = [
-//    .product(name: "Tagged", package: "swift-tagged"),
+    .product(name: "Tagged", package: "swift-tagged"),
     .product(name: "Utilities", package: "swift-utilities"),
 ]
 
@@ -21,6 +21,7 @@ let package = Package(
         .library(name: "Networking", targets: ["HTTP"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
         .package(url: "ssh://github.com/danthorpe/swift-utilities", branch: "main"),
     ],
     targets: [

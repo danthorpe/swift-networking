@@ -15,14 +15,14 @@ public final class TransportLoader: HTTPLoadable {
         self.transport = transport
     }
 
-    public func load(_ request: HTTPRequest) async throws -> HTTPLoadableResponse {
+    public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
         do {
             let urlRequest = try createURLRequest(request: request)
-            let (data, response) = try await transport.send(request: urlRequest)
-            let httpResponse = try createHTTPResponse(request: request, data: data, response: response)
-            return .end(httpResponse)
+            let (data, urlResponse) = try await transport.send(request: urlRequest)
+            let httpResponse = try createHTTPResponse(request: request, data: data, response: urlResponse)
+            return httpResponse
         } catch {
-            throw createHTTPError(request: request, error: error)
+            throw HTTPError(request: request, other: error)
         }
     }
 }
@@ -64,31 +64,6 @@ internal extension TransportLoader {
         return urlRequest
     }
 
-    func createHTTPError(request: HTTPRequest, response: HTTPResponse? = nil, error: Error) -> HTTPError {
-        // Check to see if we already have an HTTPError
-        if let httpError = error as? HTTPError {
-            return httpError
-        }
-
-        // Check for a URLError
-        else if let urlError = error as? URLError {
-            let code: HTTPError.Code
-            switch urlError.code {
-            case .badURL:
-                code = .invalidRequest(.url)
-            default:
-                code = .unknown
-            }
-
-            return HTTPError(code, request: request, response: response, underlyingError: urlError)
-        }
-
-        // Unknown kind of error
-        else {
-            return HTTPError(.unknown, request: request, response: response, underlyingError: error)
-        }
-    }
-
     func createHTTPResult(request: HTTPRequest, data: Data?, response: URLResponse?, error: Error?) -> HTTPResult {
 
         // Build an HTTP Response
@@ -100,7 +75,7 @@ internal extension TransportLoader {
 
         // Check for errors
         if let error = error {
-            let httpError = createHTTPError(request: request, response: httpResponse, error: error)
+            let httpError = HTTPError(request: request, response: httpResponse, other: error)
             return .failure(httpError)
         }
 
