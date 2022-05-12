@@ -5,13 +5,16 @@ import Foundation
 ///
 /// A general entry point into ``HTTPLoaderBuilder`` syntax, which
 /// can be used to build custom HTTP loading pipelines.
-public struct Connection<Loader: HTTPLoadable> {
+public struct Connection<Upstream: HTTPLoadable> {
 
-    public let loader: Loader
+    public let upstream: Upstream
 
-    @inlinable
-    public init(@HTTPLoaderBuilder _ build: () -> Loader) {
-        loader = build()
+    public init<Loader>(
+        @HTTPLoaderBuilder _ build: () -> Loader
+    )
+    where Loader: HTTPLoadable, Upstream == GenerateRequestIdentifiers<Loader>
+    {
+        upstream = GenerateRequestIdentifiers(upstream: build())
     }
 }
 
@@ -25,14 +28,39 @@ public extension Connection {
             /// Throw an error if the task was already cancelled.
             try Task.checkCancellation()
 
-            return try await loader.load(request)
+            return try await upstream.load(request)
         }
     }
 
-    func request<Body>(_ request: Request<Body>) -> Task<Response<Body>, Error> {
+    func request<Body>(
+        _ request: Request<Body>
+    ) -> Task<Response<Body>, Error> {
         Task {
             let value = try await send(request.http).value
-            return try await request.decode(value)
+            return try request.decode(value)
         }
+    }
+
+    func send<Body, Requests>(
+        _ requests: Requests
+    ) async throws -> [Response<Body>]
+    where Requests: Collection, Requests.Element == Request<Body>
+    {
+        var responses: [Response<Body>] = []
+        responses.reserveCapacity(requests.count)
+        
+        try await withThrowingTaskGroup(of: Response<Body>.self) { group in
+            for element in requests {
+                group.addTask {
+                    try await self.request(element).value
+                }
+            }
+
+            for try await element in group {
+                responses.append(element)
+            }
+        }
+
+        return responses
     }
 }

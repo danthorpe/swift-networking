@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 public struct Request<Body> {
-    public typealias DecodingTask = (HTTPResponse) async throws -> Response<Body>
+    public typealias DecodingTask = (HTTPResponse) throws -> Response<Body>
     public let http: HTTPRequest
     public let decode: DecodingTask
 

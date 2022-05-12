@@ -2,13 +2,6 @@
 
 import PackageDescription
 
-var externals: [Target.Dependency] = [
-    .product(name: "Tagged", package: "swift-tagged"),
-    .product(name: "Utilities", package: "swift-utilities"),
-]
-
-var standard: [Target.Dependency] = externals + []
-
 let package = Package(
     name: "Networking",
     platforms: [
@@ -22,10 +15,15 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
+        .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.1.0"),
         .package(url: "ssh://github.com/danthorpe/swift-utilities", branch: "main"),
     ],
     targets: [
-        .target(name: "HTTP", dependencies: standard + []),
+        .target(name: "HTTP", dependencies: [
+            .product(name: "Tagged", package: "swift-tagged"),
+            .product(name: "Utilities", package: "swift-utilities"),
+            .product(name: "URLRouting", package: "swift-url-routing")
+        ]),
         .testTarget(name: "HTTPTests", dependencies: ["HTTP"]),
-    ]
+      ]
 )

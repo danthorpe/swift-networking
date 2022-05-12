@@ -3,6 +3,7 @@ import Foundation
 import HTTP
 import Tagged
 import PlaygroundSupport
+import os
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
@@ -16,12 +17,15 @@ extension Environment.Server {
     )
 }
 
+let logger = Logger(subsystem: "works.dan.StarWars", category: "Networking")
+
 /// Create a connection
 let connection = Connection {
     TransportLoader(URLSession.shared)
-        .log(using: .init(subsystem: "works.dan.StarWars", category: "Networking"))
         .throttle(maximumNumberOfRequests: 3)
         .apply(environment: .starWars)
+        .log(using: logger)
+        .resetGuard()
 }
 
 /// Define a domain type
@@ -41,22 +45,23 @@ extension Request where Body == StarWars.Person {
     }
 }
 
-/// Get a task for this request, which allows it to be cancelled.
-let task = connection.request(.person(1))
+func fetchManyPeople(ids: [Int] = Array(1...16)) async throws -> [StarWars.Person] {
+    let requests = ids
+        .map(StarWars.Person.ID.init(rawValue:))
+        .map(Request.person)
 
-Task.detached {
+    let responses = try await connection.send(requests)
 
-    /// Await the task's value to access it's body property
-    do {
-        let person = try await task.value.body
-        print("Success: \(person)")
-    }
-    catch {
-        print("Failure: \(error)")
-    }
-
-    PlaygroundPage.current.finishExecution()
+    return responses.map { $0.body }
 }
 
-
-
+Task.detached {
+    do {
+        let people = try await fetchManyPeople()
+        print(people.map(\.name))
+    }
+    catch {
+        print("Error: \(error)")
+    }
+    PlaygroundPage.current.finishExecution()
+}

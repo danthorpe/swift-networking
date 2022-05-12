@@ -35,7 +35,6 @@ public struct ConstantBackoff: HTTPRetryStrategy {
 }
 
 public actor Retry<Upstream: HTTPLoadable>: HTTPLoadable {
-    private var active: [HTTPRequest.ID: LoadableTask] = [:]
 
     public let strategy: HTTPRetryStrategy?
     public let upstream: Upstream

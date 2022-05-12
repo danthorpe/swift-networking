@@ -17,9 +17,11 @@ public final class TransportLoader: HTTPLoadable {
 
     public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
         do {
+            print("URLSession requesting: \(request.id)")
             let urlRequest = try createURLRequest(request: request)
             let (data, urlResponse) = try await transport.send(request: urlRequest)
             let httpResponse = try createHTTPResponse(request: request, data: data, response: urlResponse)
+            try? await Task.sleep(seconds: 1)
             return httpResponse
         } catch {
             throw HTTPError(request: request, other: error)

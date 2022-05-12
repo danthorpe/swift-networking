@@ -7,8 +7,15 @@
 
 import Concurrency
 import Foundation
+import Tagged
+
+private extension UUID {
+    static let empty = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
+}
 
 public struct HTTPRequest: Identifiable {
+
+    public typealias ID = Tagged<HTTPRequest, UUID>
 
     private struct State {
         var method: HTTPMethod = .get
@@ -17,7 +24,9 @@ public struct HTTPRequest: Identifiable {
         var headers: [String: String] = [:]
     }
 
-    public let id = UUID()
+    public internal(set) var id: ID = .init(rawValue: UUID.empty)
+
+    public internal(set) var number: Int = Int.min
 
     public var body: HTTPBody = EmptyBody()
 
@@ -26,6 +35,22 @@ public struct HTTPRequest: Identifiable {
 
     public init() {
         components.scheme = "https"
+    }
+}
+
+extension HTTPRequest: Hashable {
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.method == rhs.method &&
+        lhs.headers == rhs.headers &&
+        lhs.components == rhs.components
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(method)
+        hasher.combine(headers)
+        hasher.combine(components)
     }
 }
 

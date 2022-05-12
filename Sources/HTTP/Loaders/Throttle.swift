@@ -1,5 +1,6 @@
 
 import Foundation
+import os
 
 public enum ThrottleOption: HTTPRequestOption {
     public static var defaultValue: Self { .always }
@@ -14,32 +15,47 @@ extension HTTPRequest {
 }
 
 public actor Throttle<Upstream: HTTPLoadable>: HTTPLoadable {
-    private var active: [HTTPRequest.ID: LoadableTask] = [:]
+    private var active: Set<HTTPRequest.ID> = []
 
-    public var maximumNumberOfRequests = UInt.max
+    public let maximumNumberOfRequests: UInt
     public let upstream: Upstream
 
-    @inlinable
     public init(maximumNumberOfRequests: UInt = .max, upstream: Upstream) {
         self.maximumNumberOfRequests = maximumNumberOfRequests
         self.upstream = upstream
     }
 
-    @inlinable
-    convenience init(maximumNumberOfRequests max: UInt = .max, @HTTPLoaderBuilder _ build: () -> Upstream) {
+    public convenience init(maximumNumberOfRequests max: UInt = .max, @HTTPLoaderBuilder _ build: () -> Upstream) {
         self.init(maximumNumberOfRequests: max, upstream: build())
+    }
+
+    private func checkActiveCountIsAtMax() -> Bool {
+        UInt(active.count) >= maximumNumberOfRequests
+    }
+
+    private func addTaskWithId(_ id: HTTPRequest.ID) {
+        active.insert(id)
+        if let logger = Logger.current, checkActiveCountIsAtMax() {
+            logger.info("Reached max count of tasks: \(self.active.count) with \(id)")
+        }
+    }
+
+    private func removeTaskWithId(_ id: HTTPRequest.ID) {
+        active.remove(id)
+        if let logger = Logger.current, false == checkActiveCountIsAtMax() {
+            logger.info("Available for more tasks: \(self.active.count) after \(id)")
+        }
     }
 
     public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
 
-        // Check the throttle option on the request
         guard case .always = request.throttle else {
             return try await upstream.load(request)
         }
 
         // While the count of active requests is above our maximum
         // We can check for cancellation, and yield the Task
-        while UInt(active.count) > maximumNumberOfRequests {
+        while checkActiveCountIsAtMax() {
             try checkCancellation()
             await Task.yield()
         }
@@ -47,13 +63,14 @@ public actor Throttle<Upstream: HTTPLoadable>: HTTPLoadable {
         // Check for cancellation again
         try checkCancellation()
 
-        let task = upstream.send(request)
+        // Keep track of the active request
+        addTaskWithId(request.id)
 
-        // Keep track of the active tasks
-        active[request.id] = task
-        defer { active[request.id] = task }
+        // Remove the active task later
+        defer { removeTaskWithId(request.id) }
 
-        return try await task.value
+        // Await the value
+        return try await upstream.load(request)
     }
 }
 
