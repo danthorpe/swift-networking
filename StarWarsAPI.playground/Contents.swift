@@ -7,8 +7,6 @@ import os
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
-public enum StarWars { }
-
 /// Define a server environment
 extension Environment.Server {
     public static let starWars = Self(
@@ -28,7 +26,10 @@ let connection = Connection {
         .resetGuard()
 }
 
-/// Define a domain type
+/// Define domain types
+
+public enum StarWars { }
+
 extension StarWars {
     public struct Person: Equatable, Decodable {
         public typealias ID = Tagged<Person, Int>

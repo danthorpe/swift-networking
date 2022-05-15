@@ -55,7 +55,7 @@ private extension Cache {
             self.key = key
         }
 
-        override func isEqual(to other: Any?) -> Bool {
+        override func isEqual(_ other: Any?) -> Bool {
             guard let value = other as? CacheKey else {
                 return false
             }
