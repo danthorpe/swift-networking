@@ -8,6 +8,7 @@
 import Concurrency
 import Foundation
 import Tagged
+import URLRouting
 
 private extension UUID {
     static let empty = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
@@ -17,65 +18,37 @@ public struct HTTPRequest: Identifiable {
 
     public typealias ID = Tagged<HTTPRequest, UUID>
 
-    private struct State {
-        var method: HTTPMethod = .get
-        var components = URLComponents()
-        var options = [ObjectIdentifier: Any]()
-        var headers: [String: String] = [:]
-    }
-
     public internal(set) var id: ID = .init(rawValue: UUID.empty)
 
     public internal(set) var number: Int = Int.min
 
-    public var body: HTTPBody = EmptyBody()
+    @Protected
+    var options = [ObjectIdentifier: Any]()
 
     @Protected
-    private var state = State()
+    public private(set) var data: URLRequestData = .init()
 
-    public init() {
-        components.scheme = "https"
-    }
-}
-
-extension HTTPRequest: Hashable {
-
-    public static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.method == rhs.method &&
-        lhs.headers == rhs.headers &&
-        lhs.components == rhs.components
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(method)
-        hasher.combine(headers)
-        hasher.combine(components)
+    public init(data: URLRequestData) {
+        self.data = data
     }
 }
 
 public extension HTTPRequest {
 
-    var method: HTTPMethod {
-        get { $state.read { $0.method } }
-        set { $state.write { $0.method = newValue } }
+    var method: String { data.method ?? "GET" }
+
+    var host: String? {
+        get { data.host }
+        set { $data.write { $0.host = newValue } }
     }
 
-    var headers: [String: String] {
-        get { $state.read { $0.headers } }
-        set { $state.write { $0.headers = newValue } }
-    }
-
-    subscript(header key: String) -> String? {
-        get { $state.read { $0.headers[key] } }
-        set { $state.write { $0.headers[key] = newValue } }
-    }
+    var path: String { "/\(data.path.joined(separator: "/"))" }
 
     subscript<Option: HTTPRequestOption>(option type: Option.Type) -> Option.Value {
         get {
             let key = ObjectIdentifier(type)
-            return $state.read { ward in
-                guard let value = ward.options[key] as? Option.Value else {
+            return $options.read { ward in
+                guard let value = ward[key] as? Option.Value else {
                     return type.defaultValue
                 }
                 return value
@@ -83,40 +56,32 @@ public extension HTTPRequest {
         }
         set {
             let key = ObjectIdentifier(type)
-            $state.write { $0.options[key] = newValue }
+            $options.write { $0[key] = newValue }
         }
     }
 }
 
-public extension HTTPRequest {
 
-    private var components: URLComponents {
-        get { $state.read { $0.components } }
-        set { $state.write { $0.components = newValue } }
+// MARK: - Conformances
+
+extension HTTPRequest: Hashable {
+
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.number == rhs.number &&
+        lhs.data == rhs.data
     }
 
-    var scheme: String {
-        components.scheme ?? "https"
-    }
-
-    var url: URL? {
-        components.url
-    }
-
-    var host: String? {
-        get { components.host }
-        set { $state.write { $0.components.host = newValue } }
-    }
-
-    var path: String {
-        get { components.path }
-        set { $state.write { $0.components.path = newValue } }
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(number)
+        hasher.combine(data)
     }
 }
 
 extension HTTPRequest: CustomStringConvertible {
 
     public var description: String {
-        "\(method.name) \(host ?? "") \(path)"
+        "\(method) \(data.host ?? "") \(data.path)"
     }
 }

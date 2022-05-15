@@ -23,16 +23,20 @@ public struct Apply<Upstream: HTTPLoadable>: HTTPLoadable {
                     copy.host = environment.host
                 }
 
+                // TODO: What about path prefix
+
                 // We add the prefix defined in the environment alongside
                 // the host for all API calls (eg. "/api" for "/api/people)
                 // then we add the custom path for that particular request
                 // ("/people") safely, making sure "/" is present
-                let prefix = copy.path.hasPrefix("/") ? "" : "/"
-                copy.path = environment.pathPrefix + prefix + copy.path
+//                let prefix = copy.path.hasPrefix("/") ? "" : "/"
+//                copy.path = environment.pathPrefix + prefix + copy.path
+
+                // TODO: What about default headers?
 
                 // Merge the query items from the environment
                 // (specific request headers have priority)
-                copy.headers.merge(environment.headers) { (current, _) in current }
+//                copy.headers.merge(environment.headers) { (current, _) in current }
 
                 return copy
 

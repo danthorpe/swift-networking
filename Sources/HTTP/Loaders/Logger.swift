@@ -18,14 +18,15 @@ public struct Logged<Upstream: HTTPLoadable>: HTTPLoadable {
 
     public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
         try await Logger.$current.withValue(logger) {
+            let path = request.path
             do {
-                logger.info("↗️ \(request.path)")
+                logger.info("↗️ \(path)")
                 let response = try await upstream.load(request)
-                logger.info("↙️ \(request.path), success")
+                logger.info("↙️ \(path), success")
                 return response
             }
             catch {
-                logger.error("⚠️ \(request.path), error: \(String(describing: error))")
+                logger.error("⚠️ \(path), error: \(String(describing: error))")
                 throw error
             }
         }

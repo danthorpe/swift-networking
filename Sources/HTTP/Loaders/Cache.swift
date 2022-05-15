@@ -1,12 +1,12 @@
 import Foundation
 
-actor Cache<Key: Hashable, Value> {
+public actor Cache<Key: Hashable, Value> {
 
     let now: () -> Date
     let duration: TimeInterval
     private let storage = NSCache<CacheKey, CachedValue>()
 
-    init(now: @escaping () -> Date = Date.init, duration: TimeInterval = 12 * 3600) {
+    public init(now: @escaping () -> Date = Date.init, duration: TimeInterval = 12 * 3600) {
         self.now = now
         self.duration = duration
     }
@@ -79,7 +79,7 @@ public struct Cached<Upstream: HTTPLoadable>: HTTPLoadable {
     private(set) var cache: Cache<HTTPRequest, HTTPResponse>
     public let upstream: Upstream
 
-    init(cache: Cache<HTTPRequest, HTTPResponse>, upstream: Upstream) {
+    public init(in cache: Cache<HTTPRequest, HTTPResponse>, upstream: Upstream) {
         self.cache = cache
         self.upstream = upstream
     }
@@ -92,5 +92,16 @@ public struct Cached<Upstream: HTTPLoadable>: HTTPLoadable {
         let response = try await upstream.load(request)
         await cache.insert(response, forKey: cacheKey)
         return response
+    }
+}
+
+public extension HTTPLoadable {
+
+    func cached(now: @escaping () -> Date = Date.init, duration: TimeInterval = 12 * 3600) -> Cached<Self> {
+        cached(in: .init(now: now, duration: duration))
+    }
+
+    func cached(in cache: Cache<HTTPRequest, HTTPResponse>) -> Cached<Self> {
+        Cached(in: cache, upstream: self)
     }
 }

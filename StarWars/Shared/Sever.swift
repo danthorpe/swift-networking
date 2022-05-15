@@ -13,11 +13,12 @@ extension Environment.Server {
 }
 
 /// Create a connection
-let connection = Connection {
-    TransportLoader(URLSession.shared)
+let connection = Connection(StarWars.router) {
+    NetworkTransport
+        .live()
         .throttle(maximumNumberOfRequests: 3)
-        .apply(environment: .starWars)
+        .cached()
+        .retry(strategy: ConstantBackoff(delay: 1.0, maximumNumberOfAttempts: 3))
         .log(using: logger)
         .resetGuard()
 }
-

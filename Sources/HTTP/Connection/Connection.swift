@@ -1,66 +1,54 @@
-
+import Combine
 import Foundation
+import URLRouting
 
 /// An HTTP Loader which runs a series of other loaders in turn.
 ///
 /// A general entry point into ``HTTPLoaderBuilder`` syntax, which
 /// can be used to build custom HTTP loading pipelines.
-public struct Connection<Upstream: HTTPLoadable> {
+public struct Connection<Route> {
+    fileprivate let createRequestData: (Route) throws -> URLRequestData
+    public let upstream: any HTTPLoadable
 
-    public let upstream: Upstream
-
-    public init<Loader>(
-        @HTTPLoaderBuilder _ build: () -> Loader
-    )
-    where Loader: HTTPLoadable, Upstream == GenerateRequestIdentifiers<Loader>
+    public init<Router, Loader>(_ router: Router, @HTTPLoaderBuilder _ build: () -> Loader)
+    where Loader: HTTPLoadable, Router: ParserPrinter, Router.Input == URLRequestData, Router.Output == Route
     {
+        createRequestData = { try router.print($0) }
         upstream = GenerateRequestIdentifiers(upstream: build())
     }
 }
 
 public extension Connection {
 
-    func send(_ request: HTTPRequest) -> Task<HTTPResponse, Error> {
-        Task<HTTPResponse, Error> {
-            // TODO: Add Reset Guard Logic here.
-            // TODO: Add Cancel on Reset logic to Connection
-
-            /// Throw an error if the task was already cancelled.
-            try Task.checkCancellation()
-
-            return try await upstream.load(request)
-        }
+    @available(iOS 13, macOS 10.15, tvOS 13, watchOS 6, *)
+    func request<Body>(json route: Route, as body: Body.Type = Body.self, decoder: JSONDecoder = .init()) async throws -> Response<Body>
+    where Body: Decodable {
+        try await request(route, as: body, decoder: decoder)
     }
 
-    func request<Body>(
-        _ request: Request<Body>
-    ) -> Task<Response<Body>, Error> {
-        Task {
-            let value = try await send(request.http).value
-            return try request.decode(value)
-        }
-    }
+    @available(iOS 13, macOS 10.15, tvOS 13, watchOS 6, *)
+    func request<Body, Decoder>(_ route: Route, as body: Body.Type, decoder: Decoder) async throws -> Response<Body>
+    where Body: Decodable, Decoder: TopLevelDecoder, Decoder.Input == Data {
 
-    func send<Body, Requests>(
-        _ requests: Requests
-    ) async throws -> [Response<Body>]
-    where Requests: Collection, Requests.Element == Request<Body>
-    {
-        var responses: [Response<Body>] = []
-        responses.reserveCapacity(requests.count)
-        
-        try await withThrowingTaskGroup(of: Response<Body>.self) { group in
-            for element in requests {
-                group.addTask {
-                    try await self.request(element).value
-                }
-            }
+        // Create a request
+        let request = try Request<Body>(
+            http: HTTPRequest(data: createRequestData(route)),
+            decoder: decoder
+        )
 
-            for try await element in group {
-                responses.append(element)
-            }
-        }
+        // Check for cancellation
+        try Task.checkCancellation()
 
-        return responses
+        // TODO: Add Reset Guard Logic here.
+        // TODO: Add Cancel on Reset logic to Connection
+
+        // Await the http response
+        let response = try await upstream.load(request.http)
+
+        // Check for cancellation
+        try Task.checkCancellation()
+
+        // Create a decoded Response
+        return try request.decode(response)
     }
 }

@@ -15,10 +15,10 @@ public struct Request<Body> {
 extension Request where Body: Decodable {
 
     public init(json http: HTTPRequest, decoder: JSONDecoder = JSONDecoder()) {
-        self.init(http, decoder: decoder)
+        self.init(http: http, decoder: decoder)
     }
 
-    public init<Decoder: TopLevelDecoder>(_ http: HTTPRequest, decoder: Decoder) where Decoder.Input == Data {
+    public init<Decoder: TopLevelDecoder>(http: HTTPRequest, decoder: Decoder) where Decoder.Input == Data {
         self.init(http) { response in
             let data = try response.validate(request: http)
             let body = try decoder.decode(Body.self, from: data)
