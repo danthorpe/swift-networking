@@ -1,22 +1,22 @@
-import SwiftUI
 import HTTP
+import SwiftUI
 
 final class ViewModel: ObservableObject {
 
     @Published
-    var home: StarWars.Home?
+    var home: StarWarsAPI.Home?
 
-    let connection: Connection<StarWars.AppRoute>
+    let connection: Connection<StarWarsAPI.AppRoute>
 
-    init(_ connection: Connection<StarWars.AppRoute>) {
+    init(_ connection: Connection<StarWarsAPI.AppRoute>) {
         self.connection = connection
     }
 
     @MainActor
-    func fetch() async {
+    func fetch() async {        
         do {
             home = try await connection
-                .request(json: .home)
+                .request(json: .api(.home))
                 .body
         } catch {
             print("Error fetching home: \(error)")
@@ -30,9 +30,9 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
-                if let people = viewModel.home?.people {
+                if let _ = viewModel.home?.people {
                     NavigationLink("People") {
-                        Text("People")
+                        PeopleView(viewModel: .init(viewModel.connection))
                     }
                 }
                 if let planets = viewModel.home?.planets {

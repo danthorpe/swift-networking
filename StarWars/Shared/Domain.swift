@@ -3,41 +3,40 @@ import Tagged
 
 /// Define domain types
 
-public enum StarWars { }
-
-extension StarWars {
-    public struct Home: Decodable {
-        public let people: URL?
-        public let planets: URL?
-        public let films: URL?
-        public let species: URL?
-        public let vehicles: URL?
-        public let starships: URL?
-    }
-    public struct People: Decodable {
-        public let count: Int
-        public let next: URL?
-        public let previous: URL?
-        public let results: [Person]
+enum StarWarsAPI {
+    struct Home: Decodable {
+        let people: URL?
+        let planets: URL?
+        let films: URL?
+        let species: URL?
+        let vehicles: URL?
+        let starships: URL?
     }
 
-    public struct Person: Equatable, Decodable {
-        public typealias ID = Tagged<Person, Int>
-        public let name: String
-        public let height: Int
-        public let mass: Int
-        public let hairColor: String
-        public let skinColor: String
-        public let eyeColor: String
-        public let birthYear: String
-        public let gender: String
-        public let homeworld: URL?
-        public let films: [URL]
-        public let species: [URL]
-        public let vehicles: [URL]
-        public let starships: [URL]
-        public let created: Date
-        public let edited: Date
-        public let url: URL?
+    struct People: Decodable {
+        let count: Int
+        let next: URL?
+        let previous: URL?
+        let results: [Person]
+    }
+
+    struct Person: Equatable, Decodable, Hashable {
+        typealias ID = Tagged<Person, Int>
+        let name: String
+        let height: String
+        let mass: String
+        let hairColor: String
+        let skinColor: String
+        let eyeColor: String
+        let birthYear: String
+        let gender: String
+        let homeworld: URL?
+        let films: [URL]
+        let species: [URL]
+        let vehicles: [URL]
+        let starships: [URL]
+        let created: Date
+        let edited: Date
+        let url: URL?
     }
 }

@@ -1,4 +1,6 @@
 import Foundation
+import os.log
+import URLRouting
 
 public actor Cache<Key: Hashable, Value> {
 
@@ -76,17 +78,20 @@ private extension Cache {
 
 public struct Cached<Upstream: HTTPLoadable>: HTTPLoadable {
 
-    private(set) var cache: Cache<HTTPRequest, HTTPResponse>
+    private(set) var cache: Cache<URLRequestData, HTTPResponse>
     public let upstream: Upstream
 
-    public init(in cache: Cache<HTTPRequest, HTTPResponse>, upstream: Upstream) {
+    public init(in cache: Cache<URLRequestData, HTTPResponse>, upstream: Upstream) {
         self.cache = cache
         self.upstream = upstream
     }
 
     public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
-        let cacheKey = request
+        let cacheKey = request.data
         if let response = await cache.value(forKey: cacheKey) {
+            if let logger = Logger.current {
+                logger.info("📦 Cache hit for \(request.number) \(request.path)")
+            }
             return response
         }
         let response = try await upstream.load(request)
@@ -101,7 +106,7 @@ public extension HTTPLoadable {
         cached(in: .init(now: now, duration: duration))
     }
 
-    func cached(in cache: Cache<HTTPRequest, HTTPResponse>) -> Cached<Self> {
+    func cached(in cache: Cache<URLRequestData, HTTPResponse>) -> Cached<Self> {
         Cached(in: cache, upstream: self)
     }
 }

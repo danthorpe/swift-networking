@@ -36,14 +36,14 @@ public actor Throttle<Upstream: HTTPLoadable>: HTTPLoadable {
     private func addTaskWithId(_ id: HTTPRequest.ID) {
         active.insert(id)
         if let logger = Logger.current, checkActiveCountIsAtMax() {
-            logger.info("Reached max count of tasks: \(self.active.count) with \(id)")
+            logger.info("⏸ Reached max count of tasks: \(self.active.count) with \(id)")
         }
     }
 
     private func removeTaskWithId(_ id: HTTPRequest.ID) {
         active.remove(id)
-        if let logger = Logger.current, false == checkActiveCountIsAtMax() {
-            logger.info("Available for more tasks: \(self.active.count) after \(id)")
+        if let logger = Logger.current, false == checkActiveCountIsAtMax(), active.count > 0 {
+            logger.info("▶️ Available for more tasks: \(self.active.count) after \(id)")
         }
     }
 

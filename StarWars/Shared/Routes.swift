@@ -1,7 +1,7 @@
 import Foundation
 import URLRouting
 
-extension StarWars {
+extension StarWarsAPI {
     enum PeopleRoute: Equatable {
         case home
     }
@@ -12,39 +12,38 @@ extension StarWars {
         case home
     }
     enum APIRoute: Equatable {
-        case people(PeopleRoute)
-        case planets(PlanetsRoute)
-        case films(FilmsRoute)
+        case home
+        case people(PeopleRoute = .home)
+        case planets(PlanetsRoute = .home)
+        case films(FilmsRoute = .home)
     }
     enum AppRoute: Equatable {
-        case home
-        case api(APIRoute)
+        case api(APIRoute = .home)
     }
 
 }
 
 
-extension StarWars {
+extension StarWarsAPI {
     static let apiRouter = OneOf {
         // GET /api/people
-        Route(.case(StarWars.APIRoute.people(.home))) {
+        Route(.case(StarWarsAPI.APIRoute.people(.home))) {
             Path { "people" }
         }
         // GET /api/planets
-        Route(.case(StarWars.APIRoute.planets(.home))) {
+        Route(.case(StarWarsAPI.APIRoute.planets(.home))) {
             Path { "planets" }
         }
         // GET /api/films
-        Route(.case(StarWars.APIRoute.films(.home))) {
+        Route(.case(StarWarsAPI.APIRoute.films(.home))) {
             Path { "films" }
         }
     }
 
     static let router = OneOf {
         // GET /api
-        Route(.case(StarWars.AppRoute.home))
-        Route(.case(StarWars.AppRoute.api)) {
-            Path { "api" }
+        Route(.case(StarWarsAPI.AppRoute.api(.home)))
+        Route(.case(StarWarsAPI.AppRoute.api)) {
             apiRouter
         }
     }.baseURL("https://swapi.dev/api")
