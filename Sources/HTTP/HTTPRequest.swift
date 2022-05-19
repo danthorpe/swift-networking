@@ -8,17 +8,14 @@
 import Concurrency
 import Foundation
 import Tagged
+import ShortID
 import URLRouting
-
-private extension UUID {
-    static let empty = UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
-}
 
 public struct HTTPRequest: Identifiable {
 
-    public typealias ID = Tagged<HTTPRequest, UUID>
+    public typealias ID = Tagged<HTTPRequest, ShortID>
 
-    public internal(set) var id: ID = .init(rawValue: UUID.empty)
+    public let id: ID = .init(rawValue: ShortID())
 
     public internal(set) var number: Int = Int.min
 
@@ -82,6 +79,6 @@ extension HTTPRequest: Hashable {
 extension HTTPRequest: CustomStringConvertible {
 
     public var description: String {
-        "\(method) \(data.host ?? "") \(data.path)"
+        "\(method) \(path) [\(number), \(id)]"
     }
 }

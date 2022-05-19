@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
         .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.1.0"),
-        .package(url: "ssh://github.com/danthorpe/swift-utilities", branch: "main"),
+        .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.1.0"),
     ],
     targets: [
         .target(name: "HTTP", dependencies: [

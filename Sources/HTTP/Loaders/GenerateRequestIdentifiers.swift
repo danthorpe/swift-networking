@@ -1,10 +1,5 @@
 import Foundation
 
-public extension UUID {
-    @TaskLocal
-    static var generator: () -> UUID = UUID.init
-}
-
 extension HTTPRequest {
     public actor SequenceNumber {
 
@@ -37,7 +32,6 @@ public struct GenerateRequestIdentifiers<Upstream: HTTPLoadable>: HTTPLoadable {
 
     public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
         var copy = request
-        copy.id = .init(rawValue: UUID.generator())
         copy.number = await sequence.next()
         return try await upstream.load(copy)
     }

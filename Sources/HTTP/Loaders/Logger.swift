@@ -20,9 +20,9 @@ public struct Logged<Upstream: HTTPLoadable>: HTTPLoadable {
         try await Logger.$current.withValue(logger) {
             let path = request.path
             do {
-                logger.info("↗️ \(path)")
+                logger.info("↗️ \(request.description)")
                 let response = try await upstream.load(request)
-                logger.info("↙️ \(path), success")
+                logger.info("↙️ 🆗 \(request.description)")
                 return response
             }
             catch {
