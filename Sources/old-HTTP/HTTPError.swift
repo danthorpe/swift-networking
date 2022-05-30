@@ -6,6 +6,7 @@
 /// https://davedelong.com/blog/2020/06/27/http-in-swift-part-1/
 
 import Foundation
+import URLRouting
 
 public struct HTTPError: Error {
 
@@ -32,18 +33,18 @@ public struct HTTPError: Error {
     }
 
     public let code: Code
-    public let request: HTTPRequest
+    public let request: URLRequestData
     public let response: HTTPResponse?
     public let underlyingError: Error?
 
-    internal init(_ code: HTTPError.Code, request: HTTPRequest, response: HTTPResponse? = nil, underlyingError: Error? = nil) {
+    internal init(_ code: HTTPError.Code, request: URLRequestData, response: HTTPResponse? = nil, underlyingError: Error? = nil) {
         self.code = code
         self.request = request
         self.response = response
         self.underlyingError = underlyingError
     }
 
-    internal init(request: HTTPRequest, response: HTTPResponse? = nil, other error: Error) {
+    internal init(request: URLRequestData, response: HTTPResponse? = nil, other error: Error) {
         if let httpError = error as? HTTPError {
             self = httpError
         }

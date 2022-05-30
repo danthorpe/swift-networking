@@ -6,13 +6,14 @@
 /// https://davedelong.com/blog/2020/06/27/http-in-swift-part-1/
 
 import Foundation
+import URLRouting
 
 public struct HTTPResponse {
-    public let request: HTTPRequest
+    public let request: URLRequestData
     public let body: Data?
     private let response: HTTPURLResponse
 
-    public init(request: HTTPRequest, response: HTTPURLResponse, body: Data?) {
+    public init(request: URLRequestData, response: HTTPURLResponse, body: Data?) {
         self.request = request
         self.response = response
         self.body = body

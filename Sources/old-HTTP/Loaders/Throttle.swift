@@ -1,14 +1,20 @@
-
 import Foundation
 import os
+import URLRouting
 
-public enum ThrottleOption: HTTPRequestOption {
+public enum ThrottleOption: URLRequestOption {
     public static var defaultValue: Self { .always }
     case always, never
 }
 
-extension HTTPRequest {
-    public var throttle: ThrottleOption {
+extension ParserPrinter where Input == URLRequestData {
+    func throttleOption(for route: Output) -> ThrottleOption {
+        option(ThrottleOption.self, for: route)
+    }
+}
+
+extension URLRequestData {
+    var throttle: ThrottleOption {
         get { self[option: ThrottleOption.self] }
         set { self[option: ThrottleOption.self] = newValue }
     }

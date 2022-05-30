@@ -6,6 +6,7 @@
 /// https://davedelong.com/blog/2020/06/27/http-in-swift-part-1/
 
 import Foundation
+import URLRouting
 
 public struct NetworkTransport {
     var send: (URLRequest, Progress?) async throws -> (Data, URLResponse)
@@ -54,16 +55,18 @@ extension NetworkTransport {
 
 extension NetworkTransport: HTTPLoadable {
 
-    public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
-        guard let urlRequest = URLRequest(data: request.data) else {
-            throw HTTPError(.invalidRequest(.url), request: request)
-        }
-        do {
-            let (data, urlResponse) = try await send(urlRequest, nil)
-            let httpResponse = try createHTTPResponse(request: request, data: data, response: urlResponse)
-            return httpResponse
-        } catch {
-            throw HTTPError(request: request, other: error)
+    public func load(_ request: URLRequestData) -> Task<(Data, URLResponse), Error> {
+        Task {
+            guard let urlRequest = URLRequest(data: request) else {
+                throw HTTPError(.invalidRequest(.url), request: request)
+            }
+            do {
+                let (data, urlResponse) = try await send(urlRequest, nil)
+                let httpResponse = try createHTTPResponse(request: request, data: data, response: urlResponse)
+                return httpResponse
+            } catch {
+                throw HTTPError(request: request, other: error)
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 import Foundation
 import os.log
+import URLRouting
 
 public extension Logger {
     @TaskLocal
@@ -16,7 +17,7 @@ public struct Logged<Upstream: HTTPLoadable>: HTTPLoadable {
         self.upstream = upstream
     }
 
-    public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
+    public func load(_ request: URLRequestData) async throws -> (Data, URLResponse) {
         try await Logger.$current.withValue(logger) {
             let path = request.path
             do {

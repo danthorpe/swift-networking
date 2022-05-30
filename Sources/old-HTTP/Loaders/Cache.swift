@@ -76,27 +76,53 @@ private extension Cache {
     }
 }
 
+public enum CacheOption: URLRequestOption {
+    public static var defaultValue: Self = .always
+    case always, never
+}
+
+private extension URLRequestData {
+    var cacheOption: CacheOption {
+        self[option: CacheOption.self]
+    }
+}
+
+public struct CachedResponse {
+    let data: Data
+    let response: URLResponse
+}
+
 public struct Cached<Upstream: HTTPLoadable>: HTTPLoadable {
 
-    private(set) var cache: Cache<URLRequestData, HTTPResponse>
+    private(set) var cache: Cache<URLRequestData, CachedResponse>
     public let upstream: Upstream
 
-    public init(in cache: Cache<URLRequestData, HTTPResponse>, upstream: Upstream) {
+    public init(in cache: Cache<URLRequestData, CachedResponse>, upstream: Upstream) {
         self.cache = cache
         self.upstream = upstream
     }
 
-    public func load(_ request: HTTPRequest) async throws -> HTTPResponse {
-        let cacheKey = request.data
-        if let response = await cache.value(forKey: cacheKey) {
+    public func load(_ request: URLRequestData) async throws -> (Data, URLResponse) {
+        // Define the cache key
+        let cacheKey = request
+
+        // Check the cache
+        if case .always = request.cacheOption, let cachedResponse = await cache.value(forKey: cacheKey) {
             if let logger = Logger.current {
-                logger.info("📦 Cache hit for \(request.number) \(request.path)")
+                logger.info("📦 Cache hit for \(request.path)")
             }
-            return response
+            return (cachedResponse.data, cachedResponse.response)
         }
-        let response = try await upstream.load(request)
-        await cache.insert(response, forKey: cacheKey)
-        return response
+
+        // Make the request
+        let (data, response) = try await upstream.load(request)
+
+        // Store it in the cache
+        if case .always = request.cacheOption {
+            await cache.insert(.init(data: data, response: response), forKey: cacheKey)
+        }
+
+        return (data, response)
     }
 }
 
@@ -106,7 +132,7 @@ public extension HTTPLoadable {
         cached(in: .init(now: now, duration: duration))
     }
 
-    func cached(in cache: Cache<URLRequestData, HTTPResponse>) -> Cached<Self> {
+    func cached(in cache: Cache<URLRequestData, CachedResponse>) -> Cached<Self> {
         Cached(in: cache, upstream: self)
     }
 }
