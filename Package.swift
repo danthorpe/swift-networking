@@ -11,19 +11,21 @@ let package = Package(
         .watchOS("8.0")
     ],
     products: [
-        .library(name: "Networking", targets: ["HTTP"]),
+        .library(name: "Networking", targets: ["Networking"]),
     ],
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
-        .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.1.0"),
-        .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.1.0"),
+//        .package(url: "https://github.com/danthorpe/swift-url-routing", branch: "danthorpe/per-request-options"),
+        .package(path: "/Users/daniel/Work/Personal/swift-url-routing"),
+//        .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.1.0"),
+        .package(path: "/Users/daniel/Work/Personal/swift-utilities"),
     ],
     targets: [
-        .target(name: "HTTP", dependencies: [
+        .target(name: "Networking", dependencies: [
             .product(name: "Tagged", package: "swift-tagged"),
             .product(name: "Utilities", package: "swift-utilities"),
             .product(name: "URLRouting", package: "swift-url-routing")
         ]),
-        .testTarget(name: "HTTPTests", dependencies: ["HTTP"]),
+        .testTarget(name: "HTTPTests", dependencies: ["Networking"]),
       ]
 )

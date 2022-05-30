@@ -1,5 +1,6 @@
 import Foundation
 import URLRouting
+import HTTP
 
 extension StarWarsAPI {
     enum PeopleRoute: Equatable {
@@ -29,6 +30,9 @@ extension StarWarsAPI {
         // GET /api/people
         Route(.case(StarWarsAPI.APIRoute.people(.home))) {
             Path { "people" }
+            Options {
+                ThrottleOption.never
+            }
         }
         // GET /api/planets
         Route(.case(StarWarsAPI.APIRoute.planets(.home))) {

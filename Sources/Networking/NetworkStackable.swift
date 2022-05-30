@@ -8,9 +8,9 @@
 import Foundation
 import URLRouting
 
-public protocol HTTPLoadable {
+public protocol NetworkStackable {
 
-    func load(_ request: URLRequestData) -> Task<URLResponseData, Error>
+    func send(_ request: URLRequestData) async throws -> URLResponseData
 
     /// Perform any clean-up to clear any state
     func reset() async
@@ -19,7 +19,11 @@ public protocol HTTPLoadable {
     func didCancel()
 }
 
-public extension HTTPLoadable {
+
+/// Default Implementations
+public extension NetworkStackable {
+
     func reset() async { }
+
     func didCancel() { }
 }

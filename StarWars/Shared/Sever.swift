@@ -1,5 +1,5 @@
 import Foundation
-import HTTP
+import Networking
 import os
 
 let logger = Logger(subsystem: "works.dan.StarWars", category: "Networking")
@@ -12,6 +12,8 @@ extension Environment.Server {
     )
 }
 
+/*
+
 /// Create a connection
 let connection = Connection(StarWarsAPI.router) {
     NetworkTransport
@@ -22,3 +24,11 @@ let connection = Connection(StarWarsAPI.router) {
         .log(using: logger)
         .resetGuard()
 }
+*/
+
+let live = NetworkStack
+    .use(session: .shared)
+    .use(cache: ())
+    .use(logger)
+
+let connection = Connection.use(router: StarWarsAPI.router, with: live)
