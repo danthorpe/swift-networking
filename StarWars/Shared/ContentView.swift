@@ -1,4 +1,4 @@
-import HTTP
+import Networking
 import SwiftUI
 
 final class ViewModel: ObservableObject {
@@ -16,8 +16,8 @@ final class ViewModel: ObservableObject {
     func fetch() async {        
         do {
             home = try await connection
-                .request(json: .api(.home))
-                .body
+                .value(for: .api(.home), decoder: JSONDecoder())
+                .value
         } catch {
             print("Error fetching home: \(error)")
         }

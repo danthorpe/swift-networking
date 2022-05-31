@@ -39,7 +39,7 @@ extension Logged: NetworkStackable {
 
 public extension NetworkStackable {
 
-    func use(_ logger: Logger) -> Logged<Self> {
+    func use(logger: Logger) -> Logged<Self> {
         Logged(logger: logger, upstream: self)
     }
 }

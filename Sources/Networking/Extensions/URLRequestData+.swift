@@ -4,6 +4,10 @@ import URLRouting
 extension URLRequestData: CustomStringConvertible {
 
     public var description: String {
-        "\(number) \(id) \(path.description)"
+        var queryDesc = ""
+        if !query.isEmpty {
+            queryDesc = "?\(query.fields.description)"
+        }
+        return "\(number):\(id) /\(path.joined(separator: "/"))\(queryDesc)"
     }
 }

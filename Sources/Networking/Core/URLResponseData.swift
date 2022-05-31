@@ -4,17 +4,7 @@ import URLRouting
 public struct URLResponseData {
     public let request: URLRequestData
     public let data: Data
-    public let response: HTTPURLResponse
-
-    public init(
-        request: URLRequestData,
-        data: Data,
-        response: HTTPURLResponse
-    ) {
-        self.request = request
-        self.data = data
-        self.response = response
-    }
+    public let response: URLResponse
 
     public init(
         request: URLRequestData,
@@ -24,29 +14,55 @@ public struct URLResponseData {
         guard let response = response as? HTTPURLResponse else {
             throw NetworkingError(.invalidResponse, request: request, data: data)
         }
-        self.init(
-            request: request,
-            data: data,
-            response: response
-        )
+        self.request = request
+        self.data = data
+        self.response = response
     }
 
     var deconstructed: (data: Data, response: HTTPURLResponse) {
-        (data, response)
+        (data, http)
     }
 }
 
 public extension URLResponseData {
 
-    var status: HTTPStatus {
-        HTTPStatus(response.statusCode)
+    var http: HTTPURLResponse {
+        response as! HTTPURLResponse
+    }
+
+    var status: HTTPStatus? {
+        HTTPStatus(http.statusCode)
     }
 
     var message: String {
-        HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
+        HTTPURLResponse.localizedString(forStatusCode: http.statusCode)
     }
 
     var headers: [AnyHashable: Any] {
-        response.allHeaderFields
+        http.allHeaderFields
+    }
+}
+
+extension URLResponseData: Codable {
+
+    enum CodingKeys: CodingKey {
+        case request, data, response
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let request = try container.decode(URLRequestData.self, forKey: .request)
+        let data = try container.decode(Data.self, forKey: .data)
+        let responseData = try container.decode(Data.self, forKey: .response)
+        let response = try NSKeyedUnarchiver.unarchivedObject(ofClass: URLResponse.self, from: responseData)!
+        try self.init(request: request, data: data, response: response)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(request, forKey: .request)
+        try container.encode(data, forKey: .data)
+        let responseData = try NSKeyedArchiver.archivedData(withRootObject: response, requiringSecureCoding: true)
+        try container.encode(responseData, forKey: .response)
     }
 }

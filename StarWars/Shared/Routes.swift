@@ -1,6 +1,6 @@
 import Foundation
+import Networking
 import URLRouting
-import HTTP
 
 extension StarWarsAPI {
     enum PeopleRoute: Equatable {

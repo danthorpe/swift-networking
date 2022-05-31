@@ -1,4 +1,4 @@
-import HTTP
+import Networking
 import SwiftUI
 
 final class PeopleViewModel: ObservableObject {
@@ -25,8 +25,8 @@ final class PeopleViewModel: ObservableObject {
     func fetch() async {
         do {
             peopleResponse = try await connection
-                .request(json: .api(.people(.home)), decoder: decoder)
-                .body
+                .value(for: .api(.people(.home)), decoder: decoder)
+                .value
             let peopleToAppend = (peopleResponse?.results ?? [])
 //                .filter { people.contains($0) }
             if people.count < peopleToAppend.count {

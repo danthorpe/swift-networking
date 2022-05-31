@@ -30,7 +30,7 @@ public struct Identified<Upstream: NetworkStackable>: NetworkStackable {
     public func send(_ request: URLRequestData) async throws -> URLResponseData {
         var copy = request
         copy.id = .init(rawValue: ShortID().description)
-        return try await upstream.send(request)
+        return try await upstream.send(copy)
     }
 }
 

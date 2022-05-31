@@ -41,7 +41,7 @@ public struct Numbered<Upstream: NetworkStackable>: NetworkStackable {
     public func send(_ request: URLRequestData) async throws -> URLResponseData {
         var copy = request
         copy.number = await sequence.next()
-        return try await upstream.send(request)
+        return try await upstream.send(copy)
     }
 }
 

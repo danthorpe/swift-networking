@@ -53,11 +53,13 @@ public extension Connection {
     static func use<Router: ParserPrinter, NetworkStack: NetworkStackable>(router: Router, with stack: NetworkStack) -> Self
     where Router.Input == URLRequestData, Router.Output == Route
     {
+        
         let modified = stack
             // Assigns an incrementing number to each request
             .numbered()
             // Assigns an identifier to each request
             .identified()
+            // Makes resetting safe
             .guarded()
 
         return Self.init(
