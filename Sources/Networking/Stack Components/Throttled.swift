@@ -15,9 +15,9 @@ extension URLRequestData {
     }
 }
 
-private let data = ActiveRequestsData()
+public struct Throttled<Upstream: NetworkStackable>: NetworkStackable, ActiveRequestable {
+    let data = ActiveRequestsData()
 
-public struct Throttled<Upstream: NetworkStackable>: NetworkStackable {
     public let limit: Int
     public let upstream: Upstream
 
@@ -31,16 +31,13 @@ public struct Throttled<Upstream: NetworkStackable>: NetworkStackable {
             return try await upstream.send(request)
         }
 
-        let task = Task<URLResponseData, Error> {
-            let result = try await upstream.send(request)
-            await data.removeTask(for: request)
-            return result
-        }
+        let task = await submit(request, using: upstream)
 
-        let count = await data.add(task, for: request)
-
-        if let logger = Logger.current, count > limit {
-            logger.info("⏸ 🧵 \(count) requests")
+        if let logger = Logger.current {
+            let count = await data.count
+            if count > limit {
+                logger.info("⏸ 🧵 \(count) requests")
+            }
         }
 
         while await data.count > limit {
@@ -54,7 +51,7 @@ public struct Throttled<Upstream: NetworkStackable>: NetworkStackable {
 
 public extension NetworkStackable {
 
-    func throttled(max: Int) -> Throttled<Self> {
+    func throttle(max: Int) -> Throttled<Self> {
         Throttled(limit: max, upstream: self)
     }
 }

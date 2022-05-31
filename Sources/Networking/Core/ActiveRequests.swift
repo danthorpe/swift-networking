@@ -27,12 +27,34 @@ actor ActiveRequestsData {
         return index
     }
 
-    func add(_ task: Task<URLResponseData, Error>, for request: URLRequestData) -> Int {
+    func existing(request: URLRequestData) -> Value? {
+        active.values.first(where: { $0.request == request })
+    }
+
+    func add(_ task: Task<URLResponseData, Error>, for request: URLRequestData) {
         active[Key(id: request.id, number: request.number)] = Value(request: request, task: task)
-        return active.count
     }
 
     func removeTask(for request: URLRequestData) {
         active[Key(id: request.id, number: request.number)] = nil
+    }
+}
+
+protocol ActiveRequestable {
+    var data: ActiveRequestsData { get }
+}
+
+extension ActiveRequestable {
+
+    func submit<Upstream: NetworkStackable>(_ request: URLRequestData, using upstream: Upstream) async -> Task<URLResponseData, Error> {
+        let task = Task<URLResponseData, Error> {
+            let result = try await upstream.send(request)
+            await data.removeTask(for: request)
+            return result
+        }
+
+        await data.add(task, for: request)
+
+        return task
     }
 }

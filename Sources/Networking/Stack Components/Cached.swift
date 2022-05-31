@@ -31,11 +31,11 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
 
     public func send(_ request: URLRequestData) async throws -> URLResponseData {
 
-        if case .always = request.cacheOption, let cachedResponse = await cache.value(forKey: request) {
+        if case .always = request.cacheOption, let response = await cache.value(forKey: request) {
             if let logger = Logger.current {
-                logger.info("🎯 Cache hit: \(request.description)")
+                logger.info("🎯 Cached from: \(response.request.description)")
             }
-            return cachedResponse
+            return response
         }
         
         let response = try await upstream.send(request)

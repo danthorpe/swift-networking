@@ -8,8 +8,9 @@ let logger = Logger(subsystem: "works.dan.StarWars", category: "Networking")
 
 let live = NetworkStack
     .use(session: .shared)
-    .throttled(max: 3)
+    .throttle(max: 3)
     .use(cache: .init(size: 100))
+    .removeDuplicates()
     .use(logger: logger)
 
 let connection = Connection.use(router: StarWarsAPI.router, with: live)
