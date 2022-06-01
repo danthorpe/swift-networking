@@ -18,6 +18,7 @@ let decoder: JSONDecoder = {
 let live = NetworkStack
     .use(session: .shared)
     .throttle(max: 3)
+    .retry()
     .use(cache: .init(size: 100))
     .removeDuplicates()
     .use(logger: logger)

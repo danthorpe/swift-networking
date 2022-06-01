@@ -30,7 +30,7 @@ public extension URLResponseData {
         response as! HTTPURLResponse
     }
 
-    var status: HTTPStatus? {
+    var status: HTTPStatus {
         HTTPStatus(http.statusCode)
     }
 

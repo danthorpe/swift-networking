@@ -89,3 +89,9 @@ extension HTTPStatus: ExpressibleByIntegerLiteral {
         self.init(value)
     }
 }
+
+extension HTTPStatus {
+    var success: Bool {
+        (Self.ok.code..<Self.multipleChoices.code).contains(code)
+    }
+}
