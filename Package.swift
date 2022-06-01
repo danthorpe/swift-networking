@@ -26,6 +26,6 @@ let package = Package(
             .product(name: "Utilities", package: "swift-utilities"),
             .product(name: "URLRouting", package: "swift-url-routing")
         ]),
-        .testTarget(name: "HTTPTests", dependencies: ["Networking"]),
+        .testTarget(name: "NetworkingTests", dependencies: ["Networking"]),
       ]
 )
