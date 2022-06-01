@@ -3,11 +3,14 @@ import Foundation
 import URLRouting
 
 public struct Connection<Route> {
+    public let decoder: JSONDecoder
     var request: (Route) async throws -> URLResponseData
 
     public init(
+        decoder: JSONDecoder,
         request: @escaping (Route) async throws -> URLResponseData
     ) {
+        self.decoder = decoder
         self.request = request
     }
 
@@ -15,19 +18,17 @@ public struct Connection<Route> {
         try await request(route).deconstructed
     }
 
-    public func value<Value: Decodable, Decoder: TopLevelDecoder>(
+    public func value<Body: Decodable>(
         for route: Route,
-        as type: Value.Type = Value.self,
-        decoder: Decoder
-    ) async throws -> (value: Value, response: URLResponse)
-    where Decoder.Input == Data
-    {
-        // Get the response
+        as type: Body.Type = Body.self,
+        decoder specializedDecoder: JSONDecoder? = nil
+    ) async throws -> (body: Body, response: URLResponse) {
+        // Get the data & response
         let (data, response) = try await data(for: route)
 
         // Perform decoding
         do {
-            return (try decoder.decode(type, from: data), response)
+            return (try (specializedDecoder ?? decoder).decode(type, from: data), response)
         }
         catch {
             throw ConnectionError.decoding(.init(
@@ -50,9 +51,9 @@ public struct DecodingError: Error {
 }
 
 public extension Connection {
-    static func use<Router: ParserPrinter, NetworkStack: NetworkStackable>(router: Router, with stack: NetworkStack) -> Self
-    where Router.Input == URLRequestData, Router.Output == Route
-    {
+
+    init<Router: ParserPrinter, NetworkStack: NetworkStackable>(router: Router, decoder: JSONDecoder = .init(), with stack: NetworkStack)
+    where Router.Input == URLRequestData, Router.Output == Route {
         
         let modified = stack
             // Assigns an incrementing number to each request
@@ -62,7 +63,8 @@ public extension Connection {
             // Makes resetting safe
             .guarded()
 
-        return Self.init(
+        self.init(
+            decoder: decoder,
             request: { route in
                 let requestData = try router.print(route)
                 return try await modified.send(requestData)

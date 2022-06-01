@@ -9,24 +9,12 @@ final class PeopleViewModel: ObservableObject {
     @Published
     var peopleResponse: StarWarsAPI.People?
 
-    let connection: Connection<StarWarsAPI.AppRoute>
-    let decoder: JSONDecoder
-
-    init(_ connection: Connection<StarWarsAPI.AppRoute>) {
-        self.connection = connection
-        self.decoder = JSONDecoder()
-        self.decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let fmtr = DateFormatter()
-        fmtr.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-        self.decoder.dateDecodingStrategy = .formatted(fmtr)
-    }
-
     @MainActor
     func fetch() async {
         do {
             peopleResponse = try await connection
                 .value(for: .api(.people(.home)), decoder: decoder)
-                .value
+                .body
             let peopleToAppend = (peopleResponse?.results ?? [])
 //                .filter { people.contains($0) }
             if people.count < peopleToAppend.count {
@@ -61,6 +49,6 @@ extension PeopleView: View {
 
 struct PeopleView_Previews: PreviewProvider {
     static var previews: some View {
-        PeopleView(viewModel: .init(connection))
+        PeopleView(viewModel: .init())
     }
 }

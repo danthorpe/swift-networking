@@ -6,18 +6,12 @@ final class ViewModel: ObservableObject {
     @Published
     var home: StarWarsAPI.Home?
 
-    let connection: Connection<StarWarsAPI.AppRoute>
-
-    init(_ connection: Connection<StarWarsAPI.AppRoute>) {
-        self.connection = connection
-    }
-
     @MainActor
     func fetch() async {        
         do {
             home = try await connection
                 .value(for: .api(.home), decoder: JSONDecoder())
-                .value
+                .body
         } catch {
             print("Error fetching home: \(error)")
         }
@@ -32,7 +26,7 @@ struct ContentView: View {
             VStack {
                 if let _ = viewModel.home?.people {
                     NavigationLink("People") {
-                        PeopleView(viewModel: .init(viewModel.connection))
+                        PeopleView(viewModel: .init())
                     }
                 }
                 if let planets = viewModel.home?.planets {
@@ -52,7 +46,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView(
-            viewModel: .init(connection)
+            viewModel: .init()
         )
     }
 }
