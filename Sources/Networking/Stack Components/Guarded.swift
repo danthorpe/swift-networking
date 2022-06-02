@@ -17,11 +17,11 @@ public struct ResetGuarded<Upstream: NetworkStackable>: NetworkStackable {
         self.upstream = upstream
     }
 
-    public func send(_ request: URLRequestData) async throws -> URLResponseData {
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
         guard await !state.isResetting else {
             throw NetworkingError(.resetInProgress, request: request)
         }
-        return try await upstream.send(request)
+        return try await upstream.data(request)
     }
 
     public func reset() async {

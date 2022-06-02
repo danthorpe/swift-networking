@@ -29,7 +29,7 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
         self.upstream = upstream
     }
 
-    public func send(_ request: URLRequestData) async throws -> URLResponseData {
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
 
         if case .always = request.cacheOption, let response = await cache.value(forKey: request) {
             if let logger = Logger.current {
@@ -38,7 +38,7 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
             return response
         }
         
-        let response = try await upstream.send(request)
+        let response = try await upstream.data(request)
 
         if case let .always(duration) = request.cacheOption {
             await cache.insert(response, duration: duration, forKey: request)

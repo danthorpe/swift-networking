@@ -20,12 +20,12 @@ public struct Logged<Upstream: NetworkStackable> {
 
 extension Logged: NetworkStackable {
 
-    public func send(_ request: URLRequestData) async throws -> URLResponseData {
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
         let desc = request.description
         return try await Logger.$current.withValue(logger) {
             do {
                 logger.info("↗️ \(desc)")
-                let response = try await upstream.send(request)
+                let response = try await upstream.data(request)
                 logger.info("↙️ 🆗 \(desc)")
                 return response
             }

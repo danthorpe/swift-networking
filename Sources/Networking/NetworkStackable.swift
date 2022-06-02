@@ -10,7 +10,7 @@ import URLRouting
 
 public protocol NetworkStackable {
 
-    func send(_ request: URLRequestData) async throws -> URLResponseData
+    func data(_ request: URLRequestData) async throws -> URLResponseData
 
     /// Perform any clean-up to clear any state
     func reset() async

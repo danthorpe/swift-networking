@@ -2,12 +2,12 @@ import Foundation
 import URLRouting
 
 public struct NetworkStack {
-    var execute: (URLRequest, Progress?) async throws -> (Data, URLResponse)
+    var data: (URLRequest, Progress?) async throws -> (Data, URLResponse)
 
     public init(
-        send: @escaping (URLRequest, Progress?) async throws -> (Data, URLResponse)
+        data: @escaping (URLRequest, Progress?) async throws -> (Data, URLResponse)
     ) {
-        self.execute = send
+        self.data = data
     }
 }
 
@@ -15,7 +15,7 @@ extension NetworkStack {
 
     public static func use(session: URLSession) -> Self {
         .init(
-            send: { (request, progress) in
+            data: { (request, progress) in
                 var dataTask: URLSessionDataTask?
                 let cancel: () -> Void = { dataTask?.cancel() }
 
@@ -50,12 +50,12 @@ extension NetworkStack {
 // MARK: - Network Stackable
 
 extension NetworkStack: NetworkStackable {
-    public func send(_ requestData: URLRequestData) async throws -> URLResponseData {
+    public func data(_ requestData: URLRequestData) async throws -> URLResponseData {
         guard let urlRequest = URLRequest(data: requestData) else {
             throw NetworkingError(.invalidRequest(.url), request: requestData)
         }
         do {
-            let (data, urlResponse) = try await execute(urlRequest, nil)
+            let (data, urlResponse) = try await data(urlRequest, nil)
             return try URLResponseData(
                 request: requestData,
                 data: data,
