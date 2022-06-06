@@ -31,7 +31,9 @@ extension StarWarsAPI {
         Route(.case(StarWarsAPI.APIRoute.people(.home))) {
             Path { "people" }
             Options {
+                RetryStrategyOption.backoff(.exponential(maxAttemptCount: 5))
                 ThrottleOption.never
+                CacheOption.always(duration: 300)
             }
         }
         // GET /api/planets

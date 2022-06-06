@@ -1,3 +1,4 @@
+import EnvironmentProviders
 import Foundation
 import Cache
 import Networking
@@ -19,7 +20,7 @@ let live = NetworkStack
     .use(session: .shared)
     .throttle(max: 3)
     .retry()
-    .use(cache: .init(size: 100))
+    .cached(fileName: "StarWars")
     .removeDuplicates()
     .use(logger: logger)
 

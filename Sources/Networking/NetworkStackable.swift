@@ -27,3 +27,16 @@ public extension NetworkStackable {
 
     func didCancel() { }
 }
+
+
+protocol UpstreamNetworkStackable: NetworkStackable {
+    associatedtype Upstream: NetworkStackable
+    var upstream: Upstream { get }
+}
+
+extension UpstreamNetworkStackable {
+
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
+        try await upstream.data(request)
+    }
+}
