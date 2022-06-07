@@ -21,15 +21,16 @@ private extension URLRequestData {
 // MARK: - Cached Network Stack
 
 public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
-    private(set) var cache: Cache<URLRequestData, URLResponseData>
+    public typealias Cache = PersistedCache<URLRequestData, URLResponseData>
+    private(set) var cache: PersistedCache<URLRequestData, URLResponseData>
     public let upstream: Upstream
 
-    public init(in cache: Cache<URLRequestData, URLResponseData>, upstream: Upstream) {
+    public init(in cache: Cache, upstream: Upstream) {
         self.cache = cache
         self.upstream = upstream
     }
 
-    public func send(_ request: URLRequestData) async throws -> URLResponseData {
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
 
         if case .always = request.cacheOption, let response = await cache.value(forKey: request) {
             if let logger = Logger.current {
@@ -38,7 +39,7 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
             return response
         }
         
-        let response = try await upstream.send(request)
+        let response = try await upstream.data(request)
 
         if case let .always(duration) = request.cacheOption {
             await cache.insert(response, duration: duration, forKey: request)
@@ -50,7 +51,10 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
 
 public extension NetworkStackable {
 
-    func use(cache: Cache<URLRequestData, URLResponseData>) -> Cached<Self> {
-        Cached(in: cache, upstream: self)
+    func cached(size: Int = 100, fileName: String) -> Cached<Self> {
+        guard let cache = PersistedCache<URLRequestData, URLResponseData>(size: size, fileName: fileName) else {
+            fatalError("Unable to create cache file named: \(fileName)")
+        }
+        return Cached(in: cache, upstream: self)
     }
 }

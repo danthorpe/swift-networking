@@ -1,7 +1,7 @@
 import Foundation
 import URLRouting
 
-actor ActiveRequestsData {
+actor ActiveRequestsState {
     struct Key: Hashable {
         let id: URLRequestData.ID
         let number: Int
@@ -41,19 +41,19 @@ actor ActiveRequestsData {
 }
 
 protocol ActiveRequestable {
-    var data: ActiveRequestsData { get }
+    var state: ActiveRequestsState { get }
 }
 
 extension ActiveRequestable {
 
     func submit<Upstream: NetworkStackable>(_ request: URLRequestData, using upstream: Upstream) async -> Task<URLResponseData, Error> {
         let task = Task<URLResponseData, Error> {
-            let result = try await upstream.send(request)
-            await data.removeTask(for: request)
+            let result = try await upstream.data(request)
+            await state.removeTask(for: request)
             return result
         }
 
-        await data.add(task, for: request)
+        await state.add(task, for: request)
 
         return task
     }

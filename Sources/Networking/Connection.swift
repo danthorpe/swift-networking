@@ -67,7 +67,7 @@ public extension Connection {
             decoder: decoder,
             request: { route in
                 let requestData = try router.print(route)
-                return try await modified.send(requestData)
+                return try await modified.data(requestData)
             }
         )
     }

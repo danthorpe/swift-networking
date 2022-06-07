@@ -3,7 +3,7 @@ import os.log
 import URLRouting
 
 public struct RemoveDuplicates<Upstream: NetworkStackable>: NetworkStackable, ActiveRequestable {
-    let data = ActiveRequestsData()
+    let state = ActiveRequestsState()
 
     public let upstream: Upstream
 
@@ -11,8 +11,8 @@ public struct RemoveDuplicates<Upstream: NetworkStackable>: NetworkStackable, Ac
         self.upstream = upstream
     }
 
-    public func send(_ request: URLRequestData) async throws -> URLResponseData {
-        if let existing = await data.existing(request: request) {
+    public func data(_ request: URLRequestData) async throws -> URLResponseData {
+        if let existing = await state.existing(request: request) {
             if let logger = Logger.current {
                 logger.info("👻 Duplicate of: \(existing.request.description)")
             }
