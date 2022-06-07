@@ -52,5 +52,6 @@ extension StarWarsAPI {
         Route(.case(StarWarsAPI.AppRoute.api)) {
             apiRouter
         }
-    }.baseURL("https://swapi.dev/api")
+    }
+    .baseURL("https://swapi.dev/api")
 }

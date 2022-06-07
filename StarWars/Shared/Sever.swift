@@ -16,16 +16,14 @@ let decoder: JSONDecoder = {
     return decoder
 }()
 
-let live = NetworkStack
-    .use(session: .shared)
-    .throttle(max: 3)
-    .retry()
-    .cached(fileName: "StarWars")
-    .removeDuplicates()
-    .use(logger: logger)
-
 let connection = Connection(
     router: StarWarsAPI.router,
     decoder: decoder,
-    with: live
+    with: NetworkStack
+        .use(session: .shared)
+        .throttle(max: 3)
+        .retry()
+        .cached(fileName: "StarWars")
+        .removeDuplicates()
+        .use(logger: logger)
 )
