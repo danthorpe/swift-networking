@@ -10,7 +10,6 @@ enum PeopleRoute: Equatable {
 }
 
 let peopleRoute = OneOf {
-    Route(.case(PeopleRoute.home))
     Route(.case(PeopleRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -19,6 +18,7 @@ let peopleRoute = OneOf {
     Route(.case(PeopleRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(PeopleRoute.home))
 }
 
 enum PlanetsRoute: Equatable {
@@ -28,7 +28,6 @@ enum PlanetsRoute: Equatable {
 }
 
 let planetsRoute = OneOf {
-    Route(.case(PlanetsRoute.home))
     Route(.case(PlanetsRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -37,6 +36,7 @@ let planetsRoute = OneOf {
     Route(.case(PlanetsRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(PlanetsRoute.home))
 }
 
 enum FilmsRoute: Equatable {
@@ -46,7 +46,6 @@ enum FilmsRoute: Equatable {
 }
 
 let filmsRoute = OneOf {
-    Route(.case(FilmsRoute.home))
     Route(.case(FilmsRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -55,6 +54,7 @@ let filmsRoute = OneOf {
     Route(.case(FilmsRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(FilmsRoute.home))
 }
 
 enum SpeciesRoute: Equatable {
@@ -64,7 +64,6 @@ enum SpeciesRoute: Equatable {
 }
 
 let speciesRoute = OneOf {
-    Route(.case(SpeciesRoute.home))
     Route(.case(SpeciesRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -73,6 +72,7 @@ let speciesRoute = OneOf {
     Route(.case(SpeciesRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(SpeciesRoute.home))
 }
 
 enum VehiclesRoute: Equatable {
@@ -82,7 +82,6 @@ enum VehiclesRoute: Equatable {
 }
 
 let vehiclesRoute = OneOf {
-    Route(.case(VehiclesRoute.home))
     Route(.case(VehiclesRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -91,6 +90,7 @@ let vehiclesRoute = OneOf {
     Route(.case(VehiclesRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(VehiclesRoute.home))
 }
 
 enum StarshipsRoute: Equatable {
@@ -100,7 +100,6 @@ enum StarshipsRoute: Equatable {
 }
 
 let starshipsRoute = OneOf {
-    Route(.case(StarshipsRoute.home))
     Route(.case(StarshipsRoute.page(number:))) {
         Query {
             Field("page", default: 1) { Digits() }
@@ -109,6 +108,7 @@ let starshipsRoute = OneOf {
     Route(.case(StarshipsRoute.id)) {
         Path { Digits() }
     }
+    Route(.case(StarshipsRoute.home))
 }
 
 enum AppRoute: Equatable {
@@ -122,30 +122,32 @@ enum AppRoute: Equatable {
 }
 
 let router = OneOf {
-    Route(.case(AppRoute.categories))
+    Route(.case(AppRoute.categories)) {
+        Path { "api" }
+    }
     Route(.case(AppRoute.people)) {
-        Path { "people" }
+        Path { "api"; "people" }
         peopleRoute
     }
     Route(.case(AppRoute.planets)) {
-        Path { "planets" }
+        Path { "api"; "planets" }
         planetsRoute
     }
     Route(.case(AppRoute.films)) {
-        Path { "films" }
+        Path { "api"; "films" }
         filmsRoute
     }
     Route(.case(AppRoute.species)) {
-        Path { "species" }
+        Path { "api"; "species" }
         speciesRoute
     }
     Route(.case(AppRoute.vehicles)) {
-        Path { "vehicles" }
+        Path { "api"; "vehicles" }
         vehiclesRoute
     }
     Route(.case(AppRoute.starships)) {
-        Path { "starships" }
+        Path { "api"; "starships" }
         starshipsRoute
     }
 }
-.baseURL("https://swapi.dev/api")
+.baseURL("https://swapi.dev/")
