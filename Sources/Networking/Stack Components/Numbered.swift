@@ -17,17 +17,6 @@ actor SequenceNumber {
     }
 }
 
-public struct RequestNumber: URLRequestOption {
-    public static var defaultValue: Int = 0
-}
-
-extension URLRequestData {
-    public internal(set) var number: Int {
-        get { options[option: RequestNumber.self] }
-        set { options[option: RequestNumber.self] = newValue }
-    }
-}
-
 public struct Numbered<Upstream: NetworkStackable>: NetworkStackable {
     private let sequence = SequenceNumber(from: 0)
     let upstream: Upstream
@@ -39,9 +28,9 @@ public struct Numbered<Upstream: NetworkStackable>: NetworkStackable {
     }
 
     public func data(_ request: URLRequestData) async throws -> URLResponseData {
-        var copy = request
-        copy.number = await sequence.next()
-        return try await upstream.data(copy)
+        try await RequestMetadata.$number.withValue(sequence.next()) {
+            try await upstream.data(request)
+        }
     }
 }
 

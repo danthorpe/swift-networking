@@ -7,17 +7,6 @@ public extension URLRequestData {
     typealias ID = Tagged<URLRequestData, String>
 }
 
-public struct RequestID: URLRequestOption {
-    public static var defaultValue: URLRequestData.ID = "undefined-request-id"
-}
-
-extension URLRequestData: Identifiable {
-    public internal(set) var id: URLRequestData.ID {
-        get { options[option: RequestID.self] }
-        set { options[option: RequestID.self] = newValue }
-    }
-}
-
 public struct Identified<Upstream: NetworkStackable>: NetworkStackable {
     let upstream: Upstream
 
@@ -28,9 +17,9 @@ public struct Identified<Upstream: NetworkStackable>: NetworkStackable {
     }
 
     public func data(_ request: URLRequestData) async throws -> URLResponseData {
-        var copy = request
-        copy.id = .init(rawValue: ShortID().description)
-        return try await upstream.data(copy)
+        try await RequestMetadata.$id.withValue(.init(rawValue: ShortID().description)) {
+            return try await upstream.data(request)
+        }
     }
 }
 

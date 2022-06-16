@@ -3,8 +3,8 @@ import URLRouting
 
 actor ActiveRequestsState {
     struct Key: Hashable {
-        let id: URLRequestData.ID
-        let number: Int
+        let id: URLRequestData.ID = RequestMetadata.id
+        let number: Int = RequestMetadata.number
     }
     struct Value {
         let request: URLRequestData
@@ -15,28 +15,16 @@ actor ActiveRequestsState {
 
     var count: Int { active.count }
 
-    func index(of request: URLRequestData) -> Int {
-        guard let index = active.keys
-            .sorted(by: { $0.number < $1.number })
-            .map(\.id)
-            .firstIndex(of: request.id)
-        else {
-            fatalError("Expected to find index for \(request.description) in active requests.")
-        }
-        print("\(request.description) index: \(index) out of \(active.count)")
-        return index
-    }
-
     func existing(request: URLRequestData) -> Value? {
         active.values.first(where: { $0.request == request })
     }
 
     func add(_ task: Task<URLResponseData, Error>, for request: URLRequestData) {
-        active[Key(id: request.id, number: request.number)] = Value(request: request, task: task)
+        active[Key()] = Value(request: request, task: task)
     }
 
     func removeTask(for request: URLRequestData) {
-        active[Key(id: request.id, number: request.number)] = nil
+        active[Key()] = nil
     }
 }
 
