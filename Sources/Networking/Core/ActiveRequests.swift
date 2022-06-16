@@ -19,7 +19,7 @@ actor ActiveRequestsState {
         guard let index = active.keys
             .sorted(by: { $0.number < $1.number })
             .map(\.id)
-            .firstIndex(of: request.id)
+            .firstIndex(of: RequestMetadata.id)
         else {
             fatalError("Expected to find index for \(request.description) in active requests.")
         }
@@ -32,11 +32,11 @@ actor ActiveRequestsState {
     }
 
     func add(_ task: Task<URLResponseData, Error>, for request: URLRequestData) {
-        active[Key(id: request.id, number: request.number)] = Value(request: request, task: task)
+        active[Key(id: RequestMetadata.id, number: RequestMetadata.number)] = Value(request: request, task: task)
     }
 
     func removeTask(for request: URLRequestData) {
-        active[Key(id: request.id, number: request.number)] = nil
+        active[Key(id: RequestMetadata.id, number: RequestMetadata.number)] = nil
     }
 }
 

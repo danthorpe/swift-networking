@@ -11,6 +11,10 @@ extension URLRequestData: CustomStringConvertible {
             }
             queryDesc = "?\(parameters.joined(separator: "&"))"
         }
-        return "\(number):\(id) /\(path.joined(separator: "/"))\(queryDesc)"
+        var prefix = ""
+        if let number = RequestMetadata.number, let id = RequestMetadata.id {
+            prefix = "\(number):\(id) "
+        }
+        return "\(prefix)/\(path.joined(separator: "/"))\(queryDesc)"
     }
 }
