@@ -1,4 +1,5 @@
 import EnvironmentProviders
+import Extensions
 import Foundation
 import os.log
 import URLRouting
@@ -10,7 +11,7 @@ public protocol RetryStrategy {
 public struct Backoff {
 
     public static func immediate(maxAttemptCount: UInt) -> Backoff {
-        .constant(delay: 0, maxAttemptCount: maxAttemptCount)
+        constant(delay: 0, maxAttemptCount: maxAttemptCount)
     }
 
     public static func constant(delay: TimeInterval, maxAttemptCount: UInt) -> Backoff {
@@ -21,14 +22,14 @@ public struct Backoff {
     }
 
     public static func exponential(maxDelay: TimeInterval = 300, maxAttemptCount: UInt) -> Backoff {
-    let interval: TimeInterval = 1.0
-    let rate: Double = 2.0
-    return self.init { _, _, _, count in
-        guard count < maxAttemptCount else { return nil }
-        let delay = TimeInterval(interval * pow(rate, Double(count)))
-        return min(delay + .random(in: 0...0.001), maxDelay) + .random(in: 0...0.001)
+        let interval: TimeInterval = 1.0
+        let rate: Double = 2.0
+        return self.init { _, _, _, count in
+            guard count < maxAttemptCount else { return nil }
+            let delay = TimeInterval(interval * pow(rate, Double(count)))
+            return min(delay + .random(in: 0...0.001), maxDelay) + .random(in: 0...0.001)
+        }
     }
-}
 
     private var backoff: (Result<URLResponseData,Error>, Date, Calendar, UInt) -> TimeInterval?
 }
@@ -39,8 +40,10 @@ extension Backoff: RetryStrategy {
     }
 }
 
-public enum RetryStrategyOption: URLRequestOption {
-    public static var defaultValue: RetryStrategyOption? { .backoff(.constant(delay: 1, maxAttemptCount: 2)) }
+public enum RetryStrategyOption {
+    public static var defaultValue: Self? {
+        .backoff(.constant(delay: 1, maxAttemptCount: 2))
+    }
 
     case backoff(Backoff)
     case custom(RetryStrategy)
@@ -54,13 +57,6 @@ extension RetryStrategyOption: RetryStrategy {
         case let .custom(strategy):
             return strategy.retryDelay(for: result, date: date, calendar: calendar, count: count)
         }
-    }
-}
-
-public extension URLRequestData {
-    var retryStrategyOption: RetryStrategyOption? {
-        get { self[option: RetryStrategyOption.self] }
-        set { self[option: RetryStrategyOption.self] = newValue }
     }
 }
 
@@ -117,8 +113,8 @@ extension Retry {
     }
 
     func retry(request: URLRequestData, result: Result<URLResponseData, Error>) async throws -> URLResponseData {
-        // Check to see if we need to do any kind of retry
-        guard let strategy = request.retryStrategyOption, checkResultNeedsRetrying(result) else {
+        // TODO: allow optional retry strategy
+        guard let strategy = RetryStrategyOption.defaultValue, checkResultNeedsRetrying(result) else {
             return try result.get()
         }
 
@@ -126,7 +122,12 @@ extension Retry {
         let count = await data.count(for: request) ?? 0
 
         // Check the strategy to see if there is a delay
-        guard let delay = strategy.retryDelay(for: result, date: DateProvider.now(), calendar: CalendarProvider.active, count: UInt(count)), delay >= 0 else {
+        guard let delay = strategy.retryDelay(
+            for: result,
+            date: DateProvider.now(),
+            calendar: CalendarProvider.active,
+            count: UInt(count)
+        ), delay >= 0 else {
             return try result.get()
         }
 

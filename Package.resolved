@@ -57,10 +57,10 @@
     {
       "identity" : "swift-url-routing",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danthorpe/swift-url-routing",
+      "location" : "https://github.com/pointfreeco/swift-url-routing",
       "state" : {
-        "branch" : "danthorpe/per-request-options",
-        "revision" : "d3c007ba88055a8868aab8d52fdd07c34942596d"
+        "branch" : "main",
+        "revision" : "5195a70931de218af8a9fc8a1e07473bd5c8aa90"
       }
     },
     {
