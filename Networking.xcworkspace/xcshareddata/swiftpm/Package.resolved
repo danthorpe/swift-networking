@@ -1,6 +1,15 @@
 {
   "pins" : [
     {
+      "identity" : "danthorpe-utilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danthorpe/danthorpe-utilities",
+      "state" : {
+        "branch" : "main",
+        "revision" : "08614173df0b403d21dad6e0546d034b69861f57"
+      }
+    },
+    {
       "identity" : "swift-async-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-async-algorithms",
@@ -52,15 +61,6 @@
       "state" : {
         "branch" : "danthorpe/per-request-options",
         "revision" : "d3c007ba88055a8868aab8d52fdd07c34942596d"
-      }
-    },
-    {
-      "identity" : "swift-utilities",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danthorpe/swift-utilities",
-      "state" : {
-        "branch" : "main",
-        "revision" : "1d7bb8a9ca95a335e384eef96f1404aed887cea0"
       }
     },
     {
