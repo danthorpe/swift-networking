@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Networking",
+    name: "danthorpe-networking",
     platforms: [
         .macOS(.v12),
         .iOS(.v15),
@@ -16,12 +16,12 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
         .package(url: "https://github.com/danthorpe/swift-url-routing", branch: "danthorpe/per-request-options"),
-        .package(url: "https://github.com/danthorpe/swift-utilities", branch: "main"),
+        .package(url: "https://github.com/danthorpe/danthorpe-utilities", branch: "main"),
     ],
     targets: [
         .target(name: "Networking", dependencies: [
-            .product(name: "Cache", package: "swift-utilities"),
-            .product(name: "ShortID", package: "swift-utilities"),
+            .product(name: "Cache", package: "danthorpe-utilities"),
+            .product(name: "ShortID", package: "danthorpe-utilities"),
             .product(name: "Tagged", package: "swift-tagged"),
             .product(name: "URLRouting", package: "swift-url-routing")
         ]),
