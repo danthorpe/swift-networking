@@ -6,17 +6,11 @@ import URLRouting
 
 // MARK: - Cache Option
 
-public enum CacheOption: URLRequestOption {
+public enum CacheOption {
     public static var defaultValue: Self = .always(duration: 3_600)
 
     case always(duration: TimeInterval)
     case never
-}
-
-private extension URLRequestData {
-    var cacheOption: CacheOption {
-        self[option: CacheOption.self]
-    }
 }
 
 // MARK: - Cached Network Stack
@@ -47,7 +41,8 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
 
     public func data(_ request: URLRequestData) async throws -> URLResponseData {
 
-        if case .always = request.cacheOption, let response = await cache.value(forKey: request) {
+        // FIXME: always caching
+        if let response = await cache.value(forKey: request) {
             if let logger = Logger.current {
                 logger.info("🎯 Cached from: \(response.request.description)")
             }
@@ -56,9 +51,8 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
         
         let response = try await upstream.data(request)
 
-        if case let .always(duration) = request.cacheOption {
-            await cache.insert(response, forKey: request, cost: UInt64(response.data.count), duration: duration)
-        }
+        // FIXME: cache duration
+        await cache.insert(response, forKey: request, cost: UInt64(response.data.count), duration: 3_600)
 
         return response
     }

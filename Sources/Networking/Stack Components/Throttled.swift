@@ -3,16 +3,9 @@ import Foundation
 import os.log
 import URLRouting
 
-public enum ThrottleOption: URLRequestOption {
+public enum ThrottleOption {
     public static var defaultValue: Self { .always }
     case always, never
-}
-
-extension URLRequestData {
-    var throttle: ThrottleOption {
-        get { self[option: ThrottleOption.self] }
-        set { self[option: ThrottleOption.self] = newValue }
-    }
 }
 
 public struct Throttled<Upstream: NetworkStackable>: NetworkStackable, ActiveRequestable {
@@ -27,7 +20,7 @@ public struct Throttled<Upstream: NetworkStackable>: NetworkStackable, ActiveReq
     }
 
     public func data(_ request: URLRequestData) async throws -> URLResponseData {
-        guard case .always = request.throttle else {
+        guard case .always = ThrottleOption.defaultValue else {
             return try await upstream.data(request)
         }
 
