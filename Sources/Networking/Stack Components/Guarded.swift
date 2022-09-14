@@ -32,7 +32,7 @@ public struct ResetGuarded<Upstream: NetworkStackable>: NetworkStackable {
 }
 
 extension NetworkStackable {
-    
+
     func guarded() -> ResetGuarded<Self> {
         ResetGuarded(upstream: self)
     }

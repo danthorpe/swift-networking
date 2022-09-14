@@ -61,10 +61,8 @@ extension NetworkStack: NetworkStackable {
                 data: data,
                 response: urlResponse
             )
-        }
-        catch {
+        } catch {
             throw NetworkingError(request: requestData, other: error)
         }
     }
 }
-

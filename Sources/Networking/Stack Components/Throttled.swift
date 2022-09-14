@@ -14,7 +14,7 @@ public struct Throttled<Upstream: NetworkStackable>: NetworkStackable, ActiveReq
     public let limit: Int
     public let upstream: Upstream
 
-    public init(limit: Int, upstream: Upstream) { 
+    public init(limit: Int, upstream: Upstream) {
         self.limit = limit
         self.upstream = upstream
     }

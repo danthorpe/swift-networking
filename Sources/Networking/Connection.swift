@@ -29,8 +29,7 @@ public struct Connection<Route> {
         // Perform decoding
         do {
             return (try (specializedDecoder ?? decoder).decode(type, from: data), response)
-        }
-        catch {
+        } catch {
             throw ConnectionError.decoding(.init(
                 bytes: data,
                 response: response,
@@ -54,7 +53,7 @@ public extension Connection {
 
     init<Router: ParserPrinter, NetworkStack: NetworkStackable>(router: Router, decoder: JSONDecoder = .init(), with stack: NetworkStack)
     where Router.Input == URLRequestData, Router.Output == Route {
-        
+
         let modified = stack
             // Assigns an incrementing number to each request
             .numbered()

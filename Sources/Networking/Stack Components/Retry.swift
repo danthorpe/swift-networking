@@ -31,7 +31,7 @@ public struct Backoff {
         }
     }
 
-    private var backoff: (Result<URLResponseData,Error>, Date, Calendar, UInt) -> TimeInterval?
+    private var backoff: (Result<URLResponseData, Error>, Date, Calendar, UInt) -> TimeInterval?
 }
 
 extension Backoff: RetryStrategy {

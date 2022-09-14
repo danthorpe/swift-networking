@@ -48,7 +48,7 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
             }
             return response
         }
-        
+
         let response = try await upstream.data(request)
 
         // FIXME: cache duration
