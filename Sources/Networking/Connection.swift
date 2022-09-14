@@ -51,7 +51,11 @@ public struct DecodingError: Error {
 
 public extension Connection {
 
-    init<Router: ParserPrinter, NetworkStack: NetworkStackable>(router: Router, decoder: JSONDecoder = .init(), with stack: NetworkStack)
+    init<Router: ParserPrinter, NetworkStack: NetworkStackable>(
+        router: Router,
+        decoder: JSONDecoder = .init(),
+        with stack: NetworkStack
+    )
     where Router.Input == URLRequestData, Router.Output == Route {
 
         let modified = stack

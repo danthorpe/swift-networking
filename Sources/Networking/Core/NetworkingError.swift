@@ -31,7 +31,13 @@ public struct NetworkingError: Error {
     public let data: Data?
     public let underlyingError: Error?
 
-    internal init(_ code: Self.Code, request: URLRequestData, response: URLResponse? = nil, data: Data? = nil, underlyingError: Error? = nil) {
+    internal init(
+        _ code: Self.Code,
+        request: URLRequestData,
+        response: URLResponse? = nil,
+        data: Data? = nil,
+        underlyingError: Error? = nil
+    ) {
         self.code = code
         self.request = request
         self.response = response
