@@ -1,12 +1,21 @@
 {
   "pins" : [
     {
+      "identity" : "danthorpe-plugins",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danthorpe/danthorpe-plugins",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7edd6d777e85be799df3800ab992d9a7a2ec9f21"
+      }
+    },
+    {
       "identity" : "danthorpe-utilities",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danthorpe/danthorpe-utilities",
       "state" : {
         "branch" : "main",
-        "revision" : "08614173df0b403d21dad6e0546d034b69861f57"
+        "revision" : "ec5cb24191798066dc4884215fe909021f8ea34e"
       }
     },
     {

@@ -17,14 +17,21 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
         .package(url: "https://github.com/pointfreeco/swift-url-routing", branch: "main"),
         .package(url: "https://github.com/danthorpe/danthorpe-utilities", branch: "main"),
+        .package(url: "https://github.com/danthorpe/danthorpe-plugins", branch: "main"),
     ],
     targets: [
-        .target(name: "Networking", dependencies: [
-            .product(name: "Cache", package: "danthorpe-utilities"),
-            .product(name: "ShortID", package: "danthorpe-utilities"),
-            .product(name: "Tagged", package: "swift-tagged"),
-            .product(name: "URLRouting", package: "swift-url-routing")
-        ]),
+        .target(
+            name: "Networking",
+            dependencies: [
+                .product(name: "Cache", package: "danthorpe-utilities"),
+                .product(name: "ShortID", package: "danthorpe-utilities"),
+                .product(name: "Tagged", package: "swift-tagged"),
+                .product(name: "URLRouting", package: "swift-url-routing")
+            ],
+            plugins: [
+                .plugin(name: "SwiftLintPlugin", package: "danthorpe-plugins")
+            ]
+        ),
         .testTarget(name: "NetworkingTests", dependencies: ["Networking"]),
       ]
 )
