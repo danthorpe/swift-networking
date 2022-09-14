@@ -5,7 +5,12 @@ import os.log
 import URLRouting
 
 public protocol RetryStrategy {
-    func retryDelay(for result: Result<URLResponseData, Error>, date: Date, calendar: Calendar, count: UInt) -> TimeInterval?
+    func retryDelay(
+        for result: Result<URLResponseData, Error>,
+        date: Date,
+        calendar: Calendar,
+        count: UInt
+    ) -> TimeInterval?
 }
 
 public struct Backoff {
@@ -31,11 +36,16 @@ public struct Backoff {
         }
     }
 
-    private var backoff: (Result<URLResponseData,Error>, Date, Calendar, UInt) -> TimeInterval?
+    private var backoff: (Result<URLResponseData, Error>, Date, Calendar, UInt) -> TimeInterval?
 }
 
 extension Backoff: RetryStrategy {
-    public func retryDelay(for result: Result<URLResponseData, Error>, date: Date, calendar: Calendar, count: UInt) -> TimeInterval? {
+    public func retryDelay(
+        for result: Result<URLResponseData, Error>,
+        date: Date,
+        calendar: Calendar,
+        count: UInt
+    ) -> TimeInterval? {
         backoff(result, date, calendar, count)
     }
 }
@@ -50,7 +60,12 @@ public enum RetryStrategyOption {
 }
 
 extension RetryStrategyOption: RetryStrategy {
-    public func retryDelay(for result: Result<URLResponseData, Error>, date: Date, calendar: Calendar, count: UInt) -> TimeInterval? {
+    public func retryDelay(
+        for result: Result<URLResponseData, Error>,
+        date: Date,
+        calendar: Calendar,
+        count: UInt
+    ) -> TimeInterval? {
         switch self {
         case let .backoff(strategy):
             return strategy.retryDelay(for: result, date: date, calendar: calendar, count: count)

@@ -28,8 +28,7 @@ extension Logged: NetworkStackable {
                 let response = try await upstream.data(request)
                 logger.info("↙️ 🆗 \(desc)")
                 return response
-            }
-            catch {
+            } catch {
                 logger.error("⚠️ \(desc), error: \(String(describing: error))")
                 throw error
             }
@@ -43,4 +42,3 @@ public extension NetworkStackable {
         Logged(logger: logger, upstream: self)
     }
 }
-

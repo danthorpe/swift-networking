@@ -27,7 +27,7 @@ public struct URLResponseData {
 public extension URLResponseData {
 
     var http: HTTPURLResponse {
-        response as! HTTPURLResponse
+        response as! HTTPURLResponse // swiftlint:disable:this force_cast
     }
 
     var status: HTTPStatus {

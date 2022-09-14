@@ -34,7 +34,10 @@ protocol ActiveRequestable {
 
 extension ActiveRequestable {
 
-    func submit<Upstream: NetworkStackable>(_ request: URLRequestData, using upstream: Upstream) async -> Task<URLResponseData, Error> {
+    func submit<Upstream: NetworkStackable>(
+        _ request: URLRequestData,
+        using upstream: Upstream
+    ) async -> Task<URLResponseData, Error> {
         let task = Task<URLResponseData, Error> {
             let result = try await upstream.data(request)
             await state.removeTask(for: request)

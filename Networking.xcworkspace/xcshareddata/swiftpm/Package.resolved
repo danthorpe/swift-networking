@@ -1,12 +1,21 @@
 {
   "pins" : [
     {
+      "identity" : "danthorpe-plugins",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danthorpe/danthorpe-plugins",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7edd6d777e85be799df3800ab992d9a7a2ec9f21"
+      }
+    },
+    {
       "identity" : "danthorpe-utilities",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danthorpe/danthorpe-utilities",
       "state" : {
         "branch" : "main",
-        "revision" : "08614173df0b403d21dad6e0546d034b69861f57"
+        "revision" : "ec5cb24191798066dc4884215fe909021f8ea34e"
       }
     },
     {
@@ -15,7 +24,7 @@
       "location" : "https://github.com/apple/swift-async-algorithms",
       "state" : {
         "branch" : "main",
-        "revision" : "6e9a5757bc36d1190a5c3b985f5e2539dc048c04"
+        "revision" : "68c8dc285b7e85866adf907b0301f15dec73dd13"
       }
     },
     {
@@ -23,17 +32,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-case-paths",
       "state" : {
-        "revision" : "b4a872984463070c71e2e97e5c02c73a07d0fe36",
-        "version" : "0.9.0"
+        "revision" : "7346701ea29da0a85d4403cf3d7a589a58ae3dee",
+        "version" : "0.9.2"
       }
     },
     {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-collections.git",
+      "location" : "https://github.com/apple/swift-collections",
       "state" : {
-        "revision" : "48254824bb4248676bf7ce56014ff57b142b77eb",
-        "version" : "1.0.2"
+        "revision" : "f504716c27d2e5d4144fa4794b12129301d17729",
+        "version" : "1.0.3"
       }
     },
     {
@@ -41,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-parsing",
       "state" : {
-        "revision" : "28d32e9ace1c4c43f5e5a177be837a202494c2d5",
-        "version" : "0.9.2"
+        "revision" : "bc92e84968990b41640214b636667f35b6e5d44c",
+        "version" : "0.10.0"
       }
     },
     {
@@ -57,10 +66,10 @@
     {
       "identity" : "swift-url-routing",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danthorpe/swift-url-routing",
+      "location" : "https://github.com/pointfreeco/swift-url-routing",
       "state" : {
-        "branch" : "danthorpe/per-request-options",
-        "revision" : "d3c007ba88055a8868aab8d52fdd07c34942596d"
+        "branch" : "main",
+        "revision" : "5195a70931de218af8a9fc8a1e07473bd5c8aa90"
       }
     },
     {
@@ -68,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "50a70a9d3583fe228ce672e8923010c8df2deddd",
-        "version" : "0.2.1"
+        "revision" : "30314f1ece684dd60679d598a9b89107557b67d9",
+        "version" : "0.4.1"
       }
     }
   ],
