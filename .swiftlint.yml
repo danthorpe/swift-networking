@@ -13,7 +13,7 @@ identifier_name:
     warning: 90
   min_length: 2
 nesting: 
-  statement_level: 
+  function_level: 
     error: 8
     warning: 4
   type_level: 
