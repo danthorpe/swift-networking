@@ -14,7 +14,7 @@ package.platforms = [
 
 package.dependencies = [
     .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.7.0"),
-    .package(url: "https://github.com/pointfreeco/swift-url-routing", branch: "main"),
+    .package(url: "https://github.com/pointfreeco/swift-url-routing", from: "0.3.1"),
     .package(url: "https://github.com/danthorpe/danthorpe-utilities", from: "0.2.0"),
     .package(url: "https://github.com/danthorpe/danthorpe-plugins", from: "0.2.0"),
 ]
