@@ -20,7 +20,6 @@ extension NetworkStack {
                 let cancel: () -> Void = { dataTask?.cancel() }
 
                 return try await withTaskCancellationHandler(
-                    handler: { cancel() },
                     operation: {
                         try await withCheckedThrowingContinuation { continuation in
                             dataTask = session.dataTask(with: request) { data, response, error in
@@ -40,6 +39,8 @@ extension NetworkStack {
                             // Resume the data task
                             dataTask?.resume()
                         }
+                    }, onCancel: {
+                        cancel()
                     }
                 )
             }
