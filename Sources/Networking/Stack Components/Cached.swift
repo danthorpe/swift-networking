@@ -15,8 +15,10 @@ public enum CacheOption {
 
 // MARK: - Cached Network Stack
 
+@available(iOS 15.0, *)
 public typealias NetworkCache = Cache<URLRequestData, URLResponseData>
 
+@available(iOS 15.0, *)
 public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
     private(set) var cache: NetworkCache
     public let upstream: Upstream
@@ -58,6 +60,7 @@ public struct Cached<Upstream: NetworkStackable>: NetworkStackable {
     }
 }
 
+@available(iOS 15.0, *)
 public extension NetworkStackable {
 
     func cached(size: Int = 100, fileName: String) -> Cached<Self> {
