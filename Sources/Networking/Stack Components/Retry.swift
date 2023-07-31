@@ -105,7 +105,7 @@ public struct Retry<Upstream: NetworkStackable>: NetworkStackable {
 
     func submit(_ request: URLRequestData) async -> Task<URLResponseData, Error> {
         await data.add(request)
-        return Task {
+        return Task<URLResponseData, Error> {
             try await upstream.data(request)
         }
     }
