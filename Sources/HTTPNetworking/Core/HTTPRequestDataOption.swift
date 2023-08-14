@@ -14,9 +14,9 @@ extension HTTPRequestDataOption {
 
 struct HTTPRequestDataOptionContainer: @unchecked Sendable {
     let value: Any
-    let isEqualTo: (Any) -> Bool
+    let isEqualTo: (Any?) -> Bool
 
-    init(_ value: Any, isEqualTo: @escaping (Any) -> Bool) {
+    init(_ value: Any, isEqualTo: @escaping (Any?) -> Bool) {
         self.value = value
         self.isEqualTo = isEqualTo
     }

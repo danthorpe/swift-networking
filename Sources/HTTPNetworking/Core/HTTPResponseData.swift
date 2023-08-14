@@ -3,10 +3,15 @@ import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
 
+@dynamicMemberLookup
 public struct HTTPResponseData: Hashable, Sendable {
     public let request: HTTPRequestData
     public let data: Data
     private let _response: HTTPResponse
+
+    public subscript<Value>(dynamicMember dynamicMemberLookup: KeyPath<HTTPResponse, Value>) -> Value {
+        _response[keyPath: dynamicMemberLookup]
+    }
 
     public init(request: HTTPRequestData, data: Data, urlResponse: URLResponse?) throws {
         guard let response = (urlResponse as? HTTPURLResponse)?.httpResponse else {
@@ -31,7 +36,7 @@ public struct HTTPResponseData: Hashable, Sendable {
             let body = try transform(payload, self)
             return body
         } catch let error as DecodingError {
-            throw "TODO: Decoding Error"
+            throw "TODO: Decoding Error \(error)"
         }
     }
 }

@@ -17,11 +17,11 @@ extension NetworkingComponent {
     public func logged(using logger: Logger) -> some NetworkingComponent {
         NetworkLogger.$logger.withValue(logger) {
             logged { request in
-                logger.info("↗️ \(request)")
+                logger.info("↗️ \(request.debugDescription)")
             } onSuccess: { request, _, _ in
-                logger.info("↙️ 🆗 \(request)")
+                logger.info("↙️ 🆗 \(request.debugDescription)")
             } onFailure: { request, error in
-                logger.error("⚠️ \(request), error: \(String(describing: error))")
+                logger.error("⚠️ \(request.debugDescription), error: \(String(describing: error))")
             }
         }
     }

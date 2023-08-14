@@ -6,11 +6,11 @@ extension NetworkingComponent {
 
 public struct RequestSequence {
     @TaskLocal
-    public static var number: Int = 0
+    public static var number: Int = 1
 }
 
 struct Numbered<Upstream: NetworkingComponent>: NetworkingComponent {
-    private let sequence = SequenceNumber(value: 0)
+    private let sequence = SequenceNumber(value: 1)
     let upstream: Upstream
 
     func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {

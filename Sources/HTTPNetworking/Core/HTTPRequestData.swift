@@ -6,12 +6,24 @@ import Helpers
 import Tagged
 import ShortID
 
+@dynamicMemberLookup
 public struct HTTPRequestData: Sendable, Identifiable {
     public typealias ID = Tagged<Self, String>
     public let id: ID
     public var body: Data?
-    fileprivate var _request: HTTPRequest
 
+    public var identifier: String {
+        id.rawValue
+    }
+
+    public subscript<Value>(
+        dynamicMember dynamicMember: WritableKeyPath<HTTPRequest, Value>
+    ) -> Value {
+        get { _request[keyPath: dynamicMember] }
+        set { _request[keyPath: dynamicMember] = newValue }
+    }
+
+    fileprivate var _request: HTTPRequest
     private var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
     public init(
@@ -35,10 +47,30 @@ public struct HTTPRequestData: Sendable, Identifiable {
     }
 
     public init(
-        method: HTTPRequest.Method,
-        scheme: String?,
+        id: String,
+        method: HTTPRequest.Method = .get,
+        scheme: String? = "https",
         authority: String?,
-        path: String?,
+        path: String? = nil,
+        headerFields: HTTPFields = [:],
+        body: Data? = nil
+    ) {
+        self.init(
+            id: .init(id),
+            method: method,
+            scheme: scheme,
+            authority: authority,
+            path: path,
+            headerFields: headerFields,
+            body: body
+        )
+    }
+
+    public init(
+        method: HTTPRequest.Method = .get,
+        scheme: String? = "https",
+        authority: String?,
+        path: String? = nil,
         headerFields: HTTPFields = [:],
         body: Data? = nil
     ) {
@@ -50,46 +82,6 @@ public struct HTTPRequestData: Sendable, Identifiable {
             authority: authority,
             path: path
         )
-    }
-}
-
-// MARK: - HTTPRequest Conveniences
-
-extension HTTPRequestData {
-
-    public var method: HTTPRequest.Method {
-        get { _request.method }
-        set { _request.method = newValue }
-    }
-
-    public var scheme: String? {
-        get { _request.scheme }
-        set { _request.scheme = newValue }
-    }
-
-    public var authority: String? {
-        get { _request.authority }
-        set { _request.authority = newValue }
-    }
-
-    public var path: String? {
-        get { _request.path }
-        set { _request.path = newValue }
-    }
-
-    public var extendedConnectProtocol: String? {
-        get { _request.extendedConnectProtocol }
-        set { _request.extendedConnectProtocol = newValue }
-    }
-
-    public var pseudoHeaderFields: HTTPRequest.PseudoHeaderFields {
-        get { _request.pseudoHeaderFields }
-        set { _request.pseudoHeaderFields = newValue }
-    }
-
-    public var headerFields: HTTPFields {
-        get { _request.headerFields }
-        set { _request.headerFields = newValue }
     }
 }
 
@@ -106,8 +98,15 @@ extension HTTPRequestData {
         }
         set {
             let id = ObjectIdentifier(optionType)
-            options[id] = HTTPRequestDataOptionContainer(newValue, isEqualTo: { other in
-                optionType.includeInEqualityEvaluation ? _isEqual(newValue, other) : true
+            options[id] = HTTPRequestDataOptionContainer(
+                newValue,
+                isEqualTo: { other in
+                    guard let other else {
+                        return false == optionType.includeInEqualityEvaluation
+                    }
+                    return optionType.includeInEqualityEvaluation
+                    ? _isEqual(newValue, other)
+                    : true
             })
         }
     }
@@ -120,8 +119,10 @@ extension HTTPRequestData: Equatable {
         lhs.body == rhs.body
         && lhs._request == rhs._request
         && lhs.options.allSatisfy { key, lhs in
-            guard let rhs = rhs.options[key] else { return false }
-            return lhs.isEqualTo(rhs)
+            return lhs.isEqualTo(rhs.options[key]?.value)
+        }
+        && rhs.options.allSatisfy { key, rhs in
+            return rhs.isEqualTo(lhs.options[key]?.value)
         }
     }
 }
@@ -133,17 +134,16 @@ extension HTTPRequestData: Hashable {
     }
 }
 
-extension HTTPRequestData: CustomStringConvertible {
-    public var description: String {
-        let prefix = "\(RequestSequence.number):\(id.rawValue)"
-        return "\(prefix) \(_request.authority ?? "/")\(_request.path ?? "")"
+extension HTTPRequestData: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        "[\(RequestSequence.number):\(identifier)] \(_request.debugDescription)"
     }
 }
 
 // MARK: - Foundation
 
 extension URLRequest {
-    init?(http: HTTPRequestData) {
+    public init?(http: HTTPRequestData) {
         self.init(httpRequest: http._request)
     }
 }
