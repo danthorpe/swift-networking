@@ -16,6 +16,7 @@ public typealias ResponseStream<Value> = AsyncThrowingStream<Partial<Value, Byte
 
 extension NetworkingComponent {
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    @discardableResult
     public func data(
         _ request: HTTPRequestData,
         timeout duration: Duration,
@@ -32,6 +33,7 @@ extension NetworkingComponent {
     }
 
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+    @discardableResult
     public func data(_ request: HTTPRequestData, timeout duration: Duration) async throws -> HTTPResponseData {
         try await data(request, timeout: duration, using: Dependency(\.continuousClock).wrappedValue)
     }
@@ -40,6 +42,7 @@ extension NetworkingComponent {
     @available(iOS, deprecated: 16.0)
     @available(watchOS, deprecated: 9.0)
     @available(tvOS, deprecated: 16.0)
+    @discardableResult
     public func data(_ request: HTTPRequestData, timeout timeInterval: TimeInterval) async throws -> HTTPResponseData {
         do {
             try Task.checkCancellation()
@@ -51,14 +54,16 @@ extension NetworkingComponent {
         }
     }
 
+    @discardableResult
     public func data(_ request: HTTPRequestData, timeout seconds: Int64) async throws -> HTTPResponseData {
-        if #available(iOS 16.0, *) {
+        if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
             return try await data(request, timeout: Duration(secondsComponent: seconds, attosecondsComponent: 0))
         } else {
             return try await data(request, timeout: TimeInterval(seconds))
         }
     }
 
+    @discardableResult
     public func data(_ request: HTTPRequestData) async throws -> HTTPResponseData {
         try await data(request, timeout: request.requestTimeoutInSeconds)
     }
@@ -141,7 +146,7 @@ extension NetworkingComponent {
             // Set the progress initially
             await progress.set(
                 id: request.id,
-                bytesReceived: BytesReceived(totalBytesExpected: request.expectedContentLength ?? 0)
+                bytesReceived: BytesReceived(expected: request.expectedContentLength ?? 0)
             )
 
             // Function to yield overall progress

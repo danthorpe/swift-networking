@@ -1,14 +1,15 @@
 import Dependencies
-import HTTPNetworking
 import ShortID
 import Tagged
 import XCTest
+
+@testable import HTTPNetworking
 
 final class HTTPRequestDataTests: XCTestCase {
 
     func test__basics() {
         var request = HTTPRequestData(
-            id: "some id",
+            id: .init("some id"),
             method: .get,
             scheme: "https",
             authority: "example.com",
@@ -64,7 +65,7 @@ final class HTTPRequestDataTests: XCTestCase {
 
     func test__options() {
         var request1 = HTTPRequestData(
-            id: "some id",
+            id: .init("some id"),
             authority: "example.com"
         )
 
@@ -73,7 +74,7 @@ final class HTTPRequestDataTests: XCTestCase {
         XCTAssertEqual(request1.testOption, "Goodbye")
 
         var request2 = HTTPRequestData(
-            id: "some id",
+            id: .init("some id"),
             authority: "example.com"
         )
 
@@ -95,20 +96,20 @@ final class HTTPRequestDataTests: XCTestCase {
 
     func test__description() {
         var request = HTTPRequestData(
-            id: "some id",
+            id: .init("some id"),
             authority: "example.com"
         )
-        XCTAssertEqual(request.debugDescription, "[1:some id] (GET) https://example.com")
+        XCTAssertEqual(request.debugDescription, "[0:some id] (GET) https://example.com")
 
         request.scheme = "abc"
         request.method = .post
         request.path = "/hello"
-        XCTAssertEqual(request.debugDescription, "[1:some id] (POST) abc://example.com/hello")
+        XCTAssertEqual(request.debugDescription, "[0:some id] (POST) abc://example.com/hello")
     }
 
     func test__foundation_url_request() throws {
         let request = HTTPRequestData(
-            id: "some id",
+            id: .init("some id"),
             method: .get,
             scheme: "https",
             authority: "example.com",

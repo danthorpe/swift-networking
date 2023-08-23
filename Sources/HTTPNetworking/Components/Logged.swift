@@ -11,7 +11,9 @@ extension NetworkingComponent {
         onSuccess: @escaping @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void,
         onFailure: @escaping @Sendable (HTTPRequestData, Error) async -> Void
     ) -> some NetworkingComponent {
-        Logged(onSend: onSend, onSuccess: onSuccess, onFailure: onFailure, upstream: self)
+        modified(
+            Logged(onSend: onSend, onSuccess: onSuccess, onFailure: onFailure)
+        )
     }
 
     public func logged(using logger: Logger) -> some NetworkingComponent {
@@ -27,13 +29,12 @@ extension NetworkingComponent {
     }
 }
 
-struct Logged<Upstream: NetworkingComponent>: NetworkingComponent {
+struct Logged: NetworkingModifier {
     let onSend: @Sendable (HTTPRequestData) async -> Void
     let onSuccess: @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void
     let onFailure: @Sendable (HTTPRequestData, Error) async -> Void
-    let upstream: Upstream
 
-    func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream<HTTPResponseData> { continuation in
             Task {
                 await onSend(request)

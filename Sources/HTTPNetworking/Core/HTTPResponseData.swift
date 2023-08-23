@@ -7,19 +7,23 @@ import HTTPTypesFoundation
 public struct HTTPResponseData: Hashable, Sendable {
     public let request: HTTPRequestData
     public let data: Data
-    private let _response: HTTPResponse
+    private let response: HTTPResponse
 
     public subscript<Value>(dynamicMember dynamicMemberLookup: KeyPath<HTTPResponse, Value>) -> Value {
-        _response[keyPath: dynamicMemberLookup]
+        response[keyPath: dynamicMemberLookup]
+    }
+
+    public init(request: HTTPRequestData, data: Data, response: HTTPResponse) {
+        self.request = request
+        self.data = data
+        self.response = response
     }
 
     public init(request: HTTPRequestData, data: Data, urlResponse: URLResponse?) throws {
         guard let response = (urlResponse as? HTTPURLResponse)?.httpResponse else {
             throw "TODO: Failed to convert URLResponse to HTTPResponseData"
         }
-        self.request = request
-        self.data = data
-        self._response = response
+        self.init(request: request, data: data, response: response)
     }
 
     func decode<Body, Decoder: TopLevelDecoder, Payload: Decodable>(

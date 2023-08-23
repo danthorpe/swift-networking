@@ -16,14 +16,18 @@ public enum Partial<Value, Progress> {
         }
     }
 
-    public func onValue(perform block: (Value) throws -> Void) rethrows -> Partial<Value, Progress> {
+    public func onValue(
+        perform block: (Value) throws -> Void
+    ) rethrows -> Partial<Value, Progress> {
         if case let .value(value, _) = self {
             try block(value)
         }
         return self
     }
 
-    public func mapValue<NewValue>(transform: (Value) throws -> NewValue) rethrows -> Partial<NewValue, Progress> {
+    public func mapValue<NewValue>(
+        transform: (Value) throws -> NewValue
+    ) rethrows -> Partial<NewValue, Progress> {
         switch self {
         case let .progress(progess):
             return .progress(progess)
@@ -32,7 +36,9 @@ public enum Partial<Value, Progress> {
         }
     }
 
-    public func mapProgress<NewProgress>(transform: (Progress) throws -> NewProgress) rethrows -> Partial<Value, NewProgress> {
+    public func mapProgress<NewProgress>(
+        transform: (Progress) throws -> NewProgress
+    ) rethrows -> Partial<Value, NewProgress> {
         switch self {
         case let .progress(progress):
             return try .progress(transform(progress))

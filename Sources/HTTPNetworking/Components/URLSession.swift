@@ -39,10 +39,11 @@ extension URLSession: NetworkingComponent {
                     try Task.checkCancellation()
 
                     // Track the progress of bytes received
-                    var progress = BytesReceived(totalBytesExpected: response.expectedContentLength)
+                    var progress = BytesReceived(expected: response.expectedContentLength)
+                    var bufferCount = 0
 
                     // Configure the buffer
-                    data.reserveCapacity(min(bufferSize, Int(progress.totalBytesExpected)))
+                    data.reserveCapacity(min(bufferSize, Int(progress.expected)))
 
                     // Iterate through the bytes
                     for try await byte in bytes {
@@ -52,9 +53,10 @@ extension URLSession: NetworkingComponent {
 
                         // Count how many bytes have been received
                         progress.receiveBytes(count: 1)
+                        bufferCount += 1
 
                         // Check to see if we've reached the buffer size
-                        if progress.bytesReceived >= bufferSize {
+                        if bufferCount >= bufferSize {
 
                             // Co-operative cancellation
                             try Task.checkCancellation()
@@ -62,8 +64,8 @@ extension URLSession: NetworkingComponent {
                             // Yield progress
                             continuation.yield(.progress(progress))
 
-                            // Reset the bytes received
-                            progress.bytesReceived = 0
+                            // Reset the buffer count
+                            bufferCount = 0
                         }
                     } // End of for-await-in bytes
 

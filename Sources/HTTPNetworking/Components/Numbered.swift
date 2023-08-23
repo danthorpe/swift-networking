@@ -1,19 +1,18 @@
 extension NetworkingComponent {
     public func numbered() -> some NetworkingComponent {
-        Numbered(upstream: self)
+        modified(Numbered())
     }
 }
 
 public struct RequestSequence {
     @TaskLocal
-    public static var number: Int = 1
+    public static var number: Int = 0
 }
 
-struct Numbered<Upstream: NetworkingComponent>: NetworkingComponent {
-    private let sequence = SequenceNumber(value: 1)
-    let upstream: Upstream
+struct Numbered: NetworkingModifier {
+    private let sequence = SequenceNumber(value: 0)
 
-    func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream<HTTPResponseData> { continuation in
             Task {
                 await RequestSequence.$number.withValue(sequence.next()) {

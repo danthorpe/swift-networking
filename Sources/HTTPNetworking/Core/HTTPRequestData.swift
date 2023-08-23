@@ -26,12 +26,12 @@ public struct HTTPRequestData: Sendable, Identifiable {
     fileprivate var _request: HTTPRequest
     private var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
-    public init(
+    init(
         id: ID,
-        method: HTTPRequest.Method,
-        scheme: String?,
+        method: HTTPRequest.Method = .get,
+        scheme: String? = "https",
         authority: String?,
-        path: String?,
+        path: String? = nil,
         headerFields: HTTPFields = [:],
         body: Data? = nil
     ) {
@@ -43,26 +43,6 @@ public struct HTTPRequestData: Sendable, Identifiable {
             authority: authority,
             path: path,
             headerFields: headerFields
-        )
-    }
-
-    public init(
-        id: String,
-        method: HTTPRequest.Method = .get,
-        scheme: String? = "https",
-        authority: String?,
-        path: String? = nil,
-        headerFields: HTTPFields = [:],
-        body: Data? = nil
-    ) {
-        self.init(
-            id: .init(id),
-            method: method,
-            scheme: scheme,
-            authority: authority,
-            path: path,
-            headerFields: headerFields,
-            body: body
         )
     }
 
@@ -80,7 +60,35 @@ public struct HTTPRequestData: Sendable, Identifiable {
             method: method,
             scheme: scheme,
             authority: authority,
-            path: path
+            path: path,
+            headerFields: headerFields,
+            body: body
+        )
+    }
+
+    public init(
+        method: HTTPRequest.Method = .get,
+        scheme: String? = "https",
+        authority: String?,
+        path: String? = nil,
+        headerFields: HTTPFields = [:],
+        body: any HTTPRequestBody
+    ) throws {
+        var fields = headerFields
+        let data: Data? = try {
+            guard body.isNotEmpty else {
+                return nil
+            }
+            fields.append(body.additionalHeaders)
+            return try body.encode()
+        }()
+        self.init(
+            method: method,
+            scheme: scheme,
+            authority: authority,
+            path: path,
+            headerFields: fields,
+            body: data
         )
     }
 }

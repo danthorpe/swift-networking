@@ -15,22 +15,20 @@ extension HTTPRequestData {
 
 extension NetworkingComponent {
     public func throttled(max: UInt) -> some NetworkingComponent {
-        Throttled(limit: max, upstream: self)
+        modified(Throttled(limit: max))
     }
 }
 
-struct Throttled<Upstream: NetworkingComponent>: NetworkingComponent, ActiveRequestable {
+struct Throttled: NetworkingModifier, ActiveRequestable {
 
     let activeRequests = ActiveRequests()
     let limit: UInt
-    let upstream: Upstream
 
-    init(limit: UInt, upstream: Upstream) {
+    init(limit: UInt) {
         self.limit = limit
-        self.upstream = upstream
     }
 
-    func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         guard case .always = request.throttle else {
             return upstream.send(request)
         }

@@ -6,16 +6,17 @@ var package = Package(name: "danthorpe-networking")
 // MARK: 💫 Package Customization
 
 package.platforms = [
-    .macOS(.v12),
-    .iOS(.v15),
-    .tvOS(.v14),
-    .watchOS(.v7)
+    .macOS(.v13),
+    .iOS(.v16),
+    .tvOS(.v16),
+    .watchOS(.v9)
 ]
 
 // MARK: - 🧸 Module Names
 
 let HTTPNetworking = "HTTPNetworking"
 let Helpers = "Helpers"
+let TestSupport = "TestSupport"
 
 // MARK: - 🔑 Builders
 
@@ -25,6 +26,7 @@ let 📦 = Module.builder(
         dependsOn: [ ],
         defaultWith: [
             .dependencies,
+
         ],
         unitTestsDependsOn: [ ],
         plugins: [ .swiftLint ]
@@ -32,6 +34,10 @@ let 📦 = Module.builder(
 )
 
 // MARK: - 🎯 Targets
+
+Helpers <+ 📦 {
+    $0.createUnitTests = false
+}
 
 HTTPNetworking <+ 📦 {
     $0.createProduct = .library(nil)
@@ -45,10 +51,21 @@ HTTPNetworking <+ 📦 {
         .shortID,
         .tagged
     ]
+    $0.unitTestsDependsOn = [
+        TestSupport
+    ]
+    $0.unitTestsWith = [
+        .assertionExtras
+    ]
 }
 
-Helpers <+ 📦 {
+TestSupport <+ 📦 {
     $0.createUnitTests = false
+    $0.dependsOn = [
+        HTTPNetworking,
+        Helpers
+    ]
+
 }
 
 
@@ -76,13 +93,19 @@ package.dependencies = [
     .package(url: "https://github.com/apple/swift-async-algorithms", from: "0.1.0"),
     .package(url: "https://github.com/apple/swift-collections", from: "1.0.2"),
     .package(url: "https://github.com/apple/swift-http-types", from: "0.1.0"),
-    .package(url: "https://github.com/danthorpe/danthorpe-utilities", from: "0.3.0"),
+//    .package(url: "https://github.com/danthorpe/danthorpe-utilities", branch: "main"),
+    .package(path: "../danthorpe-utilities"),
     .package(url: "https://github.com/danthorpe/danthorpe-swiftlint-plugin", from: "0.1.0"),
-    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "0.6.0"),
+    .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-custom-dump", from: "1.0.0"),
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
     .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
 ]
 
 extension Target.Dependency {
+    static let assertionExtras: Target.Dependency = .product(
+        name: "AssertionExtras", package: "danthorpe-utilities"
+    )
     static let asyncAlgorithms: Target.Dependency = .product(
         name: "AsyncAlgorithms", package: "swift-async-algorithms"
     )
