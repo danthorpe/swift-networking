@@ -24,7 +24,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
     }
 
     fileprivate var _request: HTTPRequest
-    private var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
+    fileprivate var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
     init(
         id: ID,
@@ -124,7 +124,8 @@ extension HTTPRequestData {
 
 extension HTTPRequestData: Equatable {
     public static func == (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
-        lhs.body == rhs.body
+        lhs.id == rhs.id
+        && lhs.body == rhs.body
         && lhs._request == rhs._request
         && lhs.options.allSatisfy { key, lhs in
             return lhs.isEqualTo(rhs.options[key]?.value)
@@ -145,6 +146,19 @@ extension HTTPRequestData: Hashable {
 extension HTTPRequestData: CustomDebugStringConvertible {
     public var debugDescription: String {
         "[\(RequestSequence.number):\(identifier)] \(_request.debugDescription)"
+    }
+}
+
+// MARK: - Pattern Match
+
+public func ~= (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
+    lhs.body == rhs.body
+    && lhs._request == rhs._request
+    && lhs.options.allSatisfy { key, lhs in
+        return lhs.isEqualTo(rhs.options[key]?.value)
+    }
+    && rhs.options.allSatisfy { key, rhs in
+        return rhs.isEqualTo(lhs.options[key]?.value)
     }
 }
 

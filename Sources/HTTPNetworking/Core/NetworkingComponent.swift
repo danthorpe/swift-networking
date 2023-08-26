@@ -77,21 +77,25 @@ extension NetworkingComponent {
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     public func data(
         _ requests: [HTTPRequestData],
-        timeout duration: Duration,
-        using clock: @escaping @autoclosure () -> any Clock<Duration>
+        timeout duration: Duration = .seconds(60)
     ) -> MultipleResponseStream {
-        data(requests: requests) { stream in
-            try await stream.first(beforeTimeout: duration, using: clock())
-        }
+        data(requests,
+             timeout: requests.map(\.requestTimeoutInSeconds).max().map(Duration.seconds) ?? duration,
+             using: Dependency(\.continuousClock).wrappedValue
+        )
     }
 
     @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     public func data(
         _ requests: [HTTPRequestData],
-        timeout duration: Duration
+        timeout duration: Duration,
+        using clock: @escaping @autoclosure () -> any Clock<Duration>
     ) -> MultipleResponseStream {
-        data(requests: requests) { stream in
-            try await stream.first(beforeTimeout: duration, using: Dependency(\.continuousClock).wrappedValue)
+        data(requests: requests) { request, stream in
+            try await stream.first(
+                beforeTimeout: min(duration, Duration.seconds(request.requestTimeoutInSeconds)),
+                using: clock()
+            )
         }
     }
 
@@ -103,14 +107,18 @@ extension NetworkingComponent {
         _ requests: [HTTPRequestData],
         timeout timeInterval: TimeInterval
     ) -> MultipleResponseStream {
-        data(requests: requests) { stream in
-            try await stream.first(beforeTimeout: timeInterval)
+        data(requests: requests) { request, stream in
+            try await stream.first(
+                beforeTimeout: min(timeInterval, TimeInterval(request.requestTimeoutInSeconds))
+            )
         }
     }
 
+    private typealias TimeoutStream = @Sendable (HTTPRequestData, IntermediateStream) async throws -> MultipleResponse.Element
+
     private func data(
         requests: [HTTPRequestData],
-        timeout: @escaping @Sendable (IntermediateStream) async throws -> MultipleResponse.Element
+        timeout: @escaping TimeoutStream
     ) -> MultipleResponseStream {
         MultipleResponseStream { continuation in
             let progress = ProgressTracker()
@@ -135,7 +143,7 @@ extension NetworkingComponent {
 
     @Sendable private func data(
         requests: [HTTPRequestData],
-        timeout: @escaping @Sendable (IntermediateStream) async throws -> MultipleResponse.Element,
+        timeout: @escaping TimeoutStream,
         progress: ProgressTracker,
         group: inout TaskGroup<MultipleResponse.Element>,
         continuation: MultipleResponseStream.Continuation
@@ -168,7 +176,7 @@ extension NetworkingComponent {
                     // Co-operative cancellation
                     try Task.checkCancellation()
                     // Process the stream
-                    return try await timeout(send(request)
+                    return try await timeout(request, send(request)
                         .compactMap { partial in
                             // Co-operative cancellation
                             try Task.checkCancellation()

@@ -19,7 +19,7 @@ extension NetworkingComponent {
     }
 }
 
-struct Throttled: NetworkingModifier, ActiveRequestable {
+struct Throttled: NetworkingModifier {
 
     let activeRequests = ActiveRequests()
     let limit: UInt
@@ -32,21 +32,32 @@ struct Throttled: NetworkingModifier, ActiveRequestable {
         guard case .always = request.throttle else {
             return upstream.send(request)
         }
-
         return ResponseStream<HTTPResponseData> { continuation in
             Task { [limit = self.limit] in
                 do {
-                    try await waitUntilCountLessThan(limit) { pendingRequests in
-                        if let logger = NetworkLogger.logger {
-                            logger.info("🧵 \(pendingRequests) requests")
-                        }
+                    try await activeRequests.waitUntilCountLessThan(limit) { pendingRequests in
+                        NetworkLogger.logger?.info("🧵 \(pendingRequests) requests")
                     }
-                    try await self.stream(request, using: upstream)
+                    await self.activeRequests.send(upstream: upstream, request: request)
                         .redirect(into: continuation)
                 } catch {
                     continuation.finish(throwing: error)
                 }
             }
         }
+    }
+}
+
+extension ActiveRequests {
+
+    fileprivate func isDuplicate(request: HTTPRequestData) -> Value? {
+        active.values.first(where: { $0.request ~= request })
+    }
+
+    fileprivate func send(
+        upstream: NetworkingComponent,
+        request: HTTPRequestData
+    ) -> SharedStream {
+        return add(stream: upstream.send(request), for: request)
     }
 }

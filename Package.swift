@@ -46,6 +46,7 @@ HTTPNetworking <+ 📦 {
     ]
     $0.with = [
         .asyncAlgorithms,
+        .concurrencyExtras,
         .httpTypes,
         .httpTypesFoundation,
         .shortID,
@@ -55,7 +56,8 @@ HTTPNetworking <+ 📦 {
         TestSupport
     ]
     $0.unitTestsWith = [
-        .assertionExtras
+        .assertionExtras,
+        .concurrencyExtras
     ]
 }
 
@@ -65,7 +67,9 @@ TestSupport <+ 📦 {
         HTTPNetworking,
         Helpers
     ]
-
+    $0.with = [
+        .concurrencyExtras
+    ]
 }
 
 
@@ -108,6 +112,9 @@ extension Target.Dependency {
     )
     static let asyncAlgorithms: Target.Dependency = .product(
         name: "AsyncAlgorithms", package: "swift-async-algorithms"
+    )
+    static let concurrencyExtras: Target.Dependency = .product(
+        name: "ConcurrencyExtras", package: "swift-concurrency-extras"
     )
     static let dependencies: Target.Dependency = .product(
         name: "Dependencies", package: "swift-dependencies"

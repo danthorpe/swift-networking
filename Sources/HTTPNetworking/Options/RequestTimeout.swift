@@ -1,6 +1,6 @@
 import Foundation
 
-private enum RequestTimeoutInSeconds: HTTPRequestDataOption {
+enum RequestTimeoutInSeconds: HTTPRequestDataOption {
     static var defaultOption: Int64 = 60
 }
 
