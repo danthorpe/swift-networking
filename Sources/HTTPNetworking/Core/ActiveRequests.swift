@@ -36,17 +36,4 @@ public actor ActiveRequests {
     public func removeStream(for request: HTTPRequestData) {
         active[Key(id: request.id)] = nil
     }
-
-    public func waitUntilCountLessThan(_ limit: UInt, countDidChange: @Sendable (Int) async -> Void) async throws {
-        var initial = active.count
-        while active.count > limit {
-            try Task.checkCancellation()
-            let latest = active.count
-            if initial > latest {
-                initial = latest
-                await countDidChange(latest)
-            }
-            await Task.yield()
-        }
-    }
 }

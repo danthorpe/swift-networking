@@ -6,9 +6,9 @@ import XCTest
 
 final class NumberedTests: XCTestCase {
 
-    actor RequestSequenceReporter {
+    actor RequestSequenceReporter: NetworkReportingComponent {        
         var numbers: [(identifier: String, number: Int)] = []
-        func report(_ request: HTTPRequestData) {
+        func didStart(request: HTTPRequestData) {
             numbers.append((request.identifier, RequestSequence.number))
         }
     }
@@ -25,9 +25,7 @@ final class NumberedTests: XCTestCase {
             let network = TerminalNetworkingComponent(isFailingTerminal: true)
                 .mocked(request2, stub: .ok())
                 .mocked(request1, stub: .ok())
-                .reported { request in
-                    await reporter.report(request)
-                }
+                .reported(by: reporter)
                 .numbered()
 
             try await network.data(request1)

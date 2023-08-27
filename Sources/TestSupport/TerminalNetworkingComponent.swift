@@ -7,7 +7,7 @@ public struct TerminalNetworkingComponent: NetworkingComponent {
     }
     let isFailingTerminal: Bool
     public init(
-        isFailingTerminal: Bool = false
+        isFailingTerminal: Bool = true
     ) {
         self.isFailingTerminal = isFailingTerminal
     }

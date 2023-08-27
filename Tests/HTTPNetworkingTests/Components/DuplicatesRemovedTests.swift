@@ -24,14 +24,13 @@ final class DuplicatesRemovedTests: XCTestCase {
                 let request3 = HTTPRequestData(authority: "example.com", path: "/error")
                 let request4 = HTTPRequestData(authority: "example.com") // actually the same endpoint as request 1
 
-                let network = TerminalNetworkingComponent(isFailingTerminal: true)
+                let network = TerminalNetworkingComponent()
                     .mocked(request1, stub: .ok(data: data1))
                     .mocked(request2, stub: .ok(data: data2))
                     .mocked(request3, stub: .ok(data: data3))
                     .mocked(request4, stub: .ok(data: data1))
                     .reported(by: reporter)
                     .duplicatesRemoved()
-                    .logged(using: .test)
 
                 try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
                     for _ in 0..<4 {

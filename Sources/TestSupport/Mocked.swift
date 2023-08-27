@@ -19,7 +19,7 @@ struct Mocked: NetworkingModifier {
     }
 
     func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
-        guard request == mock else {
+        guard request ~= mock else {
             return upstream.send(request)
         }
         return stub(request)

@@ -1,4 +1,5 @@
 import AsyncAlgorithms
+import Dependencies
 import Foundation
 
 public enum ThrottleOption: HTTPRequestDataOption {
@@ -33,13 +34,14 @@ struct Throttled: NetworkingModifier {
             return upstream.send(request)
         }
         return ResponseStream<HTTPResponseData> { continuation in
-            Task { [limit = self.limit] in
+            Task {
                 do {
-                    try await activeRequests.waitUntilCountLessThan(limit) { pendingRequests in
-                        NetworkLogger.logger?.info("🧵 \(pendingRequests) requests")
-                    }
-                    await self.activeRequests.send(upstream: upstream, request: request)
-                        .redirect(into: continuation)
+                    try await activeRequests.send(
+                        upstream: upstream,
+                        request: request,
+                        limit: self.limit
+                    )
+                    .redirect(into: continuation)
                 } catch {
                     continuation.finish(throwing: error)
                 }
@@ -50,14 +52,20 @@ struct Throttled: NetworkingModifier {
 
 extension ActiveRequests {
 
-    fileprivate func isDuplicate(request: HTTPRequestData) -> Value? {
-        active.values.first(where: { $0.request ~= request })
-    }
-
     fileprivate func send(
         upstream: NetworkingComponent,
-        request: HTTPRequestData
-    ) -> SharedStream {
+        request: HTTPRequestData,
+        limit: UInt
+    ) async throws -> SharedStream {
+        guard active.count >= limit else {
+            return add(stream: upstream.send(request), for: request)
+        }
+        while active.count >= limit {
+            // Co-operative cancellation
+            try Task.checkCancellation()
+            // Yield
+            await Task.yield()
+        }
         return add(stream: upstream.send(request), for: request)
     }
 }
