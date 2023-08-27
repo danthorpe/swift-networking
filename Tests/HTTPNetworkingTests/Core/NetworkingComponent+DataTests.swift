@@ -42,8 +42,10 @@ final class NetworkingComponentDataTests: XCTestCase {
             do {
                 _ = try await response.data
                 XCTFail("Expected an error to be thrown.")
+            } catch let error as StackError {
+                XCTAssertEqual(error, StackError.timeout(request))
             } catch {
-                XCTAssertEqual(error as? String, "TODO: Timeout Error")
+                XCTFail("Unexpected error \(error)")
             }
         }
     }

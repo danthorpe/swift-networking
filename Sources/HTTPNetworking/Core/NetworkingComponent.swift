@@ -28,7 +28,7 @@ extension NetworkingComponent {
                 .compactMap(\.value)
                 .first(beforeTimeout: duration, using: clock())
         } catch is TimeoutError {
-            throw "TODO: Timeout Error"
+            throw StackError.timeout(request)
         }
     }
 
@@ -50,7 +50,7 @@ extension NetworkingComponent {
                 .compactMap(\.value)
                 .first(beforeTimeout: timeInterval)
         } catch is TimeoutError {
-            throw "TODO: Timeout Error"
+            throw StackError.timeout(request)
         }
     }
 

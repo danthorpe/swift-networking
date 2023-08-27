@@ -4,9 +4,9 @@ import HTTPTypes
 
 public struct Request<Body>: Sendable {
     public let http: HTTPRequestData
-    public let decode: @Sendable (HTTPResponseData, Data?) throws -> Body
+    public let decode: @Sendable (HTTPResponseData) throws -> Body
 
-    public init(http: HTTPRequestData, decode: @escaping @Sendable (HTTPResponseData, Data?) throws -> Body) {
+    public init(http: HTTPRequestData, decode: @escaping @Sendable (HTTPResponseData) throws -> Body) {
         self.http = http
         self.decode = decode
     }
@@ -19,8 +19,8 @@ extension Request {
         decoder: Decoder,
         transform: @escaping @Sendable (Payload, HTTPResponseData) throws -> Body
     ) where Decoder.Input == Data {
-        self.init(http: http) { response, data in
-            try response.decode(data: data, as: payloadType, decoder: decoder, transform: transform)
+        self.init(http: http) { response in
+            try response.decode(as: payloadType, decoder: decoder, transform: transform)
         }
     }
 

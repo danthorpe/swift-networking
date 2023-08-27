@@ -35,7 +35,7 @@ public struct StubbedResponseStream: Equatable, Sendable {
 
     func callAsFunction(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream { continuation in
-            let responseData = HTTPResponseData(request: request, data: data, response: response)
+            let responseData = expectedResponse(request)
             Task {
                 let clock = TestClock()
                 var bytes = BytesReceived().withExpectedBytes(from: responseData)
@@ -65,6 +65,10 @@ public struct StubbedResponseStream: Equatable, Sendable {
                 }
             }
         }
+    }
+
+    public func expectedResponse(_ request: HTTPRequestData) -> HTTPResponseData {
+        HTTPResponseData(request: request, data: data, response: response)
     }
 }
 

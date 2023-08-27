@@ -5,7 +5,7 @@ extension URLSession: NetworkingComponent {
         ResponseStream<HTTPResponseData> { continuation in
             Task {
                 guard let urlRequest = URLRequest(http: request) else {
-                    continuation.finish(throwing: "TODO: Failed to create URLRequest")
+                    continuation.finish(throwing: StackError.createURLRequestFailed(request))
                     return
                 }
                 do {
