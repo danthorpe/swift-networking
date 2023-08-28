@@ -17,7 +17,7 @@ final class NetworkingComponentDataTests: XCTestCase {
         } operation: {
             let request = HTTPRequestData(authority: "example.com")
             let data = try XCTUnwrap("Hello World".data(using: .utf8))
-            let network = TerminalNetworkingComponent(isFailingTerminal: true)
+            let network = TerminalNetworkingComponent()
                 .mocked(request, stub: .ok(data: data))
 
             let response = try await network.data(request)
@@ -34,7 +34,7 @@ final class NetworkingComponentDataTests: XCTestCase {
         } operation: {
             let request = HTTPRequestData(authority: "example.com")
             let data = try XCTUnwrap("Hello World".data(using: .utf8))
-            let network = TerminalNetworkingComponent(isFailingTerminal: true)
+            let network = TerminalNetworkingComponent()
                 .mocked(request, stub: .ok(data: data))
 
             async let response = network.data(request, timeout: .seconds(2))
@@ -48,5 +48,44 @@ final class NetworkingComponentDataTests: XCTestCase {
                 XCTFail("Unexpected error \(error)")
             }
         }
+    }
+
+    func test__basic_data_progress() async throws {
+        actor UpdateProgress {
+            var bytesReceived: [BytesReceived] = []
+            func update(_ bytesReceived: BytesReceived) {
+                self.bytesReceived.append(bytesReceived)
+            }
+        }
+        let progress = UpdateProgress()
+        let progressExpectation = expectation(description: "Update progress")
+        progressExpectation.assertForOverFulfill = true
+        progressExpectation.expectedFulfillmentCount = 5
+
+        try await withDependencies {
+            $0.shortID = .incrementing
+            $0.continuousClock = TestClock()
+        } operation: {
+            let request = HTTPRequestData(authority: "example.com")
+            let data = try XCTUnwrap("Hello World".data(using: .utf8))
+            let network = TerminalNetworkingComponent()
+                .mocked(request, stub: .ok(data: data))
+
+            let response = try await network.data(request) { bytesReceived in
+                progressExpectation.fulfill()
+                await progress.update(bytesReceived)
+            }
+            XCTAssertEqual(response.data, data)
+            await fulfillment(of: [progressExpectation])
+            let bytesReceived = await progress.bytesReceived
+            XCTAssertEqual(bytesReceived, [
+                BytesReceived(received: 2, expected: 11),
+                BytesReceived(received: 4, expected: 11),
+                BytesReceived(received: 6, expected: 11),
+                BytesReceived(received: 8, expected: 11),
+                BytesReceived(received: 11, expected: 11)
+            ])
+        }
+
     }
 }

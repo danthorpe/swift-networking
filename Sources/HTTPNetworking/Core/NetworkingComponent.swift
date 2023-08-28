@@ -12,59 +12,47 @@ public protocol NetworkingComponent {
 
 public typealias ResponseStream<Value> = AsyncThrowingStream<Partial<Value, BytesReceived>, Error>
 
-// MARK: - Timed Out single Request/Response Data
-
 extension NetworkingComponent {
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
+
     @discardableResult
     public func data(
         _ request: HTTPRequestData,
+        progress updateProgress: @escaping @Sendable (BytesReceived) async -> Void = { _ in },
         timeout duration: Duration,
         using clock: @autoclosure () -> any Clock<Duration>
     ) async throws -> HTTPResponseData {
         do {
             try Task.checkCancellation()
             return try await send(request)
-                .compactMap(\.value)
+                .compactMap { element in
+                    await updateProgress(element.progress)
+                    return element.value
+                }
                 .first(beforeTimeout: duration, using: clock())
         } catch is TimeoutError {
             throw StackError.timeout(request)
         }
     }
 
-    @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
     @discardableResult
-    public func data(_ request: HTTPRequestData, timeout duration: Duration) async throws -> HTTPResponseData {
-        try await data(request, timeout: duration, using: Dependency(\.continuousClock).wrappedValue)
-    }
-
-    @available(macOS, deprecated: 13.0)
-    @available(iOS, deprecated: 16.0)
-    @available(watchOS, deprecated: 9.0)
-    @available(tvOS, deprecated: 16.0)
-    @discardableResult
-    public func data(_ request: HTTPRequestData, timeout timeInterval: TimeInterval) async throws -> HTTPResponseData {
-        do {
-            try Task.checkCancellation()
-            return try await send(request)
-                .compactMap(\.value)
-                .first(beforeTimeout: timeInterval)
-        } catch is TimeoutError {
-            throw StackError.timeout(request)
-        }
+    public func data(
+        _ request: HTTPRequestData,
+        progress updateProgress: @escaping @Sendable (BytesReceived) async -> Void = { _ in },
+        timeout duration: Duration
+    ) async throws -> HTTPResponseData {
+        try await data(
+            request,
+            progress: updateProgress,
+            timeout: duration,
+            using: Dependency(\.continuousClock).wrappedValue
+        )
     }
 
     @discardableResult
-    public func data(_ request: HTTPRequestData, timeout seconds: Int64) async throws -> HTTPResponseData {
-        if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
-            return try await data(request, timeout: Duration(secondsComponent: seconds, attosecondsComponent: 0))
-        } else {
-            return try await data(request, timeout: TimeInterval(seconds))
-        }
-    }
-
-    @discardableResult
-    public func data(_ request: HTTPRequestData) async throws -> HTTPResponseData {
-        try await data(request, timeout: request.requestTimeoutInSeconds)
+    public func data(
+        _ request: HTTPRequestData,
+        progress updateProgress: @escaping @Sendable (BytesReceived) async -> Void = { _ in }
+    ) async throws -> HTTPResponseData {
+        try await data(request, progress: updateProgress, timeout: .seconds(request.requestTimeoutInSeconds))
     }
 }

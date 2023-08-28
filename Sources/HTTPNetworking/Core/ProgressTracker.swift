@@ -1,4 +1,4 @@
-actor ProgressTracker: Sendable {
+public actor ProgressTracker: Sendable {
     private var tasks: [AnyHashable: BytesReceived] = [:]
 
     func set(id: some Hashable & Sendable, bytesReceived: BytesReceived) {
@@ -9,11 +9,11 @@ actor ProgressTracker: Sendable {
         tasks[id] = nil
     }
 
-    func overall() -> BytesReceived {
+    public func overall() -> BytesReceived {
         tasks.values.reduce(BytesReceived(), +)
     }
 
-    func fractionCompleted() -> Double {
+    public func fractionCompleted() -> Double {
         overall().fractionCompleted
     }
 }
