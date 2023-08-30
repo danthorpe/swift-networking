@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "danthorpe-utilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danthorpe/danthorpe-utilities",
+      "state" : {
+        "branch" : "main",
+        "revision" : "41952314b339782450ca6d68e332a6551f50234b"
+      }
+    },
+    {
       "identity" : "swift-argument-parser",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
