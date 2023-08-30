@@ -24,7 +24,6 @@ public struct RemoveDuplicates<Upstream: NetworkStackable>: NetworkStackable, Ac
 }
 
 public extension NetworkStackable {
-
     func removeDuplicates() -> RemoveDuplicates<Self> {
         RemoveDuplicates(upstream: self)
     }
