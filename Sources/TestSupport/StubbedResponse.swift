@@ -19,11 +19,11 @@ public struct StubbedResponseStream: Equatable, Sendable {
         public static let `default`: Self = .uniform()
     }
 
-    let configuration: Configuration
-    let data: Data
-    let response: HTTPResponse
+    public let configuration: Configuration
+    public let data: Data
+    public let response: HTTPResponse
 
-    init(
+    public init(
         _ configuration: Configuration = .default,
         data: Data = Data(),
         response: HTTPResponse
@@ -33,7 +33,7 @@ public struct StubbedResponseStream: Equatable, Sendable {
         self.response = response
     }
 
-    func callAsFunction(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    public func callAsFunction(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream { continuation in
             let responseData = expectedResponse(request)
             Task {

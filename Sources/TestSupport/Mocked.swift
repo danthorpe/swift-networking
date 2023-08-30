@@ -7,6 +7,12 @@ extension NetworkingComponent {
     ) -> some NetworkingComponent {
         modified(Mocked(request: request, with: stub))
     }
+
+    public func mocked(
+        _ block: @escaping @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<HTTPResponseData>
+    ) -> some NetworkingComponent {
+        modified(CustomMocked(block: block))
+    }
 }
 
 struct Mocked: NetworkingModifier {
@@ -23,5 +29,13 @@ struct Mocked: NetworkingModifier {
             return upstream.send(request)
         }
         return stub(request)
+    }
+}
+
+struct CustomMocked: NetworkingModifier {
+    let block: @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<HTTPResponseData>
+
+    func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+        block(upstream, request)
     }
 }

@@ -24,7 +24,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
     }
 
     fileprivate var _request: HTTPRequest
-    fileprivate var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
+    internal fileprivate(set) var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
     init(
         id: ID,
@@ -117,6 +117,10 @@ extension HTTPRequestData {
                     : true
             })
         }
+    }
+
+    internal mutating func copy(options other: [ObjectIdentifier: HTTPRequestDataOptionContainer]) {
+        self.options = other
     }
 }
 
