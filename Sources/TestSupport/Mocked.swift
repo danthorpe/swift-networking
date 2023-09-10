@@ -19,6 +19,8 @@ struct Mocked: NetworkingModifier {
     let mock: HTTPRequestData
     let stub: StubbedResponseStream
 
+    @NetworkEnvironment(\.instrument) var instrument
+
     init(request: HTTPRequestData, with stubbedResponse: StubbedResponseStream) {
         self.mock = request
         self.stub = stubbedResponse
@@ -28,7 +30,12 @@ struct Mocked: NetworkingModifier {
         guard request ~= mock else {
             return upstream.send(request)
         }
-        return stub(request)
+        return ResponseStream { continuation in
+            Task {
+                await instrument?.measureElapsedTime("Mocked")
+                await stub(request).redirect(into: continuation)
+            }
+        }
     }
 }
 

@@ -1,22 +1,27 @@
 import Combine
 import Foundation
+import Helpers
 import HTTPTypes
 import HTTPTypesFoundation
 
 @dynamicMemberLookup
-public struct HTTPResponseData: Hashable, Sendable {
+public struct HTTPResponseData: Sendable {
     public let request: HTTPRequestData
     public let data: Data
-    private let response: HTTPResponse
+    private let _response: HTTPResponse
 
-    public subscript<Value>(dynamicMember dynamicMemberLookup: KeyPath<HTTPResponse, Value>) -> Value {
-        response[keyPath: dynamicMemberLookup]
+    public subscript<Value>(
+        dynamicMember dynamicMemberLookup: KeyPath<HTTPResponse, Value>
+    ) -> Value {
+        _response[keyPath: dynamicMemberLookup]
     }
+
+    internal fileprivate(set) var metadata: [ObjectIdentifier: HTTPResponseMetadataContainer] = [:]
 
     public init(request: HTTPRequestData, data: Data, response: HTTPResponse) {
         self.request = request
         self.data = data
-        self.response = response
+        self._response = response
     }
 
     public init(request: HTTPRequestData, data: Data, urlResponse: URLResponse?) throws {
@@ -40,6 +45,64 @@ public struct HTTPResponseData: Hashable, Sendable {
         }
     }
 }
+
+// MARK: - Metadata
+
+extension HTTPResponseData {
+    public subscript<Metadata: HTTPResponseMetadata>(metadata metadataType: Metadata.Type) -> Metadata.Value {
+        get {
+            let id = ObjectIdentifier(metadataType)
+            guard let container = metadata[id], let value = container.value as? Metadata.Value else {
+                return metadataType.defaultMetadata
+            }
+            return value
+        }
+        set {
+            let id = ObjectIdentifier(metadataType)
+            metadata[id] = HTTPResponseMetadataContainer(
+                newValue,
+                isEqualTo: { other in
+                    guard let other else {
+                        return false == metadataType.includeInEqualityEvaluation
+                    }
+                    return metadataType.includeInEqualityEvaluation
+                    ? _isEqual(newValue, other)
+                    : true
+                })
+        }
+    }
+
+    internal mutating func copy(metadata other: [ObjectIdentifier: HTTPResponseMetadataContainer]) {
+        self.metadata = other
+    }
+}
+
+// MARK: - Conformances
+
+extension HTTPResponseData: Equatable {
+    public static func == (lhs: HTTPResponseData, rhs: HTTPResponseData) -> Bool {
+        lhs.request == rhs.request
+        && lhs.data == rhs.data
+        && lhs._response == rhs._response
+        && lhs.metadata.allSatisfy { key, lhs in
+            return lhs.isEqualTo(rhs.metadata[key]?.value)
+        }
+        && rhs.metadata.allSatisfy { key, rhs in
+            return rhs.isEqualTo(lhs.metadata[key]?.value)
+        }
+    }
+}
+
+extension HTTPResponseData: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(request)
+        hasher.combine(data)
+        hasher.combine(_response)
+    }
+}
+
+
+// MARK: - Conveniences
 
 extension HTTPResponse.Status {
     public var isFailure: Bool {
