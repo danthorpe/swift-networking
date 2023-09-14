@@ -7,7 +7,7 @@ import XCTest
 
 @testable import HTTPNetworking
 
-final class AutomaticRetryTests: XCTestCase {
+final class RetryTests: XCTestCase {
 
     final class RetryingMock {
         var stubs: [StubbedResponseStream]
@@ -60,6 +60,7 @@ final class AutomaticRetryTests: XCTestCase {
             XCTAssertTrue(retryingMock.stubs.isEmpty)
         }
     }
+
     func test__given_no_retry_strategy() async {
         withDependencies {
             $0.shortID = .incrementing
@@ -69,6 +70,7 @@ final class AutomaticRetryTests: XCTestCase {
             request.retryingStrategy = nil
         }
     }
+
     func test__default_behaviour__constant_backoff() async {
         let request = HTTPRequestData(id: .init("1"), authority: "example.com")
         XCTAssertTrue(request.supportsRetryingRequests)
@@ -95,7 +97,6 @@ final class AutomaticRetryTests: XCTestCase {
         )
         XCTAssertNil(delay)
     }
-
 }
 
 final class RetryStrategyTests: XCTestCase {
@@ -123,5 +124,81 @@ final class RetryStrategyTests: XCTestCase {
             calendar: .current
         )
         XCTAssertNil(delay)
+    }
+
+    func test_exponential_backoff() async {
+        let request = HTTPRequestData(id: .init("1"), authority: "example.com")
+        let strategy = BackoffRetryStrategy.exponential(maxDelay: .seconds(20), maxAttemptCount: 6)
+        var delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay?.components.seconds, 2)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay?.components.seconds, 4)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay?.components.seconds, 8)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay?.components.seconds, 16)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
+                .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay?.components.seconds, 20)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
+                .failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertNil(delay)
+    }
+
+    func test_immediate_backoff() async {
+        let request = HTTPRequestData(id: .init("1"), authority: "example.com")
+        let strategy = BackoffRetryStrategy.immediate(maxAttemptCount: 3)
+        var delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay, .zero)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertEqual(delay, .zero)
+        delay = await strategy.retryDelay(
+            request: request,
+            after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
+            date: Date(),
+            calendar: .current
+        )
+        XCTAssertNil(delay)
+
     }
 }
