@@ -6,7 +6,7 @@ import XCTest
 
 final class NumberedTests: XCTestCase {
 
-    actor RequestSequenceReporter: NetworkReportingComponent {        
+    actor RequestSequenceReporter: NetworkReportingComponent {
         var numbers: [(identifier: String, number: Int)] = []
         func didStart(request: HTTPRequestData) {
             numbers.append((request.identifier, RequestSequence.number))
