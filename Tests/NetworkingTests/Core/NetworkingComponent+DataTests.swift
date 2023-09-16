@@ -6,7 +6,7 @@ import TestSupport
 import XCTest
 import ShortID
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class NetworkingComponentDataTests: XCTestCase {
 

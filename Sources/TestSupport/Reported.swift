@@ -1,4 +1,4 @@
-import HTTPNetworking
+import Networking
 import Helpers
 
 public protocol NetworkReportingComponent: Actor {

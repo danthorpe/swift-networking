@@ -14,7 +14,7 @@ package.platforms = [
 
 // MARK: - 🧸 Module Names
 
-let HTTPNetworking = "HTTPNetworking"
+let Networking = "Networking"
 let Helpers = "Helpers"
 let TestSupport = "TestSupport"
 
@@ -38,7 +38,7 @@ Helpers <+ 📦 {
     $0.createUnitTests = false
 }
 
-HTTPNetworking <+ 📦 {
+Networking <+ 📦 {
     $0.createProduct = .library(nil)
     $0.dependsOn = [
         Helpers
@@ -64,7 +64,7 @@ HTTPNetworking <+ 📦 {
 TestSupport <+ 📦 {
     $0.createUnitTests = false
     $0.dependsOn = [
-        HTTPNetworking,
+        Networking,
         Helpers
     ]
     $0.with = [

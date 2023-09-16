@@ -3,7 +3,7 @@ import Foundation
 import TestSupport
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class RequestTimeoutOptionTests: XCTestCase {
     func test__request_timeout_option() {

@@ -1,4 +1,4 @@
-import HTTPNetworking
+import Networking
 
 extension NetworkingComponent {
     public func mocked(

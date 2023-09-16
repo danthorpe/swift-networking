@@ -5,7 +5,7 @@ import os.log
 import TestSupport
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class RetryTests: XCTestCase {
 
