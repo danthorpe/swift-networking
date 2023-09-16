@@ -1,65 +1,66 @@
 import os.log
 
-public enum NetworkLogger {
-    @TaskLocal
-    public static var logger: Logger?
-}
+public typealias LogStart = @Sendable (HTTPRequestData) async -> Void
+public typealias LogFailure = @Sendable (HTTPRequestData, Error) async -> Void
+public typealias LogSuccess = @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void
+
 
 extension NetworkingComponent {
+
     public func logged(
-        onSend: @escaping @Sendable (HTTPRequestData) async -> Void,
-        onSuccess: @escaping @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void,
-        onFailure: @escaping @Sendable (HTTPRequestData, Error) async -> Void
+        using logger: Logger,
+        onStart: LogStart? = nil,
+        onFailure: LogFailure? = nil,
+        onSuccess: LogSuccess? = nil
     ) -> some NetworkingComponent {
         modified(
-            Logged(onSend: onSend, onSuccess: onSuccess, onFailure: onFailure, logger: nil)
-        )
-    }
-
-    public func logged(using logger: Logger) -> some NetworkingComponent {
-        modified(
             Logged(
-                onSend: { request in
-                    logger.info("↗️ \(request.debugDescription)")
-                },
-                onSuccess: { request, _, _ in
-                    logger.info("↙️ 🆗 \(request.debugDescription)")
-                },
-                onFailure: { request, error in
+                onStart: onStart ?? { logger.info("↗️ \($0.debugDescription)") },
+                onFailure: onFailure ?? { request, error in
                     logger.error("⚠️ \(request.debugDescription), error: \(String(describing: error))")
                 },
-                logger: logger
+                onSuccess: onSuccess ?? { request, _, _ in
+                    logger.info("↙️ 🆗 \(request.debugDescription)")
+                }
             )
         )
+        .networkEnvironment(\.logger) { logger }
+    }
+}
+
+extension Logger: NetworkEnvironmentKey { }
+
+extension NetworkEnvironmentValues {
+    public var logger: Logger? {
+        get { self[Logger.self] }
+        set { self[Logger.self] = newValue }
     }
 }
 
 struct Logged: NetworkingModifier {
-    let onSend: @Sendable (HTTPRequestData) async -> Void
-    let onSuccess: @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void
-    let onFailure: @Sendable (HTTPRequestData, Error) async -> Void
-    let logger: Logger?
+    typealias OnStart = LogStart
+    typealias OnFailure = LogFailure
+    typealias OnSuccess = LogSuccess
+
+    let onStart: OnStart
+    let onFailure: OnFailure
+    let onSuccess: OnSuccess
 
     func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream<HTTPResponseData> { continuation in
             Task {
-                await NetworkLogger.$logger.withValue(logger) {
-                    await onSend(request)
-                    do {
-                        for try await element in upstream.send(request) {
-                            switch element {
-                            case .progress:
-                                continuation.yield(element)
-                            case let .value(response, bytesReceived):
-                                await onSuccess(request, response, bytesReceived)
-                                continuation.yield(element)
-                            }
+                await onStart(request)
+                do {
+                    for try await element in upstream.send(request) {
+                        if case let .value(response, bytesReceived) = element {
+                            await onSuccess(response.request, response, bytesReceived)
                         }
-                        continuation.finish()
-                    } catch {
-                        await onFailure(request, error)
-                        continuation.finish(throwing: error)
+                        continuation.yield(element)
                     }
+                    continuation.finish()
+                } catch {
+                    await onFailure(request, error)
+                    continuation.finish(throwing: error)
                 }
             }
         }

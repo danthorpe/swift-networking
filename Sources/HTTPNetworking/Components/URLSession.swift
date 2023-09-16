@@ -1,10 +1,13 @@
 import Dependencies
 import Foundation
+import os.log
 
 extension URLSession: NetworkingComponent {
     public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream<HTTPResponseData> { continuation in
+            @NetworkEnvironment(\.logger) var logger
             Task {
+                logger?.info("↗️ \(request.debugDescription)")
                 guard let urlRequest = URLRequest(http: request) else {
                     continuation.finish(throwing: StackError.createURLRequestFailed(request))
                     return
