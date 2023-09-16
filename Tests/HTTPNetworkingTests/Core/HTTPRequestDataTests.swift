@@ -119,6 +119,7 @@ final class HTTPRequestDataTests: XCTestCase {
         )
 
         let urlRequest = try XCTUnwrap(URLRequest(http: request))
+        XCTAssertEqual(urlRequest.url?.absoluteString, "https://example.com/example")
     }
 }
 

@@ -1,3 +1,4 @@
+import Algorithms
 import Combine
 import Dependencies
 import Foundation
@@ -12,6 +13,9 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public let id: ID
     public var body: Data?
 
+    @Sanitized fileprivate var request: HTTPRequest
+    internal fileprivate(set) var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
+
     public var identifier: String {
         id.rawValue
     }
@@ -19,12 +23,9 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public subscript<Value>(
         dynamicMember dynamicMember: WritableKeyPath<HTTPRequest, Value>
     ) -> Value {
-        get { _request[keyPath: dynamicMember] }
-        set { _request[keyPath: dynamicMember] = newValue }
+        get { $request[keyPath: dynamicMember] }
+        set { $request[keyPath: dynamicMember] = newValue }
     }
-
-    fileprivate var _request: HTTPRequest
-    internal fileprivate(set) var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
     init(
         id: ID,
@@ -37,19 +38,19 @@ public struct HTTPRequestData: Sendable, Identifiable {
     ) {
         self.id = id
         self.body = body
-        self._request = .init(
+        self._request = .init(projectedValue: .init(
             method: method,
             scheme: scheme,
             authority: authority,
             path: path,
             headerFields: headerFields
-        )
+        ))
     }
 
     public init(
         method: HTTPRequest.Method = .get,
         scheme: String? = "https",
-        authority: String?,
+        authority: String? = nil,
         path: String? = nil,
         headerFields: HTTPFields = [:],
         body: Data? = nil
@@ -69,7 +70,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public init(
         method: HTTPRequest.Method = .get,
         scheme: String? = "https",
-        authority: String?,
+        authority: String? = nil,
         path: String? = nil,
         headerFields: HTTPFields = [:],
         body: any HTTPRequestBody
@@ -130,7 +131,7 @@ extension HTTPRequestData: Equatable {
     public static func == (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
         lhs.id == rhs.id
         && lhs.body == rhs.body
-        && lhs._request == rhs._request
+        && lhs.request == rhs.request
         && lhs.options.allSatisfy { key, lhs in
             return lhs.isEqualTo(rhs.options[key]?.value)
         }
@@ -143,13 +144,13 @@ extension HTTPRequestData: Equatable {
 extension HTTPRequestData: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(body)
-        hasher.combine(_request)
+        hasher.combine(request)
     }
 }
 
 extension HTTPRequestData: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "[\(RequestSequence.number):\(identifier)] \(_request.debugDescription)"
+        "[\(RequestSequence.number):\(identifier)] \(request.debugDescription)"
     }
 }
 
@@ -157,7 +158,7 @@ extension HTTPRequestData: CustomDebugStringConvertible {
 
 public func ~= (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
     lhs.body == rhs.body
-    && lhs._request == rhs._request
+    && (lhs.request == rhs.request)
     && lhs.options.allSatisfy { key, lhs in
         return lhs.isEqualTo(rhs.options[key]?.value)
     }
@@ -166,10 +167,46 @@ public func ~= (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
     }
 }
 
+// MARK: - Sanitize
+
+@propertyWrapper
+private struct Sanitized {
+    var projectedValue: HTTPRequest
+    var wrappedValue: HTTPRequest {
+        projectedValue.sanitized()
+    }
+}
+
+extension HTTPRequest {
+    fileprivate func sanitized() -> Self {
+        var copy = self
+        copy.sanitize()
+        return copy
+    }
+
+    fileprivate mutating func sanitize() {
+        // Trim any trailing / from authority
+        authority = authority?.trimSlashSuffix()
+        // Ensure there is a single / on the path if it exists
+        if let trimmedPath = path?.trimSlashPrefix(), !trimmedPath.isEmpty {
+            path = "/" + trimmedPath
+        }
+    }
+}
+
+extension String {
+    fileprivate mutating func trimSlashSuffix() -> String {
+        String(self.trimmingSuffix(while: { $0 == "/" }))
+    }
+    fileprivate mutating func trimSlashPrefix() -> String {
+        String(self.trimmingPrefix(while: { $0 == "/" }))
+    }
+}
+
 // MARK: - Foundation
 
 extension URLRequest {
     public init?(http: HTTPRequestData) {
-        self.init(httpRequest: http._request)
+        self.init(httpRequest: http.request)
     }
 }

@@ -26,7 +26,6 @@ let 📦 = Module.builder(
         dependsOn: [ ],
         defaultWith: [
             .dependencies,
-
         ],
         unitTestsDependsOn: [ ],
         plugins: [ .swiftLint ]
@@ -45,6 +44,7 @@ HTTPNetworking <+ 📦 {
         Helpers
     ]
     $0.with = [
+        .algorithms,
         .asyncAlgorithms,
         .concurrencyExtras,
         .httpTypes,
@@ -93,6 +93,7 @@ extension Target.PluginUsage {
 // MARK: - 👜 3rd Party Dependencies
 
 package.dependencies = [
+    .package(url: "https://github.com/apple/swift-algorithms", from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.2"),
     .package(url: "https://github.com/apple/swift-async-algorithms", from: "0.1.0"),
     .package(url: "https://github.com/apple/swift-http-types", from: "0.1.0"),
@@ -104,6 +105,9 @@ package.dependencies = [
 ]
 
 extension Target.Dependency {
+    static let algorithms: Target.Dependency = .product(
+        name: "Algorithms", package: "swift-algorithms"
+    )
     static let assertionExtras: Target.Dependency = .product(
         name: "AssertionExtras", package: "danthorpe-utilities"
     )

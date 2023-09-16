@@ -1,5 +1,6 @@
 import Dependencies
 import Foundation
+import os.log
 
 extension URLSession: NetworkingComponent {
     public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {

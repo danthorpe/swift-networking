@@ -18,5 +18,3 @@ public actor NetworkEnvironmentReporter<Value: Sendable>: NetworkReportingCompon
         self.finish = NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
     }
 }
-
-

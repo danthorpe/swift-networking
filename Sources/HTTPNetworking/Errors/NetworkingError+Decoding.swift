@@ -14,7 +14,8 @@ extension NetworkingError {
             let message = try decoder.decode(errorMessageType, from: response.data)
             return message
         } catch {
-            if let logger = NetworkLogger.logger {
+            @NetworkEnvironment(\.logger) var logger
+            if let logger {
                 let stringRepresentation = String(decoding: response.data, as: UTF8.self)
                 let privateLogMessage = "Decoding \(String(describing: response))"
                 + " into \(String(describing: errorMessageType)),"

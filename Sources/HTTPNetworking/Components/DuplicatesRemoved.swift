@@ -29,7 +29,8 @@ extension ActiveRequests {
         request: HTTPRequestData
     ) -> SharedStream {
         if let existing = isDuplicate(request: request) {
-            NetworkLogger.logger?.info("👻 \(request.identifier) is a duplicate of \(existing.request.debugDescription)")
+            @NetworkEnvironment(\.logger) var logger
+            logger?.info("👻 \(request.identifier) is a duplicate of \(existing.request.debugDescription)")
             return existing.stream
         }
         return add(stream: upstream.send(request), for: request)

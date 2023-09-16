@@ -38,6 +38,7 @@ actor RetryData {
     @Dependency(\.date) var date
     @Dependency(\.calendar) var calendar
     @Dependency(\.continuousClock) var clock
+    @NetworkEnvironment(\.logger) var logger
 
     private var data: [HTTPRequestData.ID: Value] = [:]
 
@@ -110,7 +111,7 @@ actor RetryData {
         let copy = request.retry()
 
         // Print some info to the logger
-        NetworkLogger.logger?.info("🤞 Retry \(originalRequestID) after \(String(describing: delay)) seconds.")
+        logger?.info("🤞 Retry \(originalRequestID) after \(String(describing: delay)).")
 
         // Return a new response stream
         return ResponseStream { continuation in

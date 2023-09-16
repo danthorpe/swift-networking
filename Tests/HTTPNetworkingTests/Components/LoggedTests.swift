@@ -52,12 +52,12 @@ final class LoggedTests: XCTestCase {
                 .mocked(request1, stub: .ok(data: data1))
                 .mocked(request2, stub: .ok(data: data2))
                 .mocked(request3, stub: .ok(.throwing, data: data3))
-                .logged { [tester] in
+                .logged(using: .test) { [tester] in
                     await tester.appendSend($0)
-                } onSuccess: { [tester] in
-                    await tester.appendSuccess(OnSuccess(request: $0, response: $1, bytes: $2))
                 } onFailure: { [tester] in
                     await tester.appendFailure(OnFailure(request: $0, error: $1))
+                } onSuccess: { [tester] in
+                    await tester.appendSuccess(OnSuccess(request: $0, response: $1, bytes: $2))
                 }
 
             try await network.data(request1)

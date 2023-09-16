@@ -27,22 +27,6 @@ extension AsyncSequence {
             await onTermination?()
         }
     }
-
-    public func redirect(
-        into continuation: AsyncThrowingStream<Element, Error>.Continuation,
-        onElement processElement: ProcessElement? = nil,
-        onError processError: ProcessError? = nil,
-        onTermination: OnTermination? = nil
-    ) {
-        Task {
-            redirect(
-                into: continuation,
-                onElement: processElement,
-                onError: processError,
-                onTermination: onTermination
-            )
-        }
-    }
 }
 
 // MARK: Timeouts

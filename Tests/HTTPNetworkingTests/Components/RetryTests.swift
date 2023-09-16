@@ -52,7 +52,7 @@ final class RetryTests: XCTestCase {
                     }
                 }
                 .automaticRetry()
-                .logged(using: Logger.test)
+                .logged(using: .test)
 
             let response = try await network.data(request, timeout: .seconds(60), using: TestClock())
 
