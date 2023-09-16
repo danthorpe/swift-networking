@@ -1,4 +1,4 @@
-import HTTPNetworking
+import Networking
 
 extension BytesReceived {
     public init(response: HTTPResponseData) {

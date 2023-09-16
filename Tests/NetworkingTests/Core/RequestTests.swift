@@ -1,6 +1,6 @@
 import Dependencies
 import Foundation
-import HTTPNetworking
+import Networking
 import ShortID
 import TestSupport
 import XCTest

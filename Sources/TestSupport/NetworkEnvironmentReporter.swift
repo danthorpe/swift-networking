@@ -1,4 +1,4 @@
-import HTTPNetworking
+import Networking
 import Helpers
 
 public actor NetworkEnvironmentReporter<Value: Sendable>: NetworkReportingComponent {
@@ -10,7 +10,7 @@ public actor NetworkEnvironmentReporter<Value: Sendable>: NetworkReportingCompon
         self.keyPath = keyPath
     }
 
-    public func didStart(request: HTTPNetworking.HTTPRequestData) {
+    public func didStart(request: Networking.HTTPRequestData) {
         self.start = NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
     }
 

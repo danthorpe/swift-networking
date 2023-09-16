@@ -2,7 +2,7 @@ import ConcurrencyExtras
 import CustomDump
 import Dependencies
 import Foundation
-import HTTPNetworking
+import Networking
 import TestSupport
 import XCTest
 

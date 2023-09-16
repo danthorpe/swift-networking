@@ -1,6 +1,6 @@
 import Clocks
 import Foundation
-import HTTPNetworking
+import Networking
 import HTTPTypes
 
 public struct StubbedError: Hashable, Error {

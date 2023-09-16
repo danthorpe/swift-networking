@@ -4,7 +4,7 @@ import ShortID
 import Tagged
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class BytesReceivedTests: XCTestCase {
     func test__init_data() throws {

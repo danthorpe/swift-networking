@@ -1,51 +1,39 @@
-import Foundation
-import URLRouting
+import ConcurrencyExtras
+import Helpers
 
-actor ActiveRequestsState {
-    struct Key: Hashable {
-        let id: URLRequestData.ID = RequestMetadata.id
-        let number: Int = RequestMetadata.number
+public actor ActiveRequests {
+    public typealias SharedStream = SharedAsyncSequence<ResponseStream<HTTPResponseData>>
+    public struct Key: Hashable {
+        public let id: HTTPRequestData.ID
+        public let number = RequestSequence.number
     }
-    struct Value {
-        let request: URLRequestData
-        let task: Task<URLResponseData, Error>
-    }
-
-    private var active: [Key: Value] = [:]
-
-    var count: Int { active.count }
-
-    func existing(request: URLRequestData) -> Value? {
-        active.values.first(where: { $0.request == request })
+    public struct Value {
+        public let request: HTTPRequestData
+        let stream: SharedStream
     }
 
-    func add(_ task: Task<URLResponseData, Error>, for request: URLRequestData) {
-        active[Key()] = Value(request: request, task: task)
+    public private(set) var active: [Key: Value] = [:]
+
+    public var count: Int { active.count }
+
+    @discardableResult
+    public func add(
+        stream: ResponseStream<HTTPResponseData>,
+        for request: HTTPRequestData
+    ) -> SharedStream {
+        let shared = ResponseStream<HTTPResponseData> { continuation in
+            Task {
+                await stream.redirect(into: continuation, onTermination: { @Sendable in
+                    await self.removeStream(for: request)
+                })
+            }
+        }.shared()
+
+        active[Key(id: request.id)] = Value(request: request, stream: shared)
+        return shared
     }
 
-    func removeTask(for request: URLRequestData) {
-        active[Key()] = nil
-    }
-}
-
-protocol ActiveRequestable {
-    var state: ActiveRequestsState { get }
-}
-
-extension ActiveRequestable {
-
-    func submit<Upstream: NetworkStackable>(
-        _ request: URLRequestData,
-        using upstream: Upstream
-    ) async -> Task<URLResponseData, Error> {
-        let task = Task<URLResponseData, Error> {
-            let result = try await upstream.data(request)
-            await state.removeTask(for: request)
-            return result
-        }
-
-        await state.add(task, for: request)
-
-        return task
+    public func removeStream(for request: HTTPRequestData) {
+        active[Key(id: request.id)] = nil
     }
 }

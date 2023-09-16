@@ -5,7 +5,7 @@ import HTTPTypes
 import TestSupport
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class CheckedStatusCodeTests: XCTestCase {
 

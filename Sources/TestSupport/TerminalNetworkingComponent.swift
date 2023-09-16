@@ -1,4 +1,4 @@
-import HTTPNetworking
+import Networking
 import XCTestDynamicOverlay
 
 public struct TerminalNetworkingComponent: NetworkingComponent {

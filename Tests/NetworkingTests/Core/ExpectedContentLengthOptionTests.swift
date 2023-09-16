@@ -3,7 +3,7 @@ import Foundation
 import TestSupport
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class ExpectedContentLengthOptionTests: XCTestCase {
     func test__expected_content_length_option() {

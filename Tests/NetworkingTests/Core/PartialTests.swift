@@ -4,7 +4,7 @@ import ShortID
 import Tagged
 import XCTest
 
-@testable import HTTPNetworking
+@testable import Networking
 
 final class PartialTests: XCTestCase {
 
