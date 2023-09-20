@@ -63,6 +63,7 @@ Networking <+ 📦 {
 
 TestSupport <+ 📦 {
     $0.createUnitTests = false
+    $0.createProduct = .library(nil)
     $0.dependsOn = [
         Networking,
         Helpers
