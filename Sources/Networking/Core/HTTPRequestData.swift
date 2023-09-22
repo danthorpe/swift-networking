@@ -187,9 +187,15 @@ extension HTTPRequest {
     fileprivate mutating func sanitize() {
         // Trim any trailing / from authority
         authority = authority?.trimSlashSuffix()
-        // Ensure there is a single / on the path if it exists
+        // Ensure there is a single / on the path
         if let trimmedPath = path?.trimSlashPrefix(), !trimmedPath.isEmpty {
             path = "/" + trimmedPath
+        }
+
+        if let path, path.isEmpty {
+            self.path = "/"
+        } else if nil == path {
+            self.path = "/"
         }
     }
 }

@@ -6,6 +6,13 @@ import XCTest
 @testable import Networking
 
 final class HTTPRequestDataTests: XCTestCase {
+    override func invokeTest() {
+        withDependencies {
+            $0.shortID = .incrementing
+        } operation: {
+            super.invokeTest()
+        }
+    }
 
     func test__basics() {
         var request = HTTPRequestData(
@@ -52,15 +59,10 @@ final class HTTPRequestDataTests: XCTestCase {
     }
 
     func test__short_id() {
-        let id = ShortID()
-        withDependencies {
-            $0.shortID = .constant(id)
-        } operation: {
-            let request = HTTPRequestData(
-                authority: "example.com"
-            )
-            XCTAssertEqual(request.identifier, id.description)
-        }
+        let request = HTTPRequestData(
+            authority: "example.com"
+        )
+        XCTAssertEqual(request.identifier, "000001")
     }
 
     func test__options() {
@@ -99,7 +101,7 @@ final class HTTPRequestDataTests: XCTestCase {
             id: .init("some id"),
             authority: "example.com"
         )
-        XCTAssertEqual(request.debugDescription, "[0:some id] (GET) https://example.com")
+        XCTAssertEqual(request.debugDescription, "[0:some id] (GET) https://example.com/")
 
         request.scheme = "abc"
         request.method = .post
@@ -107,7 +109,7 @@ final class HTTPRequestDataTests: XCTestCase {
         XCTAssertEqual(request.debugDescription, "[0:some id] (POST) abc://example.com/hello")
     }
 
-    func test__foundation_url_request() throws {
+    func test__foundation_url_request_with_path() throws {
         let request = HTTPRequestData(
             id: .init("some id"),
             method: .get,
@@ -120,6 +122,15 @@ final class HTTPRequestDataTests: XCTestCase {
 
         let urlRequest = try XCTUnwrap(URLRequest(http: request))
         XCTAssertEqual(urlRequest.url?.absoluteString, "https://example.com/example")
+    }
+
+    func test__foundation_url_request_minimum_arguments() throws {
+        let request = HTTPRequestData(
+            authority: "example.com"
+        )
+
+        let urlRequest = try XCTUnwrap(URLRequest(http: request))
+        XCTAssertEqual(urlRequest.url?.absoluteString, "https://example.com/")
     }
 }
 
