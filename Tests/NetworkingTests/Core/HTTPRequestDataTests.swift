@@ -101,7 +101,7 @@ final class HTTPRequestDataTests: XCTestCase {
             id: .init("some id"),
             authority: "example.com"
         )
-        XCTAssertEqual(request.debugDescription, "[0:some id] (GET) https://example.com")
+        XCTAssertEqual(request.debugDescription, "[0:some id] (GET) https://example.com/")
 
         request.scheme = "abc"
         request.method = .post
