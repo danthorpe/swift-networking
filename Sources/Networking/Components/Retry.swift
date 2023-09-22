@@ -19,7 +19,12 @@ struct Retry: NetworkingModifier {
             Task {
                 await data
                     .send(upstream: upstream, request: request)
-                    .redirect(into: continuation)
+                    .redirect(into: continuation, onTermination: {
+                        if await data.shouldMeasureElapsedTime {
+                            @NetworkEnvironment(\.instrument) var instrument
+                            await instrument?.measureElapsedTime("AutomaticRetry")
+                        }
+                    })
             }
         }
     }
@@ -41,6 +46,7 @@ actor RetryData {
     @NetworkEnvironment(\.logger) var logger
 
     private var data: [HTTPRequestData.ID: Value] = [:]
+    private(set) var shouldMeasureElapsedTime: Bool = false
 
     func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         return ResponseStream { continuation in
@@ -55,6 +61,8 @@ actor RetryData {
                     continuation.finish()
                 } catch {
                     do {
+                        // Indicate that we should measure the elapsed time at the end
+                        shouldMeasureElapsedTime = true
                         // Retry
                         try await retry(
                             request: request,

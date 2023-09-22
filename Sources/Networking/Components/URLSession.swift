@@ -6,6 +6,7 @@ extension URLSession: NetworkingComponent {
     public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
         ResponseStream<HTTPResponseData> { continuation in
             Task {
+                @NetworkEnvironment(\.instrument) var instrument
                 guard let urlRequest = URLRequest(http: request) else {
                     continuation.finish(throwing: StackError.createURLRequestFailed(request))
                     return
@@ -18,8 +19,11 @@ extension URLSession: NetworkingComponent {
                             }
                         }
                         .eraseToThrowingStream()
-                        .redirect(into: continuation)
+                        .redirect(into: continuation, onTermination: {
+                            await instrument?.measureElapsedTime("URLSession")
+                        })
                 } catch {
+                    await instrument?.measureElapsedTime("\(Self.self)")
                     continuation.finish(throwing: error)
                 }
             }

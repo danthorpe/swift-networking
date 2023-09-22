@@ -1,3 +1,4 @@
+import Dependencies
 import os.log
 
 public typealias LogStart = @Sendable (HTTPRequestData) async -> Void
@@ -19,8 +20,9 @@ extension NetworkingComponent {
                 onFailure: onFailure ?? { request, error in
                     logger.error("⚠️ \(request.debugDescription), error: \(String(describing: error))")
                 },
-                onSuccess: onSuccess ?? { request, _, _ in
-                    logger.info("↙️ 🆗 \(request.debugDescription)")
+                onSuccess: onSuccess ?? { request, response, _ in
+                    logger.info("🆗 \(response.debugDescription)")
+                    logger.info("↙️ \(request.debugDescription)")
                 }
             )
         )

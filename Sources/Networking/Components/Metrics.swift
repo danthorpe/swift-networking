@@ -26,12 +26,18 @@ private actor NetworkingInstrument {
     func measureElapsedTime(label: String) {
         let now = clock.now
         let previous = measurements.last?.instant ?? start.instant
+        let duration = previous.duration(to: now)
         let measurement = ElapsedTimeMeasurement(
             label: label,
-            duration: previous.duration(to: now),
+            duration: duration,
             instant: now
         )
         measurements.append(measurement)
+
+        @NetworkEnvironment(\.logger) var logger
+        let total = measurements.total
+        logger?.info("⏱️ \(label) \(duration.description) total: \(total.description)")
+
     }
 }
 
@@ -50,6 +56,12 @@ public struct ElapsedTimeMeasurement: Equatable {
 public struct NetworkingInstrumentClient {
     public var elapsedTimeMeasurements: @Sendable () async -> [ElapsedTimeMeasurement]
     public var measureElapsedTime: @Sendable (String) async -> Void
+}
+
+extension [ElapsedTimeMeasurement] {
+    var total: Duration {
+        return map(\.duration).reduce(.zero, +)
+    }
 }
 
 extension NetworkingInstrumentClient: NetworkEnvironmentKey {

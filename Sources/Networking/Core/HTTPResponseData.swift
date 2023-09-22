@@ -101,6 +101,29 @@ extension HTTPResponseData: Hashable {
     }
 }
 
+extension HTTPResponseData: CustomDebugStringConvertible {
+    public var debugDescription: String {
+        var debugDescription = "\(self.status.description)"
+        if data.isEmpty {
+            debugDescription += " No Data"
+        } else {
+            if let contentType = self.headerFields[.contentType] {
+                debugDescription += "\(contentType.description)"
+                #if hasFeature(BareSlashRegexLiterals)
+                let regex = /(json)/
+                #else
+                let regex = #/(json)/#
+                #endif
+                if contentType.contains(regex) {
+                    let dataDescription = String(decoding: data, as: UTF8.self)
+                    debugDescription += "\n\(dataDescription)"
+                }
+            }
+        }
+        return debugDescription
+    }
+}
+
 
 // MARK: - Conveniences
 
