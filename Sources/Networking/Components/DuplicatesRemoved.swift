@@ -12,7 +12,12 @@ private struct DuplicatesRemoved: NetworkingModifier {
         ResponseStream { continuation in
             Task {
                 let stream = await self.activeRequests.send(upstream: upstream, request: request)
-                await stream.redirect(into: continuation)
+                await stream.redirect(into: continuation, onTermination: {
+                    if await activeRequests.shouldMeasureElapsedTime {
+                        @NetworkEnvironment(\.instrument) var instrument
+                        await instrument?.measureElapsedTime("DuplicatesRemoved")
+                    }
+                })
             }
         }
     }
@@ -29,6 +34,7 @@ extension ActiveRequests {
         request: HTTPRequestData
     ) -> SharedStream {
         if let existing = isDuplicate(request: request) {
+            shouldMeasureElapsedTime = true
             @NetworkEnvironment(\.logger) var logger
             logger?.info("👻 \(request.identifier) is a duplicate of \(existing.request.debugDescription)")
             return existing.stream

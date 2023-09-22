@@ -13,7 +13,7 @@ public actor ActiveRequests {
     }
 
     public private(set) var active: [Key: Value] = [:]
-
+    public var shouldMeasureElapsedTime: Bool = false
     public var count: Int { active.count }
 
     @discardableResult
