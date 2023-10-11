@@ -31,7 +31,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
         id: ID,
         method: HTTPRequest.Method = .get,
         scheme: String? = "https",
-        authority: String?,
+        authority: String? = nil,
         path: String? = nil,
         headerFields: HTTPFields = [:],
         body: Data? = nil
