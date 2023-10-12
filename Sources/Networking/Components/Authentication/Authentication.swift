@@ -21,6 +21,11 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
         var credentials: Credentials
         do {
           credentials = try await delegate.fetch(for: request)
+        } catch let error as AuthenticationError {
+          continuation.finish(
+            throwing: error
+          )
+          return
         } catch {
           continuation.finish(
             throwing: AuthenticationError.fetchCredentialsFailed(request, Credentials.method, error)
@@ -59,6 +64,8 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
     do {
       credentials = try await delegate.refresh(unauthorized: credentials, from: response)
       return credentials.apply(to: response.request)
+    } catch let error as AuthenticationError {
+      throw error
     } catch {
       throw AuthenticationError.refreshCredentialsFailed(response, Credentials.method, error)
     }
