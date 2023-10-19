@@ -1,7 +1,9 @@
 import Helpers
 
 extension NetworkingComponent {
-  public func authenticated<Delegate: AuthenticationDelegate>(with delegate: Delegate) -> some NetworkingComponent {
+  public func authenticated<Delegate: AuthenticationDelegate>(with delegate: Delegate)
+    -> some NetworkingComponent
+  {
     checkedStatusCode().modified(Authentication(delegate: delegate))
   }
 }
@@ -9,14 +11,16 @@ extension NetworkingComponent {
 struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
   typealias Credentials = Delegate.Credentials
   let delegate: Delegate
-  
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     guard let method = request.authenticationMethod, method == Credentials.method else {
       return upstream.send(request)
     }
     return ResponseStream { continuation in
       Task {
-        
+
         // Fetch the initial credentials
         var credentials: Credentials
         do {
@@ -32,10 +36,10 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
           )
           return
         }
-        
+
         // Update the request to use the credentials
         let newRequest = credentials.apply(to: request)
-        
+
         // Process the stream
         do {
           for try await event in upstream.send(newRequest) {
@@ -55,7 +59,7 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
       }
     }
   }
-  
+
   func refresh(
     unauthorized credentials: inout Credentials,
     response: HTTPResponseData,
@@ -80,9 +84,13 @@ public enum AuthenticationError: Error {
 extension AuthenticationError: Equatable {
   public static func == (lhs: AuthenticationError, rhs: AuthenticationError) -> Bool {
     switch (lhs, rhs) {
-    case let (.fetchCredentialsFailed(lhsR, lhsAM, lhsE), .fetchCredentialsFailed(rhsR, rhsAM, rhsE)):
+    case let (
+      .fetchCredentialsFailed(lhsR, lhsAM, lhsE), .fetchCredentialsFailed(rhsR, rhsAM, rhsE)
+    ):
       return lhsR == rhsR && lhsAM == rhsAM && _isEqual(lhsE, rhsE)
-    case let (.refreshCredentialsFailed(lhsR, lhsAM, lhsE), .refreshCredentialsFailed(rhsR, rhsAM, rhsE)):
+    case let (
+      .refreshCredentialsFailed(lhsR, lhsAM, lhsE), .refreshCredentialsFailed(rhsR, rhsAM, rhsE)
+    ):
       return lhsR == rhsR && lhsAM == rhsAM && _isEqual(lhsE, rhsE)
     default:
       return false
@@ -99,7 +107,7 @@ extension AuthenticationError: NetworkingError {
       return response.request
     }
   }
-  
+
   public var response: HTTPResponseData? {
     switch self {
     case .fetchCredentialsFailed:

@@ -21,7 +21,9 @@ private struct NetworkEnvironmentWritingModifier<
     self.keyPath = keyPath
     self.value = value
   }
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     var values = NetworkEnvironmentValues.environmentValues
     values[keyPath: keyPath] = value()
     return NetworkEnvironmentValues.$environmentValues.withValue(values) {
@@ -37,11 +39,11 @@ public protocol NetworkEnvironmentKey {
 @propertyWrapper
 public struct NetworkEnvironment<Value>: @unchecked Sendable {
   private let keyPath: KeyPath<NetworkEnvironmentValues, Value>
-  
+
   public var wrappedValue: Value {
     NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
   }
-  
+
   public init(
     _ keyPath: KeyPath<NetworkEnvironmentValues, Value>
   ) {
@@ -49,11 +51,10 @@ public struct NetworkEnvironment<Value>: @unchecked Sendable {
   }
 }
 
-
 public struct NetworkEnvironmentValues: Sendable {
   @TaskLocal public static var environmentValues = Self()
   private var storage: [ObjectIdentifier: AnySendable] = [:]
-  
+
   public subscript<Key: NetworkEnvironmentKey>(
     key: Key.Type
   ) -> Key.Value? where Key.Value: Sendable {

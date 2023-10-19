@@ -8,27 +8,31 @@ extension NetworkingComponent {
 
 private struct DuplicatesRemoved: NetworkingModifier {
   let activeRequests = ActiveRequests()
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     ResponseStream { continuation in
       Task {
         let stream = await self.activeRequests.send(upstream: upstream, request: request)
-        await stream.redirect(into: continuation, onTermination: {
-          if await activeRequests.shouldMeasureElapsedTime {
-            @NetworkEnvironment(\.instrument) var instrument
-            await instrument?.measureElapsedTime("DuplicatesRemoved")
-          }
-        })
+        await stream.redirect(
+          into: continuation,
+          onTermination: {
+            if await activeRequests.shouldMeasureElapsedTime {
+              @NetworkEnvironment(\.instrument) var instrument
+              await instrument?.measureElapsedTime("DuplicatesRemoved")
+            }
+          })
       }
     }
   }
 }
 
 extension ActiveRequests {
-  
+
   fileprivate func isDuplicate(request: HTTPRequestData) -> Value? {
     active.values.first(where: { $0.request ~= request })
   }
-  
+
   fileprivate func send(
     upstream: NetworkingComponent,
     request: HTTPRequestData

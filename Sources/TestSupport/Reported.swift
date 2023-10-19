@@ -1,5 +1,5 @@
-import Networking
 import Helpers
+import Networking
 
 public protocol NetworkReportingComponent: Actor {
   func didStart(request: HTTPRequestData)
@@ -7,7 +7,7 @@ public protocol NetworkReportingComponent: Actor {
 }
 
 extension NetworkReportingComponent {
-  public func didFinish(request: HTTPRequestData) { }
+  public func didFinish(request: HTTPRequestData) {}
 }
 
 extension NetworkingComponent {
@@ -18,14 +18,18 @@ extension NetworkingComponent {
 
 struct Reported: NetworkingModifier {
   let reporter: any NetworkReportingComponent
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     ResponseStream { continuation in
       Task {
         await reporter.didStart(request: request)
         await upstream.send(request)
-          .redirect(into: continuation, onTermination: {
-            await reporter.didFinish(request: request)
-          })
+          .redirect(
+            into: continuation,
+            onTermination: {
+              await reporter.didFinish(request: request)
+            })
       }
     }
   }
@@ -48,12 +52,12 @@ public actor TestReporter: NetworkReportingComponent {
     self.requests = requests
     self.activeRequests = requests
   }
-  
+
   public func didStart(request: HTTPRequestData) {
     self.requests.append(request)
     self.activeRequests.append(request)
   }
-  
+
   public func didFinish(request: HTTPRequestData) {
     self.activeRequests.removeAll { $0.id == request.id }
   }

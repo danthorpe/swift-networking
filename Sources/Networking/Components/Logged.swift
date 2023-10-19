@@ -3,8 +3,8 @@ import os.log
 
 public typealias LogStart = @Sendable (HTTPRequestData) async -> Void
 public typealias LogFailure = @Sendable (HTTPRequestData, Error) async -> Void
-public typealias LogSuccess = @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async -> Void
-
+public typealias LogSuccess = @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async ->
+  Void
 
 extension NetworkingComponent {
 
@@ -30,7 +30,7 @@ extension NetworkingComponent {
   }
 }
 
-extension Logger: NetworkEnvironmentKey { }
+extension Logger: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var logger: Logger? {
@@ -48,7 +48,9 @@ struct Logged: NetworkingModifier {
   let onFailure: OnFailure
   let onSuccess: OnSuccess
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     ResponseStream<HTTPResponseData> { continuation in
       Task {
         await onStart(request)

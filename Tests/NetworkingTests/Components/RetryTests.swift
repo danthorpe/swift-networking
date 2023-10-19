@@ -1,28 +1,30 @@
 import AssertionExtras
 import Dependencies
 import Foundation
-import os.log
 import TestSupport
 import XCTest
+import os.log
 
 @testable import Networking
 
 final class RetryTests: XCTestCase {
-  
+
   final class RetryingMock {
     var stubs: [StubbedResponseStream]
     init(stubs: [StubbedResponseStream]) {
       self.stubs = stubs.reversed()
     }
-    
-    func send(upstream: NetworkingComponent, request: HTTPRequestData) throws -> ResponseStream<HTTPResponseData> {
+
+    func send(upstream: NetworkingComponent, request: HTTPRequestData) throws -> ResponseStream<
+      HTTPResponseData
+    > {
       guard let stub = stubs.popLast() else {
         throw "Exhausted supply of stub responses"
       }
       return stub(request)
     }
   }
-  
+
   func test__basic_retry() async throws {
     let clock = ImmediateClock()
     let data = try XCTUnwrap("Hello".data(using: .utf8))
@@ -30,10 +32,10 @@ final class RetryTests: XCTestCase {
       stubs: [
         .init(.throwing, response: .init(status: .badGateway)),
         .init(.throwing, response: .init(status: .badGateway)),
-        .ok(data: data)
+        .ok(data: data),
       ]
     )
-    
+
     try await withDependencies {
       $0.date = .constant(Date())
       $0.calendar = .current
@@ -41,7 +43,7 @@ final class RetryTests: XCTestCase {
       $0.continuousClock = clock
     } operation: {
       let request = HTTPRequestData(authority: "example.com")
-      
+
       let network = TerminalNetworkingComponent()
         .mocked { upstream, request in
           do {
@@ -53,14 +55,14 @@ final class RetryTests: XCTestCase {
         }
         .automaticRetry()
         .logged(using: .test)
-      
+
       let response = try await network.data(request, timeout: .seconds(60), using: TestClock())
-      
+
       XCTAssertEqual(response.data, data)
       XCTAssertTrue(retryingMock.stubs.isEmpty)
     }
   }
-  
+
   func test__given_no_retry_strategy() async {
     withDependencies {
       $0.shortID = .incrementing
@@ -70,7 +72,7 @@ final class RetryTests: XCTestCase {
       request.retryingStrategy = nil
     }
   }
-  
+
   func test__default_behaviour__constant_backoff() async {
     let request = HTTPRequestData(id: .init("1"), authority: "example.com")
     XCTAssertTrue(request.supportsRetryingRequests)
@@ -125,7 +127,7 @@ final class RetryStrategyTests: XCTestCase {
     )
     XCTAssertNil(delay)
   }
-  
+
   func test_exponential_backoff() async {
     let request = HTTPRequestData(id: .init("1"), authority: "example.com")
     let strategy = BackoffRetryStrategy.exponential(maxDelay: .seconds(20), maxAttemptCount: 6)
@@ -152,29 +154,38 @@ final class RetryStrategyTests: XCTestCase {
     XCTAssertEqual(delay?.components.seconds, 8)
     delay = await strategy.retryDelay(
       request: request,
-      after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
+      after: [
+        .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
+        .failure("Some Error"),
+      ],
       date: Date(),
       calendar: .current
     )
     XCTAssertEqual(delay?.components.seconds, 16)
     delay = await strategy.retryDelay(
       request: request,
-      after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
-              .failure("Some Error")],
+      after: [
+        .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
+        .failure("Some Error"),
+        .failure("Some Error"),
+      ],
       date: Date(),
       calendar: .current
     )
     XCTAssertEqual(delay?.components.seconds, 20)
     delay = await strategy.retryDelay(
       request: request,
-      after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
-              .failure("Some Error"), .failure("Some Error")],
+      after: [
+        .failure("Some Error"), .failure("Some Error"), .failure("Some Error"),
+        .failure("Some Error"),
+        .failure("Some Error"), .failure("Some Error"),
+      ],
       date: Date(),
       calendar: .current
     )
     XCTAssertNil(delay)
   }
-  
+
   func test_immediate_backoff() async {
     let request = HTTPRequestData(id: .init("1"), authority: "example.com")
     let strategy = BackoffRetryStrategy.immediate(maxAttemptCount: 3)
@@ -199,6 +210,6 @@ final class RetryStrategyTests: XCTestCase {
       calendar: .current
     )
     XCTAssertNil(delay)
-    
+
   }
 }

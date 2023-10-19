@@ -2,7 +2,7 @@ import HTTPTypes
 import os.log
 
 extension NetworkingComponent {
-  
+
   public func server(authority: String?) -> some NetworkingComponent {
     server(mutate: \.authority) { _ in
       authority
@@ -10,7 +10,7 @@ extension NetworkingComponent {
       logger?.info("💁 authority -> '\(authority ?? "no value")' \(request.debugDescription)")
     }
   }
-  
+
   public func server(headerField name: HTTPField.Name, value: String?) -> some NetworkingComponent {
     server(mutate: \.headerFields) { headers in
       var copy = headers
@@ -20,18 +20,24 @@ extension NetworkingComponent {
       // swiftlint:disable line_length
       guard let logger else { return }
       guard name.requiresPrivateLogging else {
-        logger.info("💁 header \(name) -> '\(value ?? "no value", privacy: .public)' \(request.debugDescription)")
+        logger.info(
+          "💁 header \(name) -> '\(value ?? "no value", privacy: .public)' \(request.debugDescription)"
+        )
         return
       }
       if name.requireHashPrivateLogging {
-        logger.info("💁 header \(name) -> '\(value ?? "no value", privacy: .private(mask: .hash))' \(request.debugDescription)")
+        logger.info(
+          "💁 header \(name) -> '\(value ?? "no value", privacy: .private(mask: .hash))' \(request.debugDescription)"
+        )
       } else {
-        logger.info("💁 header \(name) -> '\(value ?? "no value", privacy: .private)' \(request.debugDescription)")
+        logger.info(
+          "💁 header \(name) -> '\(value ?? "no value", privacy: .private)' \(request.debugDescription)"
+        )
       }
       // swiftlint:enable line_length
     }
   }
-  
+
   public func server(prefixPath: String, delimiter: String = "/") -> some NetworkingComponent {
     server(mutate: \.path) { path in
       guard let path else { return prefixPath }
@@ -40,7 +46,7 @@ extension NetworkingComponent {
       logger?.info("💁 prefix path -> '\(prefixPath)' \(request.debugDescription)")
     }
   }
-  
+
   public func server<Value>(
     mutate keypath: WritableKeyPath<HTTPRequestData, Value>,
     with transform: @escaping (Value) -> Value,
@@ -52,7 +58,7 @@ extension NetworkingComponent {
       log(logger, request)
     }
   }
-  
+
   public func server(
     _ mutateRequest: @escaping (inout HTTPRequestData) -> Void
   ) -> some NetworkingComponent {
@@ -62,7 +68,9 @@ extension NetworkingComponent {
 
 private struct MutateRequest: NetworkingModifier {
   let mutate: (inout HTTPRequestData) -> Void
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     var copy = request
     mutate(&copy)
     return upstream.send(copy)
