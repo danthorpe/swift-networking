@@ -13,7 +13,7 @@ final class BasicCredentialsTests: XCTestCase {
     let request = credentials.apply(to: HTTPRequestData(id: "1"))
     XCTAssertEqual(request.headerFields[.authorization], "Basic YmxvYjpzdXBlciEkM2NyZXQ=")
   }
-
+  
   func test__provide_credentials() {
     var request = HTTPRequestData(id: "1")
     request.basicCredentials = BasicCredentials(user: "blob", password: "super!$3cret")

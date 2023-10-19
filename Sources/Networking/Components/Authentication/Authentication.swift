@@ -9,14 +9,14 @@ extension NetworkingComponent {
 struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
   typealias Credentials = Delegate.Credentials
   let delegate: Delegate
-
+  
   func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     guard let method = request.authenticationMethod, method == Credentials.method else {
       return upstream.send(request)
     }
     return ResponseStream { continuation in
       Task {
-
+        
         // Fetch the initial credentials
         var credentials: Credentials
         do {
@@ -32,10 +32,10 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
           )
           return
         }
-
+        
         // Update the request to use the credentials
         let newRequest = credentials.apply(to: request)
-
+        
         // Process the stream
         do {
           for try await event in upstream.send(newRequest) {
@@ -55,7 +55,7 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
       }
     }
   }
-
+  
   func refresh(
     unauthorized credentials: inout Credentials,
     response: HTTPResponseData,
@@ -99,7 +99,7 @@ extension AuthenticationError: NetworkingError {
       return response.request
     }
   }
-
+  
   public var response: HTTPResponseData? {
     switch self {
     case .fetchCredentialsFailed:
