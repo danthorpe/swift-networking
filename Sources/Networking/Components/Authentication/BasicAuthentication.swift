@@ -7,7 +7,7 @@ extension AuthenticationMethod {
 public struct BasicCredentials: Hashable, Sendable, AuthenticatingCredentials, HTTPRequestDataOption {
   public static var method: AuthenticationMethod = .basic
   public static let defaultOption: Self? = nil
-  
+
   public let user: String
   public let password: String
 

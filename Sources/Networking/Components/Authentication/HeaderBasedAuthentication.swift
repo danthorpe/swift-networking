@@ -1,26 +1,26 @@
 public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
   actor StateMachine: AuthenticationDelegate {
     typealias Credentials = Delegate.Credentials
-
+    
     private enum State {
       case idle
       case fetching(Task<Credentials, Error>)
       case authorized(Credentials)
     }
-
+    
     let delegate: Delegate
     private var state: State = .idle
-
+    
     @NetworkEnvironment(\.logger) var logger
-
+    
     init(delegate: Delegate) {
       self.delegate = delegate
     }
-
+    
     private func set(state: State) {
       self.state = state
     }
-
+    
     func fetch(for request: HTTPRequestData) async throws -> Credentials {
       switch state {
       case let .authorized(credentials):
@@ -33,7 +33,7 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
         return try await task.value
       }
     }
-
+    
     private func performCredentialFetch(for request: HTTPRequestData) async throws -> Credentials {
       logger?.info("🔐 Fetching credentials for \(Credentials.method.rawValue, privacy: .public) authorization method")
       do {
@@ -45,17 +45,17 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
         throw AuthenticationError.fetchCredentialsFailed(request, Credentials.method, error)
       }
     }
-
+    
     func refresh(unauthorized credentials: Credentials, from response: HTTPResponseData) async throws -> Credentials {
       if case let .fetching(task) = state {
         return try await task.value
       }
-
+      
       let task = Task { try await performCredentialRefresh(unauthorized: credentials, from: response) }
       set(state: .fetching(task))
       return try await task.value
     }
-
+    
     private func performCredentialRefresh(
       unauthorized credentials: Credentials,
       from response: HTTPResponseData
@@ -73,9 +73,9 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
       }
     }
   }
-
+  
   fileprivate let state: StateMachine
-
+  
   public init(delegate: Delegate) {
     state = StateMachine(delegate: delegate)
   }

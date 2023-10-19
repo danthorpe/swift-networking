@@ -2,7 +2,7 @@ import HTTPTypes
 import os.log
 
 extension NetworkingComponent {
-
+  
   public func server(authority: String?) -> some NetworkingComponent {
     server(mutate: \.authority) { _ in
       authority
@@ -10,7 +10,7 @@ extension NetworkingComponent {
       logger?.info("💁 authority -> '\(authority ?? "no value")' \(request.debugDescription)")
     }
   }
-
+  
   public func server(headerField name: HTTPField.Name, value: String?) -> some NetworkingComponent {
     server(mutate: \.headerFields) { headers in
       var copy = headers
@@ -31,7 +31,7 @@ extension NetworkingComponent {
       // swiftlint:enable line_length
     }
   }
-
+  
   public func server(prefixPath: String, delimiter: String = "/") -> some NetworkingComponent {
     server(mutate: \.path) { path in
       guard let path else { return prefixPath }
@@ -40,7 +40,7 @@ extension NetworkingComponent {
       logger?.info("💁 prefix path -> '\(prefixPath)' \(request.debugDescription)")
     }
   }
-
+  
   public func server<Value>(
     mutate keypath: WritableKeyPath<HTTPRequestData, Value>,
     with transform: @escaping (Value) -> Value,
@@ -52,7 +52,7 @@ extension NetworkingComponent {
       log(logger, request)
     }
   }
-
+  
   public func server(
     _ mutateRequest: @escaping (inout HTTPRequestData) -> Void
   ) -> some NetworkingComponent {
