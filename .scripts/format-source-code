@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+swift-format format -i -r -p Sources/ Tests/
