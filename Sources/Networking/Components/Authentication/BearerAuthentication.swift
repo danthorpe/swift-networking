@@ -5,8 +5,7 @@ extension AuthenticationMethod {
 }
 
 public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOption,
-  AuthenticatingCredentials
-{
+  AuthenticatingCredentials {
   public static let method: AuthenticationMethod = .bearer
   public static let defaultOption: Self? = nil
 

@@ -236,8 +236,7 @@ public struct BackoffRetryStrategy: RetryingStrategy {
     constant(delay: .zero, maxAttemptCount: maxAttemptCount)
   }
 
-  public static func exponential(maxDelay: Duration = .seconds(300), maxAttemptCount: UInt) -> Self
-  {
+  public static func exponential(maxDelay: Duration = .seconds(300), maxAttemptCount: UInt) -> Self {
     let interval: Double = 1
     let rate: Double = 2.0
     return .init { _, attempts, _, _ in

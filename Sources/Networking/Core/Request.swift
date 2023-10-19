@@ -6,8 +6,7 @@ public struct Request<Body>: Sendable {
   public let http: HTTPRequestData
   public let decode: @Sendable (HTTPResponseData) throws -> Body
 
-  public init(http: HTTPRequestData, decode: @escaping @Sendable (HTTPResponseData) throws -> Body)
-  {
+  public init(http: HTTPRequestData, decode: @escaping @Sendable (HTTPResponseData) throws -> Body) {
     self.http = http
     self.decode = decode
   }

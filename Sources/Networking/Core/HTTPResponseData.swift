@@ -50,8 +50,7 @@ public struct HTTPResponseData: Sendable {
 
 extension HTTPResponseData {
   public subscript<Metadata: HTTPResponseMetadata>(metadata metadataType: Metadata.Type)
-    -> Metadata.Value
-  {
+    -> Metadata.Value {
     get {
       let id = ObjectIdentifier(metadataType)
       guard let container = metadata[id], let value = container.value as? Metadata.Value else {

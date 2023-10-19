@@ -17,7 +17,6 @@ extension NetworkingComponent {
       copy[name] = value
       return copy
     } log: { logger, request in
-      // swiftlint:disable line_length
       guard let logger else { return }
       guard name.requiresPrivateLogging else {
         logger.info(
@@ -34,7 +33,6 @@ extension NetworkingComponent {
           "💁 header \(name) -> '\(value ?? "no value", privacy: .private)' \(request.debugDescription)"
         )
       }
-      // swiftlint:enable line_length
     }
   }
 

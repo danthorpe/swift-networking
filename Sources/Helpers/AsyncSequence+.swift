@@ -34,8 +34,7 @@ extension AsyncSequence {
 @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
 extension AsyncSequence {
   public func first(beforeTimeout duration: Duration, using clock: any Clock<Duration>) async throws
-    -> Element
-  {
+    -> Element {
     try await first(beforeTimeout: duration, using: clock, where: { _ in true })
   }
 

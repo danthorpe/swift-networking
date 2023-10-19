@@ -49,8 +49,7 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
     }
 
     func refresh(unauthorized credentials: Credentials, from response: HTTPResponseData)
-      async throws -> Credentials
-    {
+      async throws -> Credentials {
       if case let .fetching(task) = state {
         return try await task.value
       }

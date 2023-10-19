@@ -3,8 +3,7 @@ import Protected
 import XCTestDynamicOverlay
 
 public final class TestAuthenticationDelegate<Credentials: AuthenticatingCredentials>: @unchecked
-  Sendable
-{
+  Sendable {
   public typealias Fetch = @Sendable (HTTPRequestData) async throws -> Credentials
   public typealias Refresh = @Sendable (Credentials, HTTPResponseData) async throws -> Credentials
 

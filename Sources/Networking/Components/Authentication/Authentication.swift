@@ -2,8 +2,7 @@ import Helpers
 
 extension NetworkingComponent {
   public func authenticated<Delegate: AuthenticationDelegate>(with delegate: Delegate)
-    -> some NetworkingComponent
-  {
+    -> some NetworkingComponent {
     checkedStatusCode().modified(Authentication(delegate: delegate))
   }
 }
