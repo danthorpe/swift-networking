@@ -46,7 +46,7 @@ public struct StubbedResponseStream: Equatable, Sendable {
           continuation.finish()
         case .throwing:
           let bytesReceived = bytes.expected / 4
-          for _ in 0..<2 {
+          for _ in 0 ..< 2 {
             await clock.advance(by: .seconds(2))
             bytes.receiveBytes(count: bytesReceived)
             continuation.yield(.progress(bytes))
@@ -55,7 +55,7 @@ public struct StubbedResponseStream: Equatable, Sendable {
 
         case let .uniform(steps: steps, interval: interval):
           let bytesReceived = bytes.expected / Int64(steps)
-          for _ in 0..<steps {
+          for _ in 0 ..< steps {
             await clock.advance(by: interval)
             bytes.receiveBytes(count: bytesReceived)
             continuation.yield(.progress(bytes))

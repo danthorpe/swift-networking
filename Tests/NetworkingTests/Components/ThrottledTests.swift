@@ -23,7 +23,7 @@ final class ThrottledTests: XCTestCase {
           .throttled(max: 5)
 
         try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
-          for _ in 0..<100 {
+          for _ in 0 ..< 100 {
             group.addTask {
               try await network.data(HTTPRequestData(authority: "example.com"))
             }

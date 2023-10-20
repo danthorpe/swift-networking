@@ -50,7 +50,8 @@ public struct HTTPResponseData: Sendable {
 
 extension HTTPResponseData {
   public subscript<Metadata: HTTPResponseMetadata>(metadata metadataType: Metadata.Type)
-    -> Metadata.Value {
+    -> Metadata.Value
+  {
     get {
       let id = ObjectIdentifier(metadataType)
       guard let container = metadata[id], let value = container.value as? Metadata.Value else {
@@ -86,10 +87,10 @@ extension HTTPResponseData: Equatable {
       && lhs.data == rhs.data
       && lhs._response == rhs._response
       && lhs.metadata.allSatisfy { key, lhs in
-        return lhs.isEqualTo(rhs.metadata[key]?.value)
+        lhs.isEqualTo(rhs.metadata[key]?.value)
       }
       && rhs.metadata.allSatisfy { key, rhs in
-        return rhs.isEqualTo(lhs.metadata[key]?.value)
+        rhs.isEqualTo(lhs.metadata[key]?.value)
       }
   }
 }
@@ -111,9 +112,9 @@ extension HTTPResponseData: CustomDebugStringConvertible {
       if let contentType = self.headerFields[.contentType] {
         debugDescription += "\(contentType.description)"
         #if hasFeature(BareSlashRegexLiterals)
-          let regex = /(json)/
+        let regex = /(json)/
         #else
-          let regex = #/(json)/#
+        let regex = #/(json)/#
         #endif
         if contentType.contains(regex) {
           let dataDescription = String(decoding: data, as: UTF8.self)

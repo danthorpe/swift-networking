@@ -33,7 +33,7 @@ final class DuplicatesRemovedTests: XCTestCase {
           .duplicatesRemoved()
 
         try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
-          for _ in 0..<4 {
+          for _ in 0 ..< 4 {
             group.addTask {
               try await network.data(request1)
             }

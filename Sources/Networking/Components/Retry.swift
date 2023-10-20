@@ -55,7 +55,7 @@ actor RetryData {
   func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
-    return ResponseStream { continuation in
+    ResponseStream { continuation in
       Task {
         var progress = BytesReceived()
         do {
@@ -216,8 +216,7 @@ public protocol RetryingStrategy {
 }
 
 public struct BackoffRetryStrategy: RetryingStrategy {
-  private var block:
-    (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) -> Duration?
+  private var block: (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) -> Duration?
   public init(
     block: @escaping (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) ->
       Duration?
@@ -241,7 +240,7 @@ public struct BackoffRetryStrategy: RetryingStrategy {
     let rate: Double = 2.0
     return .init { _, attempts, _, _ in
       guard attempts.count < maxAttemptCount else { return nil }
-      let delay: Double = (interval * pow(rate, Double(attempts.count))) + .random(in: 0...0.001)
+      let delay: Double = (interval * pow(rate, Double(attempts.count))) + .random(in: 0 ... 0.001)
       return min(.seconds(delay), maxDelay)
     }
   }

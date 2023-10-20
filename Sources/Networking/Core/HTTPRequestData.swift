@@ -134,10 +134,10 @@ extension HTTPRequestData: Equatable {
       && lhs.body == rhs.body
       && lhs.request == rhs.request
       && lhs.options.allSatisfy { key, lhs in
-        return lhs.isEqualTo(rhs.options[key]?.value)
+        lhs.isEqualTo(rhs.options[key]?.value)
       }
       && rhs.options.allSatisfy { key, rhs in
-        return rhs.isEqualTo(lhs.options[key]?.value)
+        rhs.isEqualTo(lhs.options[key]?.value)
       }
   }
 }
@@ -161,10 +161,10 @@ public func ~= (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
   lhs.body == rhs.body
     && (lhs.request == rhs.request)
     && lhs.options.allSatisfy { key, lhs in
-      return lhs.isEqualTo(rhs.options[key]?.value)
+      lhs.isEqualTo(rhs.options[key]?.value)
     }
     && rhs.options.allSatisfy { key, rhs in
-      return rhs.isEqualTo(lhs.options[key]?.value)
+      rhs.isEqualTo(lhs.options[key]?.value)
     }
 }
 

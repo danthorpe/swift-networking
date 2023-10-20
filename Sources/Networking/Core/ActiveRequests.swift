@@ -29,7 +29,8 @@ public actor ActiveRequests {
             await self.removeStream(for: request)
           })
       }
-    }.shared()
+    }
+    .shared()
 
     active[Key(id: request.id)] = Value(request: request, stream: shared)
     return shared

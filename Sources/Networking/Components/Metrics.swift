@@ -60,7 +60,7 @@ public struct NetworkingInstrumentClient {
 
 extension [ElapsedTimeMeasurement] {
   var total: Duration {
-    return map(\.duration).reduce(.zero, +)
+    map(\.duration).reduce(.zero, +)
   }
 }
 

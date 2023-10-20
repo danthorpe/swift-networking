@@ -15,7 +15,8 @@ extension NetworkingComponent {
 }
 
 private struct Modified<Upstream: NetworkingComponent, Modifier: NetworkingModifier>:
-  NetworkingComponent {
+  NetworkingComponent
+{
   let upstream: Upstream
   let modifier: Modifier
   init(upstream: Upstream, modifier: Modifier) {

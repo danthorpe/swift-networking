@@ -77,26 +77,29 @@ final class RetryTests: XCTestCase {
     let request = HTTPRequestData(id: .init("1"), authority: "example.com")
     XCTAssertTrue(request.supportsRetryingRequests)
     let strategy = request.retryingStrategy
-    var delay = await strategy?.retryDelay(
-      request: request,
-      after: [.failure("Some Error")],
-      date: Date(),
-      calendar: .current
-    )
+    var delay = await strategy?
+      .retryDelay(
+        request: request,
+        after: [.failure("Some Error")],
+        date: Date(),
+        calendar: .current
+      )
     XCTAssertEqual(delay, .seconds(3))
-    delay = await strategy?.retryDelay(
-      request: request,
-      after: [.failure("Some Error"), .failure("Some Error")],
-      date: Date(),
-      calendar: .current
-    )
+    delay = await strategy?
+      .retryDelay(
+        request: request,
+        after: [.failure("Some Error"), .failure("Some Error")],
+        date: Date(),
+        calendar: .current
+      )
     XCTAssertEqual(delay, .seconds(3))
-    delay = await strategy?.retryDelay(
-      request: request,
-      after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
-      date: Date(),
-      calendar: .current
-    )
+    delay = await strategy?
+      .retryDelay(
+        request: request,
+        after: [.failure("Some Error"), .failure("Some Error"), .failure("Some Error")],
+        date: Date(),
+        calendar: .current
+      )
     XCTAssertNil(delay)
   }
 }

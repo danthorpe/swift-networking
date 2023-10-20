@@ -40,9 +40,9 @@ final class AuthenticationTests: XCTestCase {
     try await withMainSerialExecutor {
       try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
 
-        for _ in 0..<4 {
+        for _ in 0 ..< 4 {
           group.addTask {
-            return try await network.data(copy)
+            try await network.data(copy)
           }
         }
 

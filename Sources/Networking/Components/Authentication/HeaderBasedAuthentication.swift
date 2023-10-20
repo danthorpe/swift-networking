@@ -35,9 +35,10 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
     }
 
     private func performCredentialFetch(for request: HTTPRequestData) async throws -> Credentials {
-      logger?.info(
-        "🔐 Fetching credentials for \(Credentials.method.rawValue, privacy: .public) authorization method"
-      )
+      logger?
+        .info(
+          "🔐 Fetching credentials for \(Credentials.method.rawValue, privacy: .public) authorization method"
+        )
       do {
         let credentials = try await delegate.fetch(for: request)
         set(state: .authorized(credentials))
@@ -49,7 +50,8 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
     }
 
     func refresh(unauthorized credentials: Credentials, from response: HTTPResponseData)
-      async throws -> Credentials {
+      async throws -> Credentials
+    {
       if case let .fetching(task) = state {
         return try await task.value
       }
@@ -65,9 +67,10 @@ public struct HeaderBasedAuthentication<Delegate: AuthenticationDelegate> {
       unauthorized credentials: Credentials,
       from response: HTTPResponseData
     ) async throws -> Credentials {
-      logger?.info(
-        "🔑 Refreshing credentials for \(Credentials.method.rawValue, privacy: .public) authorization method"
-      )
+      logger?
+        .info(
+          "🔑 Refreshing credentials for \(Credentials.method.rawValue, privacy: .public) authorization method"
+        )
       do {
         let refreshed = try await delegate.refresh(unauthorized: credentials, from: response)
         set(state: .authorized(refreshed))
