@@ -10,7 +10,7 @@ public struct JSONBody: HTTPRequestBody {
   public init<Body: Encodable>(_ value: Body, encoder: JSONEncoder = JSONEncoder()) {
     _encode = { try encoder.encode(value) }
   }
-  
+
   public func encode() throws -> Data {
     try _encode()
   }

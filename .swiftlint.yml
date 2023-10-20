@@ -3,6 +3,10 @@ analyzer_rules:
   - explicit_self
 disabled_rules: 
   - multiple_closures_with_trailing_closure
+  - trailing_comma
+function_body_length:
+  error: 200
+  warning: 80
 identifier_name: 
   allowed_symbols: _
   excluded: 

@@ -11,8 +11,10 @@ public struct RequestSequence {
 
 struct Numbered: NetworkingModifier {
   private let sequence = SequenceNumber(value: 0)
-  
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     ResponseStream<HTTPResponseData> { continuation in
       Task {
         await RequestSequence.$number.withValue(sequence.next()) {
@@ -26,13 +28,13 @@ struct Numbered: NetworkingModifier {
 actor SequenceNumber {
   @TaskLocal
   static var next: @Sendable (Int) -> Int = { $0 + 1 }
-  
+
   private var value: Int
-  
+
   init(value: Int) {
     self.value = value
   }
-  
+
   func next() -> Int {
     value = Self.next(value)
     return value

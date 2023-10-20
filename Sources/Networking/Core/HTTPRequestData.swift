@@ -4,29 +4,29 @@ import Dependencies
 import Foundation
 import HTTPTypes
 import Helpers
-import Tagged
 import ShortID
+import Tagged
 
 @dynamicMemberLookup
 public struct HTTPRequestData: Sendable, Identifiable {
   public typealias ID = Tagged<Self, String>
   public let id: ID
   public var body: Data?
-  
+
   @Sanitized fileprivate var request: HTTPRequest
   internal fileprivate(set) var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
-  
+
   public var identifier: String {
     id.rawValue
   }
-  
+
   public subscript<Value>(
     dynamicMember dynamicMember: WritableKeyPath<HTTPRequest, Value>
   ) -> Value {
     get { $request[keyPath: dynamicMember] }
     set { $request[keyPath: dynamicMember] = newValue }
   }
-  
+
   init(
     id: ID,
     method: HTTPRequest.Method = .get,
@@ -38,15 +38,16 @@ public struct HTTPRequestData: Sendable, Identifiable {
   ) {
     self.id = id
     self.body = body
-    self._request = .init(projectedValue: .init(
-      method: method,
-      scheme: scheme,
-      authority: authority,
-      path: path,
-      headerFields: headerFields
-    ))
+    self._request = .init(
+      projectedValue: .init(
+        method: method,
+        scheme: scheme,
+        authority: authority,
+        path: path,
+        headerFields: headerFields
+      ))
   }
-  
+
   public init(
     method: HTTPRequest.Method = .get,
     scheme: String? = "https",
@@ -66,7 +67,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
       body: body
     )
   }
-  
+
   public init(
     method: HTTPRequest.Method = .get,
     scheme: String? = "https",
@@ -114,12 +115,12 @@ extension HTTPRequestData {
             return false == optionType.includeInEqualityEvaluation
           }
           return optionType.includeInEqualityEvaluation
-          ? _isEqual(newValue, other)
-          : true
+            ? _isEqual(newValue, other)
+            : true
         })
     }
   }
-  
+
   internal mutating func copy(options other: [ObjectIdentifier: HTTPRequestDataOptionContainer]) {
     self.options = other
   }
@@ -130,14 +131,14 @@ extension HTTPRequestData {
 extension HTTPRequestData: Equatable {
   public static func == (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
     lhs.id == rhs.id
-    && lhs.body == rhs.body
-    && lhs.request == rhs.request
-    && lhs.options.allSatisfy { key, lhs in
-      return lhs.isEqualTo(rhs.options[key]?.value)
-    }
-    && rhs.options.allSatisfy { key, rhs in
-      return rhs.isEqualTo(lhs.options[key]?.value)
-    }
+      && lhs.body == rhs.body
+      && lhs.request == rhs.request
+      && lhs.options.allSatisfy { key, lhs in
+        lhs.isEqualTo(rhs.options[key]?.value)
+      }
+      && rhs.options.allSatisfy { key, rhs in
+        rhs.isEqualTo(lhs.options[key]?.value)
+      }
   }
 }
 
@@ -158,13 +159,13 @@ extension HTTPRequestData: CustomDebugStringConvertible {
 
 public func ~= (lhs: HTTPRequestData, rhs: HTTPRequestData) -> Bool {
   lhs.body == rhs.body
-  && (lhs.request == rhs.request)
-  && lhs.options.allSatisfy { key, lhs in
-    return lhs.isEqualTo(rhs.options[key]?.value)
-  }
-  && rhs.options.allSatisfy { key, rhs in
-    return rhs.isEqualTo(lhs.options[key]?.value)
-  }
+    && (lhs.request == rhs.request)
+    && lhs.options.allSatisfy { key, lhs in
+      lhs.isEqualTo(rhs.options[key]?.value)
+    }
+    && rhs.options.allSatisfy { key, rhs in
+      rhs.isEqualTo(lhs.options[key]?.value)
+    }
 }
 
 // MARK: - Sanitize
@@ -183,7 +184,7 @@ extension HTTPRequest {
     copy.sanitize()
     return copy
   }
-  
+
   fileprivate mutating func sanitize() {
     // Trim any trailing / from authority
     authority = authority?.trimSlashSuffix()
@@ -191,7 +192,7 @@ extension HTTPRequest {
     if let trimmedPath = path?.trimSlashPrefix(), !trimmedPath.isEmpty {
       path = "/" + trimmedPath
     }
-    
+
     if let path, path.isEmpty {
       self.path = "/"
     } else if nil == path {

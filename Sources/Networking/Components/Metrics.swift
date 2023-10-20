@@ -1,5 +1,5 @@
-import Dependencies
 import Clocks
+import Dependencies
 import Foundation
 
 extension NetworkingComponent {
@@ -12,17 +12,17 @@ extension NetworkingComponent {
 }
 
 private actor NetworkingInstrument {
-  
+
   let clock: AnyClock<Duration>
   let start: ElapsedTimeMeasurement
   var end: ElapsedTimeMeasurement?
   var measurements: [ElapsedTimeMeasurement] = []
-  
+
   init(clock: any Clock<Duration>) {
     self.clock = AnyClock(clock)
     self.start = .init(label: "start", duration: .zero, instant: AnyClock(clock).now)
   }
-  
+
   func measureElapsedTime(label: String) {
     let now = clock.now
     let previous = measurements.last?.instant ?? start.instant
@@ -33,11 +33,11 @@ private actor NetworkingInstrument {
       instant: now
     )
     measurements.append(measurement)
-    
+
     @NetworkEnvironment(\.logger) var logger
     let total = measurements.total
     logger?.info("⏱️ \(label) \(duration.description) total: \(total.description)")
-    
+
   }
 }
 
@@ -45,7 +45,7 @@ public struct ElapsedTimeMeasurement: Equatable {
   public let label: String
   public let duration: Duration
   let instant: AnyClock<Duration>.Instant
-  
+
   public init(label: String, duration: Duration, instant: AnyClock<Duration>.Instant) {
     self.label = label
     self.duration = duration
@@ -60,7 +60,7 @@ public struct NetworkingInstrumentClient {
 
 extension [ElapsedTimeMeasurement] {
   var total: Duration {
-    return map(\.duration).reduce(.zero, +)
+    map(\.duration).reduce(.zero, +)
   }
 }
 

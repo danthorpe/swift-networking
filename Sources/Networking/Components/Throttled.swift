@@ -21,15 +21,17 @@ extension NetworkingComponent {
 }
 
 struct Throttled: NetworkingModifier {
-  
+
   let activeRequests = ActiveRequests()
   let limit: UInt
-  
+
   init(limit: UInt) {
     self.limit = limit
   }
-  
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     guard case .always = request.throttle else {
       return upstream.send(request)
     }
@@ -51,7 +53,7 @@ struct Throttled: NetworkingModifier {
 }
 
 extension ActiveRequests {
-  
+
   fileprivate func send(
     upstream: NetworkingComponent,
     request: HTTPRequestData,

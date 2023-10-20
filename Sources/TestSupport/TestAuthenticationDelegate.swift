@@ -2,16 +2,18 @@ import Networking
 import Protected
 import XCTestDynamicOverlay
 
-public final class TestAuthenticationDelegate<Credentials: AuthenticatingCredentials>: @unchecked Sendable {
+public final class TestAuthenticationDelegate<Credentials: AuthenticatingCredentials>: @unchecked
+  Sendable
+{
   public typealias Fetch = @Sendable (HTTPRequestData) async throws -> Credentials
   public typealias Refresh = @Sendable (Credentials, HTTPResponseData) async throws -> Credentials
-  
+
   @Protected public var fetchCount: Int = 0
   @Protected public var refreshCount: Int = 0
-  
+
   public var fetch: Fetch
   public var refresh: Refresh
-  
+
   public init(
     fetch: @escaping Fetch = unimplemented("TestAuthenticationDelegate.fetch"),
     refresh: @escaping Refresh = unimplemented("TestAuthenticationDelegate.refresh")
@@ -26,7 +28,7 @@ extension TestAuthenticationDelegate: AuthenticationDelegate {
     fetchCount += 1
     return try await fetch(request)
   }
-  
+
   public func refresh(
     unauthorized credentials: Credentials,
     from response: HTTPResponseData

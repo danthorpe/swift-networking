@@ -21,18 +21,18 @@ final class MetricsTests: XCTestCase {
         .delayed(by: .seconds(3))
         .reported(by: reporter)
         .instrument()
-      
+
       async let response = network.data(request1)
       await clock.advance(by: .seconds(3))
       let receivedData = try await response.data
-      
+
       XCTAssertEqual(receivedData, data)
-      
+
       guard let measurements = await reporter.finish??.elapsedTimeMeasurements() else {
         XCTFail("Expected to have elapsed time measurements")
         return
       }
-      
+
       XCTAssertNoDifference(measurements.map(\.label), ["Delay", "Mocked"])
       XCTAssertNoDifference(measurements.map(\.duration), [.zero, .seconds(3)])
     }

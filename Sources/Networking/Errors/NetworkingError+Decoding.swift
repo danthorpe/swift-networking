@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 extension NetworkingError {
-  
+
   public func decodeResponseBody<ErrorMessage: Decodable, Decoder: TopLevelDecoder>(
     as errorMessageType: ErrorMessage.Type,
     using decoder: Decoder
@@ -17,15 +17,16 @@ extension NetworkingError {
       @NetworkEnvironment(\.logger) var logger
       if let logger {
         let stringRepresentation = String(decoding: response.data, as: UTF8.self)
-        let privateLogMessage = "Decoding \(String(describing: response))"
-        + " into \(String(describing: errorMessageType)),"
-        + " but received: \(stringRepresentation)"
+        let privateLogMessage =
+          "Decoding \(String(describing: response))"
+          + " into \(String(describing: errorMessageType)),"
+          + " but received: \(stringRepresentation)"
         logger.error("Failed to decode error message. \(privateLogMessage, privacy: .private)")
       }
       return nil
     }
   }
-  
+
   public func decodeResponseBodyIntoJSON<ErrorMessage: Decodable>(
     as errorMessageType: ErrorMessage.Type
   ) -> ErrorMessage? {

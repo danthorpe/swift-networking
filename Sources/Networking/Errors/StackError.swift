@@ -17,7 +17,8 @@ enum StackError: Error {
 extension StackError: NetworkingError {
   var request: HTTPRequestData {
     switch self {
-    case .createURLRequestFailed(let request), .invalidURLResponse(let request, _, _), .timeout(let request):
+    case .createURLRequestFailed(let request), .invalidURLResponse(let request, _, _),
+      .timeout(let request):
       return request
     case .unauthorized(let response), .decodeResponse(let response, _), .statusCode(let response):
       return response.request

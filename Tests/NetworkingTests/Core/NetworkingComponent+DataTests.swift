@@ -2,14 +2,14 @@ import AssertionExtras
 import Dependencies
 import Foundation
 import Helpers
+import ShortID
 import TestSupport
 import XCTest
-import ShortID
 
 @testable import Networking
 
 final class NetworkingComponentDataTests: XCTestCase {
-  
+
   func test__basic_data() async throws {
     try await withDependencies {
       $0.shortID = .incrementing
@@ -19,13 +19,13 @@ final class NetworkingComponentDataTests: XCTestCase {
       let data = try XCTUnwrap("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
-      
+
       let response = try await network.data(request)
-      
+
       XCTAssertEqual(response.data, data)
     }
   }
-  
+
   func test__basic_data__timeout() async throws {
     let clock = TestClock()
     try await withDependencies {
@@ -36,7 +36,7 @@ final class NetworkingComponentDataTests: XCTestCase {
       let data = try XCTUnwrap("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
-      
+
       async let response = network.data(request, timeout: .seconds(2))
       await clock.advance(by: .seconds(3))
       do {
@@ -49,7 +49,7 @@ final class NetworkingComponentDataTests: XCTestCase {
       }
     }
   }
-  
+
   func test__basic_data_progress() async throws {
     actor UpdateProgress {
       var bytesReceived: [BytesReceived] = []
@@ -61,7 +61,7 @@ final class NetworkingComponentDataTests: XCTestCase {
     let progressExpectation = expectation(description: "Update progress")
     progressExpectation.assertForOverFulfill = true
     progressExpectation.expectedFulfillmentCount = 5
-    
+
     try await withDependencies {
       $0.shortID = .incrementing
       $0.continuousClock = TestClock()
@@ -70,7 +70,7 @@ final class NetworkingComponentDataTests: XCTestCase {
       let data = try XCTUnwrap("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
-      
+
       let response = try await network.data(request) { bytesReceived in
         progressExpectation.fulfill()
         await progress.update(bytesReceived)
@@ -78,14 +78,16 @@ final class NetworkingComponentDataTests: XCTestCase {
       XCTAssertEqual(response.data, data)
       await fulfillment(of: [progressExpectation])
       let bytesReceived = await progress.bytesReceived
-      XCTAssertEqual(bytesReceived, [
-        BytesReceived(received: 2, expected: 11),
-        BytesReceived(received: 4, expected: 11),
-        BytesReceived(received: 6, expected: 11),
-        BytesReceived(received: 8, expected: 11),
-        BytesReceived(received: 11, expected: 11)
-      ])
+      XCTAssertEqual(
+        bytesReceived,
+        [
+          BytesReceived(received: 2, expected: 11),
+          BytesReceived(received: 4, expected: 11),
+          BytesReceived(received: 6, expected: 11),
+          BytesReceived(received: 8, expected: 11),
+          BytesReceived(received: 11, expected: 11),
+        ])
     }
-    
+
   }
 }

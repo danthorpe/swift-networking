@@ -11,11 +11,11 @@ public actor ActiveRequests {
     public let request: HTTPRequestData
     let stream: SharedStream
   }
-  
+
   public private(set) var active: [Key: Value] = [:]
   public var shouldMeasureElapsedTime: Bool = false
   public var count: Int { active.count }
-  
+
   @discardableResult
   public func add(
     stream: ResponseStream<HTTPResponseData>,
@@ -23,16 +23,19 @@ public actor ActiveRequests {
   ) -> SharedStream {
     let shared = ResponseStream<HTTPResponseData> { continuation in
       Task {
-        await stream.redirect(into: continuation, onTermination: { @Sendable in
-          await self.removeStream(for: request)
-        })
+        await stream.redirect(
+          into: continuation,
+          onTermination: { @Sendable in
+            await self.removeStream(for: request)
+          })
       }
-    }.shared()
-    
+    }
+    .shared()
+
     active[Key(id: request.id)] = Value(request: request, stream: shared)
     return shared
   }
-  
+
   public func removeStream(for request: HTTPRequestData) {
     active[Key(id: request.id)] = nil
   }

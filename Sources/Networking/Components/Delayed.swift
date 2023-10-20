@@ -11,10 +11,12 @@ struct Delayed: NetworkingModifier {
   @Dependency(\.continuousClock) var clock
   @NetworkEnvironment(\.instrument) var instrument
   @NetworkEnvironment(\.logger) var logger
-  
+
   let duration: Duration
-  
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  > {
     ResponseStream { continuation in
       Task {
         do {
@@ -26,7 +28,7 @@ struct Delayed: NetworkingModifier {
         } catch {
           continuation.finish(throwing: error)
         }
-        
+
         await upstream.send(request).redirect(into: continuation)
       }
     }

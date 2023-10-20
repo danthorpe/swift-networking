@@ -3,7 +3,9 @@ import Foundation
 import Helpers
 
 public protocol NetworkingModifier {
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
+  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+    HTTPResponseData
+  >
 }
 
 extension NetworkingComponent {
@@ -12,7 +14,9 @@ extension NetworkingComponent {
   }
 }
 
-private struct Modified<Upstream: NetworkingComponent, Modifier: NetworkingModifier>: NetworkingComponent {
+private struct Modified<Upstream: NetworkingComponent, Modifier: NetworkingModifier>:
+  NetworkingComponent
+{
   let upstream: Upstream
   let modifier: Modifier
   init(upstream: Upstream, modifier: Modifier) {

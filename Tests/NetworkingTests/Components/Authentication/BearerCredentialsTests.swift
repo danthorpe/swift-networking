@@ -13,7 +13,7 @@ final class BearerCredentialsTests: XCTestCase {
     let request = credentials.apply(to: HTTPRequestData(id: "1"))
     XCTAssertEqual(request.headerFields[.authorization], "Bearer super!$3cret")
   }
-  
+
   func test__provide_credentials() {
     var request = HTTPRequestData(id: "1")
     request.bearerCredentials = BearerCredentials(token: "super!$3cret")
