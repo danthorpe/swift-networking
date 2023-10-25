@@ -9,6 +9,17 @@ import XCTest
 
 final class CheckedStatusCodeTests: XCTestCase {
 
+  override func invokeTest() {
+    withDependencies {
+      $0.shortID = .incrementing
+      $0.continuousClock = TestClock()
+    } operation: {
+      withMainSerialExecutor {
+        super.invokeTest()
+      }
+    }
+  }
+
   func configureNetwork(
     for status: HTTPResponse.Status
   ) -> (network: some NetworkingComponent, response: HTTPResponseData) {
@@ -17,44 +28,27 @@ final class CheckedStatusCodeTests: XCTestCase {
     let network = TerminalNetworkingComponent()
       .mocked(request, stub: stubbed)
       .checkedStatusCode()
-
     return (network, stubbed.expectedResponse(request))
   }
 
   func test__ok() async throws {
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      let (network, expectedResponse) = configureNetwork(for: .ok)
-      try await network.data(expectedResponse.request)
-    }
+    let (network, expectedResponse) = configureNetwork(for: .ok)
+    try await network.data(expectedResponse.request)
   }
 
   func test__internal_server_error() async throws {
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      let (network, expectedResponse) = configureNetwork(for: .internalServerError)
-      await XCTAssertThrowsError(
-        try await network.data(expectedResponse.request),
-        matches: StackError.statusCode(expectedResponse)
-      )
-    }
+    let (network, expectedResponse) = configureNetwork(for: .internalServerError)
+    await XCTAssertThrowsError(
+      try await network.data(expectedResponse.request),
+      matches: StackError.statusCode(expectedResponse)
+    )
   }
 
   func test__unauthorized() async throws {
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      let (network, expectedResponse) = configureNetwork(for: .unauthorized)
-      await XCTAssertThrowsError(
-        try await network.data(expectedResponse.request),
-        matches: StackError.unauthorized(expectedResponse)
-      )
-    }
+    let (network, expectedResponse) = configureNetwork(for: .unauthorized)
+    await XCTAssertThrowsError(
+      try await network.data(expectedResponse.request),
+      matches: StackError.unauthorized(expectedResponse)
+    )
   }
-
 }

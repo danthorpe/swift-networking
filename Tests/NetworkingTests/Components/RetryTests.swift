@@ -42,7 +42,7 @@ final class RetryTests: XCTestCase {
       $0.shortID = .incrementing
       $0.continuousClock = clock
     } operation: {
-      let request = HTTPRequestData(authority: "example.com")
+      let request = HTTPRequestData()
 
       let network = TerminalNetworkingComponent()
         .mocked { upstream, request in
@@ -68,7 +68,7 @@ final class RetryTests: XCTestCase {
       $0.shortID = .incrementing
       $0.continuousClock = TestClock()
     } operation: {
-      var request = HTTPRequestData(authority: "example.com")
+      var request = HTTPRequestData()
       request.retryingStrategy = nil
     }
   }

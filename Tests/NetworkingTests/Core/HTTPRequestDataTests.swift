@@ -29,7 +29,7 @@ final class HTTPRequestDataTests: XCTestCase {
     XCTAssertEqual(request.method, .get)
     XCTAssertEqual(request.scheme, "https")
     XCTAssertEqual(request.authority, "example.com")
-    XCTAssertEqual(request.path, "example")
+    XCTAssertEqual(request.path, "/example")
     XCTAssertEqual(request.headerFields, [:])
     XCTAssertNil(request.body)
 
@@ -43,7 +43,7 @@ final class HTTPRequestDataTests: XCTestCase {
     XCTAssertEqual(request.authority, "example.co.uk")
 
     request.path = "example/another"
-    XCTAssertEqual(request.path, "example/another")
+    XCTAssertEqual(request.path, "/example/another")
 
     request.headerFields = [
       .contentType: "application/json",

@@ -12,7 +12,15 @@ public struct HTTPRequestData: Sendable, Identifiable {
   public typealias ID = Tagged<Self, String>
   public let id: ID
   public var body: Data?
+  public var queryItems: [URLQueryItem]? {
+    get { _queryItems }
+    set {
+      _queryItems = newValue
+      syncPathFromQueryItems()
+    }
+  }
 
+  fileprivate var _queryItems: [URLQueryItem]?
   @Sanitized fileprivate var request: HTTPRequest
   internal fileprivate(set) var options: [ObjectIdentifier: HTTPRequestDataOptionContainer] = [:]
 
@@ -20,19 +28,56 @@ public struct HTTPRequestData: Sendable, Identifiable {
     id.rawValue
   }
 
-  public subscript<Value>(
-    dynamicMember dynamicMember: WritableKeyPath<HTTPRequest, Value>
-  ) -> Value {
-    get { $request[keyPath: dynamicMember] }
-    set { $request[keyPath: dynamicMember] = newValue }
+  public var method: HTTPRequest.Method {
+    get { request.method }
+    set { $request.method = newValue }
+  }
+
+  public var scheme: String {
+    get { request.scheme ?? Defaults.scheme }
+    set { $request.scheme = newValue }
+  }
+
+  public var authority: String {
+    get { request.authority ?? Defaults.authority }
+    set { $request.authority = newValue }
+  }
+
+  public var path: String {
+    get { request.path ?? Defaults.path }
+    set {
+      $request.path = newValue
+      syncQueryItemsFromPath()
+    }
+  }
+
+  public var headerFields: HTTPFields {
+    get { request.headerFields }
+    set { $request.headerFields = newValue }
+  }
+
+  /// Get/Set the first query parameter
+  public subscript(
+    dynamicMember key: String
+  ) -> String? {
+    get {
+      queryItems?.first(where: { $0.name == key })?.value
+    }
+    set {
+      guard let newValue else {
+        queryItems?.removeAll(where: { $0.name == key })
+        return
+      }
+      queryItems.append(URLQueryItem(name: key, value: newValue))
+    }
   }
 
   init(
     id: ID,
-    method: HTTPRequest.Method = .get,
-    scheme: String? = "https",
-    authority: String? = nil,
-    path: String? = nil,
+    method: HTTPRequest.Method = Defaults.method,
+    scheme: String = Defaults.scheme,
+    authority: String = Defaults.authority,
+    path: String = Defaults.path,
     headerFields: HTTPFields = [:],
     body: Data? = nil
   ) {
@@ -49,10 +94,10 @@ public struct HTTPRequestData: Sendable, Identifiable {
   }
 
   public init(
-    method: HTTPRequest.Method = .get,
-    scheme: String? = "https",
-    authority: String? = nil,
-    path: String? = nil,
+    method: HTTPRequest.Method = Defaults.method,
+    scheme: String = Defaults.scheme,
+    authority: String = Defaults.authority,
+    path: String = Defaults.path,
     headerFields: HTTPFields = [:],
     body: Data? = nil
   ) {
@@ -69,10 +114,10 @@ public struct HTTPRequestData: Sendable, Identifiable {
   }
 
   public init(
-    method: HTTPRequest.Method = .get,
-    scheme: String? = "https",
-    authority: String? = nil,
-    path: String? = nil,
+    method: HTTPRequest.Method = Defaults.method,
+    scheme: String = Defaults.scheme,
+    authority: String = Defaults.authority,
+    path: String = Defaults.path,
     headerFields: HTTPFields = [:],
     body: any HTTPRequestBody
   ) throws {
@@ -92,6 +137,34 @@ public struct HTTPRequestData: Sendable, Identifiable {
       headerFields: fields,
       body: data
     )
+  }
+
+  public enum Defaults {
+    public static let method: HTTPRequest.Method = .get
+    public static let scheme = "https"
+    public static let authority = "example.com"
+    public static let path = "/"
+  }
+
+  internal mutating func syncQueryItemsFromPath() {
+    guard let url = $request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+      assertionFailure("Unable to create URL or URLComponents needed to set the query")
+      return
+    }
+    _queryItems = components.queryItems
+  }
+
+  internal mutating func syncPathFromQueryItems() {
+    guard let url = $request.url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+      assertionFailure("Unable to create URL or URLComponents needed to set the query")
+      return
+    }
+    components.queryItems = _queryItems
+    guard let url = components.url else {
+      assertionFailure("Unable to create URL after settings queryItems")
+      return
+    }
+    $request.url = url
   }
 }
 
@@ -188,7 +261,9 @@ extension HTTPRequest {
   fileprivate mutating func sanitize() {
     // Trim any trailing / from authority
     authority = authority?.trimSlashSuffix()
-    // Ensure there is a single / on the path
+    // Remove any trailing slashes from the path
+    path = path?.trimSlashSuffix()
+    // Ensure there is a single / on the start of path
     if let trimmedPath = path?.trimSlashPrefix(), !trimmedPath.isEmpty {
       path = "/" + trimmedPath
     }
