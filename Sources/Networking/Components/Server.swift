@@ -3,11 +3,11 @@ import os.log
 
 extension NetworkingComponent {
 
-  public func server(authority: String?) -> some NetworkingComponent {
+  public func server(authority: String) -> some NetworkingComponent {
     server(mutate: \.authority) { _ in
       authority
     } log: { logger, request in
-      logger?.info("💁 authority -> '\(authority ?? "no value")' \(request.debugDescription)")
+      logger?.info("💁 authority -> '\(authority)' \(request.debugDescription)")
     }
   }
 
@@ -38,8 +38,7 @@ extension NetworkingComponent {
 
   public func server(prefixPath: String, delimiter: String = "/") -> some NetworkingComponent {
     server(mutate: \.path) { path in
-      guard let path else { return prefixPath }
-      return prefixPath + delimiter + path
+      return delimiter + prefixPath + path
     } log: { logger, request in
       logger?.info("💁 prefix path -> '\(prefixPath)' \(request.debugDescription)")
     }
