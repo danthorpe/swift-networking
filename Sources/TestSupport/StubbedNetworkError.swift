@@ -10,7 +10,7 @@ public struct StubbedNetworkError: Error {
     self.error = error
   }
 
-  init(request: HTTPRequestData, data: Data = Data(), response: HTTPURLResponse) {
+  public init(request: HTTPRequestData, data: Data = Data(), response: HTTPURLResponse) {
     guard let httpResponse = response.httpResponse else {
       fatalError("Unable to create HTTPResponse from \(response)")
     }

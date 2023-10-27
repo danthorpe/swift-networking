@@ -155,6 +155,28 @@ extension HTTPResponse.Status {
   }
 }
 
+extension Result where Success == HTTPResponseData, Failure: Error {
+  public var httpRequest: HTTPRequestData? {
+    switch self {
+    case let .success(response):
+      return response.request
+    case let .failure(error):
+      return error.httpRequest
+    }
+  }
+}
+
+extension Result where Success == HTTPResponseData, Failure: NetworkingError {
+  public var request: HTTPRequestData {
+    switch self {
+    case let .success(response):
+      return response.request
+    case let .failure(error):
+      return error.request
+    }
+  }
+}
+
 private func ~= (lhs: HTTPURLResponse, rhs: HTTPURLResponse) -> Bool {
   lhs.url == rhs.url
   && lhs.mimeType == rhs.mimeType
