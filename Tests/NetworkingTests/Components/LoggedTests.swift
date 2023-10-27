@@ -65,7 +65,7 @@ final class LoggedTests: XCTestCase {
       try await network.data(request1)
       try await XCTAssertThrowsError(
         await network.data(request3),
-        matches: StubbedError(request: request3)
+        matches: StubbedNetworkError(request: request3)
       )
 
       let requests = await tester.onSend
@@ -76,7 +76,7 @@ final class LoggedTests: XCTestCase {
       XCTAssertEqual(failureRequests, [request3])
       let failureErrors = await tester.onFailure.map(\.error)
       XCTAssertEqual(
-        failureErrors.compactMap { $0 as? StubbedError }, [StubbedError(request: request3)])
+        failureErrors.compactMap { $0 as? StubbedNetworkError }, [StubbedNetworkError(request: request3)])
     }
   }
 }

@@ -8,27 +8,36 @@ import Helpers
 public struct HTTPResponseData: Sendable {
   public let request: HTTPRequestData
   public let data: Data
-  private let _response: HTTPResponse
+  private let rawValue: HTTPURLResponse
+  private let http: HTTPResponse
 
   public subscript<Value>(
     dynamicMember dynamicMemberLookup: KeyPath<HTTPResponse, Value>
   ) -> Value {
-    _response[keyPath: dynamicMemberLookup]
+    http[keyPath: dynamicMemberLookup]
+  }
+
+  public var url: URL? {
+    rawValue.url
   }
 
   internal fileprivate(set) var metadata: [ObjectIdentifier: HTTPResponseMetadataContainer] = [:]
 
-  public init(request: HTTPRequestData, data: Data, response: HTTPResponse) {
+  init(request: HTTPRequestData, data: Data, httpUrlResponse: HTTPURLResponse, httpResponse: HTTPResponse) {
     self.request = request
     self.data = data
-    self._response = response
+    self.rawValue = httpUrlResponse
+    self.http = httpResponse
   }
 
   public init(request: HTTPRequestData, data: Data, urlResponse: URLResponse?) throws {
-    guard let response = (urlResponse as? HTTPURLResponse)?.httpResponse else {
+    guard
+      let httpUrlResponse = (urlResponse as? HTTPURLResponse),
+      let httpResponse = httpUrlResponse.httpResponse
+    else {
       throw StackError.invalidURLResponse(request, data, urlResponse)
     }
-    self.init(request: request, data: data, response: response)
+    self.init(request: request, data: data, httpUrlResponse: httpUrlResponse, httpResponse: httpResponse)
   }
 
   func decode<Body, Decoder: TopLevelDecoder, Payload: Decodable>(
@@ -84,14 +93,14 @@ extension HTTPResponseData {
 extension HTTPResponseData: Equatable {
   public static func == (lhs: HTTPResponseData, rhs: HTTPResponseData) -> Bool {
     lhs.request == rhs.request
-      && lhs.data == rhs.data
-      && lhs._response == rhs._response
-      && lhs.metadata.allSatisfy { key, lhs in
-        lhs.isEqualTo(rhs.metadata[key]?.value)
-      }
-      && rhs.metadata.allSatisfy { key, rhs in
-        rhs.isEqualTo(lhs.metadata[key]?.value)
-      }
+    && lhs.data == rhs.data
+    && lhs.rawValue ~= rhs.rawValue // HTTPURLResponse is a reference type
+    && lhs.metadata.allSatisfy { key, lhs in
+      lhs.isEqualTo(rhs.metadata[key]?.value)
+    }
+    && rhs.metadata.allSatisfy { key, rhs in
+      rhs.isEqualTo(lhs.metadata[key]?.value)
+    }
   }
 }
 
@@ -99,7 +108,8 @@ extension HTTPResponseData: Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(request)
     hasher.combine(data)
-    hasher.combine(_response)
+    hasher.combine(ObjectIdentifier(rawValue))
+    hasher.combine(http)
   }
 }
 
@@ -129,7 +139,26 @@ extension HTTPResponseData: CustomDebugStringConvertible {
 // MARK: - Conveniences
 
 extension HTTPResponse.Status {
-  public var isFailure: Bool {
-    Self.badRequest.code <= code
+  public var isSuccess: Bool {
+    false == isFailure
   }
+  public var isFailure: Bool {
+    switch kind {
+    case .clientError, .serverError:
+      return true
+    default:
+      return false
+    }
+  }
+  public var isServerError: Bool {
+    kind == .serverError
+  }
+}
+
+private func ~= (lhs: HTTPURLResponse, rhs: HTTPURLResponse) -> Bool {
+  lhs.url == rhs.url
+  && lhs.mimeType == rhs.mimeType
+  && lhs.expectedContentLength == rhs.expectedContentLength
+  && lhs.textEncodingName == rhs.textEncodingName
+  && lhs.suggestedFilename == rhs.suggestedFilename
 }

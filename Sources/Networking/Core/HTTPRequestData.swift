@@ -12,13 +12,6 @@ public struct HTTPRequestData: Sendable, Identifiable {
   public typealias ID = Tagged<Self, String>
   public let id: ID
   public var body: Data?
-  public var queryItems: [URLQueryItem]? {
-    get { _queryItems }
-    set {
-      _queryItems = newValue
-      syncPathFromQueryItems()
-    }
-  }
 
   fileprivate var _queryItems: [URLQueryItem]?
   @Sanitized fileprivate var request: HTTPRequest
@@ -43,17 +36,44 @@ public struct HTTPRequestData: Sendable, Identifiable {
     set { $request.authority = newValue }
   }
 
+  public var port: Int? {
+    components.port
+  }
+
   public var path: String {
     get { request.path ?? Defaults.path }
     set {
       $request.path = newValue
-      syncQueryItemsFromPath()
+
+      // Check to see if the new path included query items
+      if let newPathBasedQueryItems = components.queryItems {
+        _queryItems = newPathBasedQueryItems
+      } else {
+        let queryItems = _queryItems
+        mutateViaComponents { $0.queryItems = queryItems }
+      }
+    }
+  }
+
+  public var queryItems: [URLQueryItem]? {
+    get { _queryItems }
+    set {
+      _queryItems = newValue
+      mutateViaComponents { $0.queryItems = newValue }
     }
   }
 
   public var headerFields: HTTPFields {
     get { request.headerFields }
     set { $request.headerFields = newValue }
+  }
+
+  public var url: URL? {
+    get { request.url }
+    set {
+      $request.url = newValue
+      syncFromComponents()
+    }
   }
 
   /// Get/Set the first query parameter
@@ -91,6 +111,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
         path: path,
         headerFields: headerFields
       ))
+    syncFromComponents()
   }
 
   public init(
@@ -146,25 +167,27 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public static let path = "/"
   }
 
-  internal mutating func syncQueryItemsFromPath() {
-    guard let url = $request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+  private var components: URLComponents {
+    guard let url = request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
       assertionFailure("Unable to create URL or URLComponents needed to set the query")
-      return
+      return URLComponents()
     }
-    _queryItems = components.queryItems
+    return components
   }
 
-  internal mutating func syncPathFromQueryItems() {
-    guard let url = $request.url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-      assertionFailure("Unable to create URL or URLComponents needed to set the query")
-      return
-    }
-    components.queryItems = _queryItems
-    guard let url = components.url else {
-      assertionFailure("Unable to create URL after settings queryItems")
+  private mutating func mutateViaComponents(_ block: (inout URLComponents) -> Void) {
+    var copy = components
+    block(&copy)
+    guard let url = copy.url else {
+      assertionFailure("Unable to create URL after mutating components \(copy)")
       return
     }
     $request.url = url
+  }
+
+  internal mutating func syncFromComponents() {
+    let components = self.components
+    _queryItems = components.queryItems
   }
 }
 
@@ -225,6 +248,18 @@ extension HTTPRequestData: Hashable {
 extension HTTPRequestData: CustomDebugStringConvertible {
   public var debugDescription: String {
     "[\(RequestSequence.number):\(identifier)] \(request.debugDescription)"
+  }
+}
+
+// MARK: - Logging Helpers
+
+extension HTTPRequestData {
+  public var prettyPrintedHeaders: String {
+    headerFields.debugDescription
+  }
+
+  public var prettyPrintedBody: String {
+    body?.prettyPrintedData ?? "No data"
   }
 }
 
@@ -290,5 +325,6 @@ extension String {
 extension URLRequest {
   public init?(http: HTTPRequestData) {
     self.init(httpRequest: http.request)
+    self.httpBody = http.body
   }
 }

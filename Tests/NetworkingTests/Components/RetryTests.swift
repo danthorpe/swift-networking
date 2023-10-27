@@ -216,3 +216,5 @@ final class RetryStrategyTests: XCTestCase {
 
   }
 }
+
+extension String: Error { }
