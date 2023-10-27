@@ -84,12 +84,14 @@ public struct HTTPRequestData: Sendable, Identifiable {
       queryItems?.first(where: { $0.name == key })?.value
     }
     set {
+      var copy = queryItems
       // Remove all to start with
-      queryItems?.removeAll(where: { $0.name == key })
+      copy?.removeAll(where: { $0.name == key })
       guard let newValue else { return }
       let encodedValue = newValue.addingPercentEncoding(withAllowedCharacters: queryItemsAllowedCharacters)
-      queryItems.append(URLQueryItem(name: key, value: encodedValue))
-      queryItems?.sort(by: { $0.name < $1.name })
+      copy.append(URLQueryItem(name: key, value: encodedValue))
+      copy?.sort(by: { $0.name < $1.name })
+      queryItems = copy
     }
   }
 

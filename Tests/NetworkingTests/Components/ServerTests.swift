@@ -1,4 +1,5 @@
 import AssertionExtras
+import CustomDump
 import Dependencies
 import Foundation
 import HTTPTypes
@@ -8,13 +9,10 @@ import os.log
 
 @testable import Networking
 
-final class ServerTests: XCTestCase {
+final class ServerTests: NetworkingTestCase {
 
   override func invokeTest() {
-    withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
+    withTestDependencies {
       super.invokeTest()
     }
   }
@@ -150,5 +148,22 @@ final class ServerTests: XCTestCase {
     XCTAssertEqual(sentRequestsHeaders, [
       HTTPFields([HTTPField(name: customFieldName, value: "custom-value")])
     ])
+  }
+
+  func test__set_query_items_allow_characters() async throws {
+    let reporter = TestReporter()
+
+    let allowedCharacters: CharacterSet = .urlQueryAllowed.subtracting(CharacterSet(charactersIn: "+"))
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(queryItemsAllowedCharacters: allowedCharacters)
+      .logged(using: Logger())
+
+    try await network.data(HTTPRequestData(path: "?message=hello+world"))
+    let sentRequestsURL = await reporter.requests.first?.url
+
+    XCTAssertNoDifference(sentRequestsURL, URL(static: "https://example.com/?message=hello%2Bworld"))
   }
 }
