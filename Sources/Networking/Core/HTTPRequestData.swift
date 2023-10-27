@@ -12,13 +12,6 @@ public struct HTTPRequestData: Sendable, Identifiable {
   public typealias ID = Tagged<Self, String>
   public let id: ID
   public var body: Data?
-  public var queryItems: [URLQueryItem]? {
-    get { _queryItems }
-    set {
-      _queryItems = newValue
-      syncPathFromQueryItems()
-    }
-  }
 
   fileprivate var _queryItems: [URLQueryItem]?
   @Sanitized fileprivate var request: HTTPRequest
@@ -43,11 +36,30 @@ public struct HTTPRequestData: Sendable, Identifiable {
     set { $request.authority = newValue }
   }
 
+  public var port: Int? {
+    components.port
+  }
+
   public var path: String {
     get { request.path ?? Defaults.path }
     set {
       $request.path = newValue
-      syncQueryItemsFromPath()
+
+      // Check to see if the new path included query items
+      if let newPathBasedQueryItems = components.queryItems {
+        _queryItems = newPathBasedQueryItems
+      } else {
+        let queryItems = _queryItems
+        mutateViaComponents { $0.queryItems = queryItems }
+      }
+    }
+  }
+
+  public var queryItems: [URLQueryItem]? {
+    get { _queryItems }
+    set {
+      _queryItems = newValue
+      mutateViaComponents { $0.percentEncodedQueryItems = newValue }
     }
   }
 
@@ -56,7 +68,15 @@ public struct HTTPRequestData: Sendable, Identifiable {
     set { $request.headerFields = newValue }
   }
 
-  /// Get/Set the first query parameter
+  public var url: URL? {
+    get { request.url }
+    set {
+      $request.url = newValue
+      syncFromComponents()
+    }
+  }
+
+  /// Get/Set the query items, will replace an existing value for the same name
   public subscript(
     dynamicMember key: String
   ) -> String? {
@@ -64,11 +84,14 @@ public struct HTTPRequestData: Sendable, Identifiable {
       queryItems?.first(where: { $0.name == key })?.value
     }
     set {
-      guard let newValue else {
-        queryItems?.removeAll(where: { $0.name == key })
-        return
-      }
-      queryItems.append(URLQueryItem(name: key, value: newValue))
+      var copy = queryItems
+      // Remove all to start with
+      copy?.removeAll(where: { $0.name == key })
+      guard let newValue else { return }
+      let encodedValue = newValue.addingPercentEncoding(withAllowedCharacters: queryItemsAllowedCharacters)
+      copy.append(URLQueryItem(name: key, value: encodedValue))
+      copy?.sort(by: { $0.name < $1.name })
+      queryItems = copy
     }
   }
 
@@ -91,6 +114,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
         path: path,
         headerFields: headerFields
       ))
+    syncFromComponents()
   }
 
   public init(
@@ -146,25 +170,38 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public static let path = "/"
   }
 
-  internal mutating func syncQueryItemsFromPath() {
-    guard let url = $request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+  private var components: URLComponents {
+    guard let url = request.url, let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
       assertionFailure("Unable to create URL or URLComponents needed to set the query")
-      return
+      return URLComponents()
     }
-    _queryItems = components.queryItems
+    return components
   }
 
-  internal mutating func syncPathFromQueryItems() {
-    guard let url = $request.url, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
-      assertionFailure("Unable to create URL or URLComponents needed to set the query")
-      return
-    }
-    components.queryItems = _queryItems
-    guard let url = components.url else {
-      assertionFailure("Unable to create URL after settings queryItems")
+  private mutating func mutateViaComponents(_ block: (inout URLComponents) -> Void) {
+    var copy = components
+    block(&copy)
+    guard let url = copy.url else {
+      assertionFailure("Unable to create URL after mutating components \(copy)")
       return
     }
     $request.url = url
+  }
+
+  internal mutating func syncFromComponents() {
+    let components = self.components
+    _queryItems = components.percentEncodedQueryItems
+  }
+
+  internal mutating func percentEncodeQueryItems() {
+    let allowedCharacters = queryItemsAllowedCharacters
+    let encodedQueryItems = components.queryItems?.map {
+      URLQueryItem(name: $0.name, value: $0.value?.addingPercentEncoding(withAllowedCharacters: allowedCharacters))
+    }
+    _queryItems = encodedQueryItems
+    mutateViaComponents {
+      $0.percentEncodedQueryItems = encodedQueryItems
+    }
   }
 }
 
@@ -225,6 +262,18 @@ extension HTTPRequestData: Hashable {
 extension HTTPRequestData: CustomDebugStringConvertible {
   public var debugDescription: String {
     "[\(RequestSequence.number):\(identifier)] \(request.debugDescription)"
+  }
+}
+
+// MARK: - Logging Helpers
+
+extension HTTPRequestData {
+  public var prettyPrintedHeaders: String {
+    headerFields.debugDescription
+  }
+
+  public var prettyPrintedBody: String {
+    body?.prettyPrintedData ?? "No data"
   }
 }
 
@@ -290,5 +339,6 @@ extension String {
 extension URLRequest {
   public init?(http: HTTPRequestData) {
     self.init(httpRequest: http.request)
+    self.httpBody = http.body
   }
 }

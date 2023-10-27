@@ -1,14 +1,7 @@
 import Clocks
 import Foundation
 import HTTPTypes
-import Networking
-
-public struct StubbedError: Hashable, Error {
-  public let request: HTTPRequestData
-  public init(request: HTTPRequestData) {
-    self.request = request
-  }
-}
+@testable import Networking
 
 public struct StubbedResponseStream: Equatable, Sendable {
   public enum Configuration: Equatable, Sendable {
@@ -51,7 +44,7 @@ public struct StubbedResponseStream: Equatable, Sendable {
             bytes.receiveBytes(count: bytesReceived)
             continuation.yield(.progress(bytes))
           }
-          continuation.finish(throwing: StubbedError(request: request))
+          continuation.finish(throwing: StubbedNetworkError(request: request))
 
         case let .uniform(steps: steps, interval: interval):
           let bytesReceived = bytes.expected / Int64(steps)
@@ -68,7 +61,11 @@ public struct StubbedResponseStream: Equatable, Sendable {
   }
 
   public func expectedResponse(_ request: HTTPRequestData) -> HTTPResponseData {
-    HTTPResponseData(request: request, data: data, response: response)
+    guard
+      let url = request.url,
+      let httpUrlResponse = HTTPURLResponse(httpResponse: response, url: url)
+    else { fatalError("Unable to create HTTPURLResponse from \(response) and \(String(describing: request.url))") }
+    return HTTPResponseData(request: request, data: data, httpUrlResponse: httpUrlResponse, httpResponse: response)
   }
 }
 
