@@ -19,14 +19,32 @@ final class ServerTests: XCTestCase {
     }
   }
 
-  func test__set_authority_on_all_requests() async throws {
+  func test__set_scheme() async throws {
     let reporter = TestReporter()
     var headerFields = HTTPFields()
     headerFields[.contentType] = "application/json"
     headerFields[.cookie] = "cookie"
 
     let network = TerminalNetworkingComponent()
-      .mocked(HTTPRequestData(authority: "sample.com"), stub: .ok())
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(scheme: "http")
+      .logged(using: Logger())
+
+    try await network.data(HTTPRequestData())
+
+    let sentRequests = await reporter.requests
+    XCTAssertEqual(sentRequests.map(\.scheme), ["http"])
+  }
+
+  func test__set_authority() async throws {
+    let reporter = TestReporter()
+    var headerFields = HTTPFields()
+    headerFields[.contentType] = "application/json"
+    headerFields[.cookie] = "cookie"
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
       .reported(by: reporter)
       .server(authority: "sample.com")
       .logged(using: Logger())
@@ -37,14 +55,34 @@ final class ServerTests: XCTestCase {
     XCTAssertEqual(sentRequests.map(\.authority), ["sample.com"])
   }
 
-  func test__set_path_prefix_on_all_requests() async throws {
+  func test__set_path() async throws {
     let reporter = TestReporter()
     var headerFields = HTTPFields()
     headerFields[.contentType] = "application/json"
     headerFields[.cookie] = "cookie"
 
     let network = TerminalNetworkingComponent()
-      .mocked(HTTPRequestData(authority: "sample.com", path: "/v1/hello"), stub: .ok())
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(path: "hello-world")
+      .server(authority: "sample.com")
+      .logged(using: Logger())
+
+    try await network.data(HTTPRequestData(path: "hello"))
+
+    let sentRequests = await reporter.requests
+    XCTAssertEqual(sentRequests.map(\.authority), ["sample.com"])
+    XCTAssertEqual(sentRequests.map(\.path), ["/hello-world"])
+  }
+
+  func test__set_path_prefix() async throws {
+    let reporter = TestReporter()
+    var headerFields = HTTPFields()
+    headerFields[.contentType] = "application/json"
+    headerFields[.cookie] = "cookie"
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
       .reported(by: reporter)
       .server(prefixPath: "v1")
       .server(authority: "sample.com")
@@ -57,14 +95,14 @@ final class ServerTests: XCTestCase {
     XCTAssertEqual(sentRequests.map(\.path), ["/v1/hello"])
   }
 
-  func test__set_path_prefix_on_all_requests__with_empty_path() async throws {
+  func test__set_path_prefix__with_empty_path() async throws {
     let reporter = TestReporter()
     var headerFields = HTTPFields()
     headerFields[.contentType] = "application/json"
     headerFields[.cookie] = "cookie"
 
     let network = TerminalNetworkingComponent()
-      .mocked(HTTPRequestData(authority: "sample.com", path: "/v1"), stub: .ok())
+      .mocked(.ok(), check: { _ in true })
       .reported(by: reporter)
       .server(prefixPath: "v1")
       .server(authority: "sample.com")
@@ -77,23 +115,40 @@ final class ServerTests: XCTestCase {
     XCTAssertEqual(sentRequests.map(\.path), ["/v1"])
   }
 
-  func test__set_default_headers() async throws {
+  func test__set_headers() async throws {
     let reporter = TestReporter()
-    var headerFields = HTTPFields()
-    headerFields[.contentType] = "application/json"
 
     let network = TerminalNetworkingComponent()
-      .mocked(HTTPRequestData(authority: "sample.com", headerFields: headerFields), stub: .ok())
+      .mocked(.ok(), check: { _ in true })
       .reported(by: reporter)
-      .server(headerField: .contentType, value: "application/json")
-      .server(authority: "sample.com")
+      .server(headerField: .contentType, "application/json")
       .logged(using: Logger())
 
     try await network.data(HTTPRequestData())
 
-    let sentRequests = await reporter.requests
-    XCTAssertEqual(sentRequests.map(\.authority), ["sample.com"])
+    let sentRequestsHeaders = await reporter.requests.map(\.headerFields)
     XCTAssertEqual(
-      sentRequests.map(\.headerFields).compactMap { $0[.contentType] }, ["application/json"])
+      sentRequestsHeaders.compactMap { $0[.contentType] },
+      ["application/json"]
+    )
+  }
+
+  func test__set_custom_headers() async throws {
+    let reporter = TestReporter()
+
+    let customFieldName = try XCTUnwrap(HTTPField.Name("X-CUSTOM-HEADER"))
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(customHeaderField: customFieldName.rawName, "custom-value")
+      .logged(using: Logger())
+
+    try await network.data(HTTPRequestData())
+    let sentRequestsHeaders = await reporter.requests.map(\.headerFields)
+
+    XCTAssertEqual(sentRequestsHeaders, [
+      HTTPFields([HTTPField(name: customFieldName, value: "custom-value")])
+    ])
   }
 }
