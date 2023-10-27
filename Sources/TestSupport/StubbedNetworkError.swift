@@ -36,7 +36,11 @@ public struct StubbedNetworkError: Error {
     self.init(request: request, data: data, response: httpUrlResponse)
   }
 
-  public init(url: URL = URL(static: "example.com"), data: Data = Data(), status: HTTPResponse.Status = .badGateway) {
+  public init(
+    url: URL = URL(static: "example.com"),
+    data: Data = Data(),
+    status: HTTPResponse.Status = .badGateway
+  ) {
     var request = HTTPRequestData()
     request.url = url
     self.init(request: request, data: data, status: status)

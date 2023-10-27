@@ -1,9 +1,5 @@
 extension Error {
 
-  private var asNetworkingError: (any NetworkingError)? {
-    (self as? any NetworkingError)
-  }
-
   public var httpRequest: HTTPRequestData? {
     asNetworkingError?.request
   }
@@ -14,5 +10,9 @@ extension Error {
 
   public var httpBodyStringRepresentation: String? {
     asNetworkingError?.bodyStringRepresentation
+  }
+
+  private var asNetworkingError: (any NetworkingError)? {
+    (self as? any NetworkingError)
   }
 }
