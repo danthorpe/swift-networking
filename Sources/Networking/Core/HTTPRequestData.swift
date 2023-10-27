@@ -59,7 +59,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
     get { _queryItems }
     set {
       _queryItems = newValue
-      mutateViaComponents { $0.queryItems = newValue }
+      mutateViaComponents { $0.percentEncodedQueryItems = newValue }
     }
   }
 
@@ -76,7 +76,7 @@ public struct HTTPRequestData: Sendable, Identifiable {
     }
   }
 
-  /// Get/Set the first query parameter
+  /// Get/Set the query items, will replace an existing value for the same name
   public subscript(
     dynamicMember key: String
   ) -> String? {
@@ -84,11 +84,12 @@ public struct HTTPRequestData: Sendable, Identifiable {
       queryItems?.first(where: { $0.name == key })?.value
     }
     set {
-      guard let newValue else {
-        queryItems?.removeAll(where: { $0.name == key })
-        return
-      }
-      queryItems.append(URLQueryItem(name: key, value: newValue))
+      // Remove all to start with
+      queryItems?.removeAll(where: { $0.name == key })
+      guard let newValue else { return }
+      let encodedValue = newValue.addingPercentEncoding(withAllowedCharacters: queryItemsAllowedCharacters)
+      queryItems.append(URLQueryItem(name: key, value: encodedValue))
+      queryItems?.sort(by: { $0.name < $1.name })
     }
   }
 
@@ -187,7 +188,18 @@ public struct HTTPRequestData: Sendable, Identifiable {
 
   internal mutating func syncFromComponents() {
     let components = self.components
-    _queryItems = components.queryItems
+    _queryItems = components.percentEncodedQueryItems
+  }
+
+  internal mutating func percentEncodeQueryItems() {
+    let allowedCharacters = queryItemsAllowedCharacters
+    let encodedQueryItems = components.queryItems?.map {
+      URLQueryItem(name: $0.name, value: $0.value?.addingPercentEncoding(withAllowedCharacters: allowedCharacters))
+    }
+    _queryItems = encodedQueryItems
+    mutateViaComponents {
+      $0.percentEncodedQueryItems = encodedQueryItems
+    }
   }
 }
 

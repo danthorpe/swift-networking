@@ -22,7 +22,6 @@ final class HTTPResponseDataTests: NetworkingTestCase {
   }
 
   func test__failed_result_with_networking_error() {
-    let data = "Hello World".data(using: .utf8) ?? Data()
     var request = HTTPRequestData()
     request.url = URL(static: "https://example.com/failure")
     let networkingError = StubbedNetworkError(
