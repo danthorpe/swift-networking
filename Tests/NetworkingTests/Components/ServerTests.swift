@@ -51,6 +51,8 @@ final class ServerTests: NetworkingTestCase {
 
     let sentRequests = await reporter.requests
     XCTAssertEqual(sentRequests.map(\.authority), ["sample.com"])
+
+    XCTAssertEqual(network.authority, "sample.com")
   }
 
   func test__set_path() async throws {

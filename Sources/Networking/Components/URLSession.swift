@@ -4,7 +4,8 @@ import os.log
 
 extension URLSession: NetworkingComponent {
   public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
-    ResponseStream<HTTPResponseData> { continuation in
+    let request = resolve(request)
+    return ResponseStream<HTTPResponseData> { continuation in
       Task {
         @NetworkEnvironment(\.instrument) var instrument
         guard let urlRequest = URLRequest(http: request) else {

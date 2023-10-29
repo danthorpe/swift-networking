@@ -15,7 +15,8 @@ public struct TerminalNetworkingComponent: NetworkingComponent {
     self.isFailingTerminal = isFailingTerminal
   }
   public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
-    ResponseStream { continuation in
+    let request = resolve(request)
+    return ResponseStream { continuation in
       if isFailingTerminal {
         continuation.finish(throwing: TestFailure(request: request))
       } else {
