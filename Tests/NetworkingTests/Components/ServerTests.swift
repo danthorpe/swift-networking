@@ -150,6 +150,20 @@ final class ServerTests: NetworkingTestCase {
     ])
   }
 
+  func test__set_custom_header__invalid_header_name() async throws {
+    let reporter = TestReporter()
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(customHeaderField: "", "value-for-invalid-header-name")
+      .logged(using: Logger())
+
+    try await network.data(HTTPRequestData())
+    let sentRequestsHeaders = await reporter.requests.map(\.headerFields)
+    XCTAssertEqual(sentRequestsHeaders, [HTTPFields() /* expect empty fields */])
+  }
+
   func test__set_query_items_allow_characters() async throws {
     let reporter = TestReporter()
 
