@@ -6,7 +6,7 @@ import XCTest
 
 @testable import Networking
 
-final class HTTPRequestDataTests: XCTestCase {
+final class HTTPRequestDataTests: XCTestCase { // swiftlint:disable:this type_body_length
 
   var request: HTTPRequestData! {
     didSet {
