@@ -25,11 +25,9 @@ extension NetworkingComponent {
 
 struct MutateRequest: NetworkingModifier {
   let mutate: (inout HTTPRequestData) -> Void
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
-    HTTPResponseData
-  > {
+  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     var copy = request
     mutate(&copy)
-    return upstream.send(copy)
+    return copy
   }
 }
