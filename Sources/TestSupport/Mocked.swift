@@ -27,6 +27,10 @@ struct Mocked: NetworkingModifier {
     self.stub = stubbedResponse
   }
 
+  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+    request // Note: We actually do not want to resolve the request to be mocked
+  }
+
   func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
@@ -54,6 +58,10 @@ extension NetworkingComponent {
 
 struct CustomMocked: NetworkingModifier {
   let block: @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<HTTPResponseData>
+
+  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+    request // Note: We actually do not want to resolve the request to be mocked
+  }
 
   func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
