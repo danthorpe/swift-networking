@@ -46,6 +46,7 @@ Networking <+ 📦 {
   $0.with = [
     .algorithms,
     .asyncAlgorithms,
+    .cache,
     .concurrencyExtras,
     .httpTypes,
     .httpTypesFoundation,
@@ -114,6 +115,9 @@ extension Target.Dependency {
   )
   static let asyncAlgorithms: Target.Dependency = .product(
     name: "AsyncAlgorithms", package: "swift-async-algorithms"
+  )
+  static let cache: Target.Dependency = .product(
+    name: "Cache", package: "danthorpe-utilities"
   )
   static let concurrencyExtras: Target.Dependency = .product(
     name: "ConcurrencyExtras", package: "swift-concurrency-extras"
