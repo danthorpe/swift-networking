@@ -6,7 +6,7 @@ import Helpers
 
 @dynamicMemberLookup
 public struct HTTPResponseData: Sendable {
-  public let request: HTTPRequestData
+  public private(set) var request: HTTPRequestData
   public let data: Data
   private let rawValue: HTTPURLResponse
   private let http: HTTPResponse
@@ -38,6 +38,10 @@ public struct HTTPResponseData: Sendable {
       throw StackError.invalidURLResponse(request, data, urlResponse)
     }
     self.init(request: request, data: data, httpUrlResponse: httpUrlResponse, httpResponse: httpResponse)
+  }
+
+  mutating func set(request newRequest: HTTPRequestData) {
+    self.request = newRequest
   }
 
   func decode<Body, Decoder: TopLevelDecoder, Payload: Decodable>(
