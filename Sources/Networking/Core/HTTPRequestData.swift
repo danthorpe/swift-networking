@@ -261,13 +261,17 @@ extension HTTPRequestData: Hashable {
 
 extension HTTPRequestData: CustomDebugStringConvertible {
   public var debugDescription: String {
-    "[\(RequestSequence.number):\(identifier)] \(request.debugDescription)"
+    "[\(prettyPrintedIdentifier)] \(request.debugDescription)"
   }
 }
 
 // MARK: - Logging Helpers
 
 extension HTTPRequestData {
+  public var prettyPrintedIdentifier: String {
+    "\(RequestSequence.number):\(identifier)"
+  }
+
   public var prettyPrintedHeaders: String {
     headerFields.debugDescription
   }
