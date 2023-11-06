@@ -23,6 +23,7 @@ extension HTTPRequestData {
 
 private struct Cached: NetworkingModifier {
   var cache: Cache<HTTPRequestData, HTTPResponseData>
+  @NetworkEnvironment(\.logger) var logger
   func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     guard case let .always(timeToLive) = request.cacheOption else {
       return upstream.send(request)
@@ -36,7 +37,8 @@ private struct Cached: NetworkingModifier {
         copy.cachedMetadata = CachedMetadata(
           originalRequest: cachedValue.request
         )
-        continuation.yield(.value(copy, BytesReceived()))
+        logger?.debug("🎯 Cached from \(cachedValue.request.prettyPrintedIdentifier)")
+        continuation.yield(.value(copy, BytesReceived(data: cachedValue.data)))
         continuation.finish()
         return
       }
@@ -74,6 +76,10 @@ extension HTTPResponseData {
 
   public var isCached: Bool {
     nil != cachedMetadata
+  }
+
+  public var isNotCached: Bool {
+    false == isCached
   }
 
   public var cachedOriginalRequest: HTTPRequestData? {
