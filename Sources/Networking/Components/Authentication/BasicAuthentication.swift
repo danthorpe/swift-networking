@@ -17,11 +17,17 @@ public struct BasicCredentials: Hashable, Sendable, AuthenticatingCredentials, H
   }
 
   public func apply(to request: HTTPRequestData) -> HTTPRequestData {
+    @NetworkEnvironment(\.logger) var logger
     var copy = request
     let joined = user + ":" + password
     let data = Data(joined.utf8)
     let encoded = data.base64EncodedString()
-    copy.headerFields[.authorization] = "Basic \(encoded)"
+    let description = "Basic \(encoded)"
+    logger?.info("""
+        🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
+        Applying basic credentials: \(description, privacy: .private)
+        """)
+    copy.headerFields[.authorization] = description
     return copy
   }
 }
@@ -29,7 +35,10 @@ public struct BasicCredentials: Hashable, Sendable, AuthenticatingCredentials, H
 extension HTTPRequestData {
   public var basicCredentials: BasicCredentials? {
     get { self[option: BasicCredentials.self] }
-    set { self[option: BasicCredentials.self] = newValue }
+    set {
+      self[option: BasicCredentials.self] = newValue
+      self.authenticationMethod = .basic
+    }
   }
 }
 

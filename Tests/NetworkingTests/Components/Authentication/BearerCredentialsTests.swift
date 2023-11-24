@@ -18,5 +18,14 @@ final class BearerCredentialsTests: XCTestCase {
     var request = HTTPRequestData(id: "1")
     request.bearerCredentials = BearerCredentials(token: "super!$3cret")
     XCTAssertEqual(request.bearerCredentials?.token, "super!$3cret")
+    XCTAssertEqual(request.authenticationMethod, .bearer)
+  }
+
+  func test__automatically_apply_credentials() {
+    var original = HTTPRequestData(id: "1")
+    original.bearerCredentials = BearerCredentials(token: "super!$3cret")
+    let request = original.applyAuthenticationCredentials()
+    XCTAssertEqual(request.authenticationMethod, .bearer)
+    XCTAssertEqual(request.headerFields[.authorization], "Bearer super!$3cret")
   }
 }
