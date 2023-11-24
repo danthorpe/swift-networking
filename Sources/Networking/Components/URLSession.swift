@@ -5,6 +5,7 @@ import os.log
 extension URLSession: NetworkingComponent {
   public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     let request = resolve(request)
+      .applyAuthenticationCredentials()
     return ResponseStream<HTTPResponseData> { continuation in
       Task {
         @NetworkEnvironment(\.instrument) var instrument
