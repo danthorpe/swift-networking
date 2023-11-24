@@ -18,7 +18,7 @@ extension NetworkingComponent {
       Logged(
         onStart: onStart ?? {
           logger.info("↗️ \($0.debugDescription)")
-          logger.debug("\($0.prettyPrintedHeaders)")
+          logger.debug("\($0.prettyPrintedHeaders, privacy: .private)")
           logger.debug("\($0.prettyPrintedBody)")
         },
         onFailure: onFailure ?? { request, error in
@@ -27,7 +27,7 @@ extension NetworkingComponent {
         onSuccess: onSuccess ?? { request, response, _ in
           logger.info("🆗 \(response.debugDescription)")
           if response.isNotCached {
-            logger.debug("\(response.prettyPrintedHeaders)")
+            logger.debug("\(response.prettyPrintedHeaders, privacy: .private)")
             logger.debug("\(response.prettyPrintedBody)")
           }
           logger.info("↙️ \(request.debugDescription)")

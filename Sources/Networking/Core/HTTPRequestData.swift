@@ -273,7 +273,7 @@ extension HTTPRequestData {
   }
 
   public var prettyPrintedHeaders: String {
-    headerFields.debugDescription
+    headerFields.prettyPrintedDescription(title: "📮 Request Headers")
   }
 
   public var prettyPrintedBody: String {
