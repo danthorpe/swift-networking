@@ -1,5 +1,6 @@
 import Dependencies
 import os.log
+import os.signpost
 
 public typealias LogStart = @Sendable (HTTPRequestData) async -> Void
 public typealias LogFailure = @Sendable (HTTPRequestData, Error) async -> Void
@@ -10,12 +11,15 @@ extension NetworkingComponent {
 
   public func logged(
     using logger: Logger,
+    signposter: OSSignposter? = nil,
     onStart: LogStart? = nil,
     onFailure: LogFailure? = nil,
     onSuccess: LogSuccess? = nil
   ) -> some NetworkingComponent {
-    modified(
+    let signposter = signposter ?? OSSignposter(logger: logger)
+    return modified(
       Logged(
+        signposter: signposter,
         onStart: onStart ?? {
           logger.info("↗️ \($0.debugDescription)")
           logger.debug("\($0.prettyPrintedHeaders, privacy: .private)")
@@ -34,11 +38,12 @@ extension NetworkingComponent {
         }
       )
     )
+    .networkEnvironment(\.signposter) { signposter }
     .networkEnvironment(\.logger) { logger }
   }
 }
 
-extension Logger: NetworkEnvironmentKey {}
+extension Logger: NetworkEnvironmentKey { }
 
 extension NetworkEnvironmentValues {
   public var logger: Logger? {
@@ -47,11 +52,21 @@ extension NetworkEnvironmentValues {
   }
 }
 
+extension OSSignposter: NetworkEnvironmentKey { }
+
+extension NetworkEnvironmentValues {
+  public var signposter: OSSignposter? {
+    get { self[OSSignposter.self] }
+    set { self[OSSignposter.self] = newValue }
+  }
+}
+
 struct Logged: NetworkingModifier {
   typealias OnStart = LogStart
   typealias OnFailure = LogFailure
   typealias OnSuccess = LogSuccess
 
+  let signposter: OSSignposter
   let onStart: OnStart
   let onFailure: OnFailure
   let onSuccess: OnSuccess
@@ -61,6 +76,11 @@ struct Logged: NetworkingModifier {
   > {
     ResponseStream<HTTPResponseData> { continuation in
       Task {
+        let id = signposter.makeSignpostID()
+        let state = signposter.beginInterval("Start Network Request", id: id, "\(request.debugDescription)")
+        defer {
+          signposter.endInterval("Start Network Request", state)
+        }
         await onStart(request)
         do {
           for try await element in upstream.send(request) {
@@ -69,12 +89,19 @@ struct Logged: NetworkingModifier {
             }
             continuation.yield(element)
           }
+          signposter.emitEvent("End Network Request", id: id, "Success")
           continuation.finish()
         } catch {
           await onFailure(request, error)
+          signposter.emitEvent("End Network Request", id: id, "Failure")
           continuation.finish(throwing: error)
         }
       }
     }
   }
+}
+
+struct SignpostIntervalData {
+  let id: OSSignpostID
+  let state: OSSignpostIntervalState
 }
