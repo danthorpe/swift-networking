@@ -20,7 +20,7 @@ final class CachedTests: NetworkingTestCase {
   func test__basics() async throws {
     let reporter = TestReporter()
     let request = HTTPRequestData(id: "1", path: "message")
-    
+
     let data = try XCTUnwrap("Hello".data(using: .utf8))
     let cache = Cache<HTTPRequestData, HTTPResponseData>(limit: 3)
     let network = TerminalNetworkingComponent()

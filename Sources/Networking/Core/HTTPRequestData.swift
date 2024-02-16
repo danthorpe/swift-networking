@@ -88,8 +88,9 @@ public struct HTTPRequestData: Sendable, Identifiable {
       // Remove all to start with
       copy?.removeAll(where: { $0.name == key })
       guard let newValue else { return }
-      let encodedValue = newValue.addingPercentEncoding(withAllowedCharacters: queryItemsAllowedCharacters)
-      copy.append(URLQueryItem(name: key, value: encodedValue))
+      let queryItem = URLQueryItem(name: key, value: newValue)
+        .addingPercentEncoding(withAllowedCharacters: _queryItemsAllowedCharacters)
+      copy.append(queryItem)
       copy?.sort(by: { $0.name < $1.name })
       queryItems = copy
     }
@@ -168,6 +169,12 @@ public struct HTTPRequestData: Sendable, Identifiable {
     public static let scheme = "https"
     public static let authority = "example.com"
     public static let path = "/"
+    public static let queryItemsAllowedCharacters = CharacterSet.urlQueryAllowed
+      .subtracting(CharacterSet(charactersIn: "&="))
+  }
+
+  private var _queryItemsAllowedCharacters: CharacterSet {
+    queryItemsAllowedCharacters.intersection(Defaults.queryItemsAllowedCharacters)
   }
 
   private var components: URLComponents {
@@ -194,9 +201,8 @@ public struct HTTPRequestData: Sendable, Identifiable {
   }
 
   internal mutating func percentEncodeQueryItems() {
-    let allowedCharacters = queryItemsAllowedCharacters
     let encodedQueryItems = components.queryItems?.map {
-      URLQueryItem(name: $0.name, value: $0.value?.addingPercentEncoding(withAllowedCharacters: allowedCharacters))
+      $0.addingPercentEncoding(withAllowedCharacters: _queryItemsAllowedCharacters)
     }
     _queryItems = encodedQueryItems
     mutateViaComponents {
@@ -344,5 +350,14 @@ extension URLRequest {
   public init?(http: HTTPRequestData) {
     self.init(httpRequest: http.request)
     self.httpBody = http.body
+  }
+}
+
+extension URLQueryItem {
+  func addingPercentEncoding(withAllowedCharacters characters: CharacterSet) -> URLQueryItem {
+    URLQueryItem(
+      name: name.addingPercentEncoding(withAllowedCharacters: characters) ?? name,
+      value: value?.addingPercentEncoding(withAllowedCharacters: characters)
+    )
   }
 }

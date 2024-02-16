@@ -181,6 +181,13 @@ final class HTTPRequestDataTests: XCTestCase { // swiftlint:disable:this type_bo
     check(url: "https://example.com/example?message=goodbye%2Bworld&sender=blob%40example.com")
   }
 
+  func test__default_query_encoding() throws {
+    request = HTTPRequestData(path: "example?message=hello+world")
+    request.keywords = "&#"
+    XCTAssertNoDifference(request.path, "/example?keywords=%26%23&message=hello+world")
+    check(url: "https://example.com/example?keywords=%26%23&message=hello+world")
+  }
+
   func test__set_url() throws {
     request = HTTPRequestData()
     check(url: "https://example.com/")
