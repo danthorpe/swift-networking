@@ -5,13 +5,13 @@ import Foundation
 
 extension AsyncSequence {
   public typealias ProcessElement = @Sendable (Element) async -> Void
-  public typealias ProcessError = @Sendable (Error) async -> Void
+  public typealias TransformError = @Sendable (Error) async -> Error?
   public typealias OnTermination = @Sendable () async -> Void
 
   public func redirect(
     into continuation: AsyncThrowingStream<Element, Error>.Continuation,
     onElement processElement: ProcessElement? = nil,
-    onError processError: ProcessError? = nil,
+    mapError transformError: TransformError? = nil,
     onTermination: OnTermination? = nil
   ) async {
     do {
@@ -22,8 +22,13 @@ extension AsyncSequence {
       continuation.finish()
       await onTermination?()
     } catch {
-      await processError?(error)
-      continuation.finish(throwing: error)
+      if let transform = transformError {
+        if let transformedError = await transform(error) {
+          continuation.finish(throwing: transformedError)
+        }
+      } else {
+        continuation.finish(throwing: error)
+      }
       await onTermination?()
     }
   }

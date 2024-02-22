@@ -14,14 +14,17 @@ public struct StubbedNetworkError: Error {
     guard let httpResponse = response.httpResponse else {
       fatalError("Unable to create HTTPResponse from \(response)")
     }
-    self.init(StackError.statusCode(
-      HTTPResponseData(
-        request: request,
-        data: data,
-        httpUrlResponse: response,
-        httpResponse: httpResponse
+
+    self.init(
+      StackError(
+        statusCode: HTTPResponseData(
+          request: request,
+          data: data,
+          httpUrlResponse: response,
+          httpResponse: httpResponse
+        )
       )
-    ))
+    )
   }
 
   public init(request: HTTPRequestData, data: Data = Data(), status: HTTPResponse.Status = .badGateway) {

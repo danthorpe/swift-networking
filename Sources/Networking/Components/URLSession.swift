@@ -6,13 +6,16 @@ extension URLSession: NetworkingComponent {
   public func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     let request = resolve(request)
       .applyAuthenticationCredentials()
+
+    @NetworkEnvironment(\.instrument) var instrument
+
     return ResponseStream<HTTPResponseData> { continuation in
+      guard let urlRequest = URLRequest(http: request) else {
+        continuation.finish(throwing: StackError(createURLRequestFailed: request))
+        return
+      }
+
       Task {
-        @NetworkEnvironment(\.instrument) var instrument
-        guard let urlRequest = URLRequest(http: request) else {
-          continuation.finish(throwing: StackError.createURLRequestFailed(request))
-          return
-        }
         do {
           await send(urlRequest)
             .map { partial in
@@ -20,21 +23,24 @@ extension URLSession: NetworkingComponent {
                 try HTTPResponseData(request: request, data: data, urlResponse: response)
               }
             }
-            .eraseToThrowingStream()
             .redirect(
               into: continuation,
+              onElement: nil,
+              mapError: { error in
+                StackError(error, with: .request(request))
+              },
               onTermination: {
                 await instrument?.measureElapsedTime("URLSession")
-              })
+              }
+            )
         } catch {
-          await instrument?.measureElapsedTime("\(Self.self)")
-          continuation.finish(throwing: error)
+          continuation.finish(throwing: StackError(error, with: .request(request)))
         }
       }
     }
   }
 
-  @Sendable func send(_ request: URLRequest) -> ResponseStream<(Data, URLResponse)> {
+  func send(_ request: URLRequest) -> ResponseStream<(Data, URLResponse)> {
     ResponseStream<(Data, URLResponse)> { continuation in
       Task {
         do {
@@ -94,5 +100,17 @@ extension URLSession: NetworkingComponent {
         }
       }
     }
+  }
+}
+
+// MARK: - Errors
+
+extension StackError {
+  init(createURLRequestFailed request: HTTPRequestData) {
+    self.init(
+      info: .request(request),
+      kind: .createURLRequestFailed,
+      error: NoUnderlyingError()
+    )
   }
 }

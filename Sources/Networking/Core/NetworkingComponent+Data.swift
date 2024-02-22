@@ -20,7 +20,7 @@ extension NetworkingComponent {
         }
         .first(beforeTimeout: duration, using: clock())
     } catch is TimeoutError {
-      throw StackError.timeout(request)
+      throw StackError(timeout: request)
     }
   }
 
@@ -45,5 +45,18 @@ extension NetworkingComponent {
   ) async throws -> HTTPResponseData {
     try await data(
       request, progress: updateProgress, timeout: .seconds(request.requestTimeoutInSeconds))
+  }
+}
+
+// MARK: - Error Handling
+
+extension StackError {
+
+  init(timeout request: HTTPRequestData) {
+    self.init(
+      info: .request(request),
+      kind: .timeout,
+      error: NoUnderlyingError()
+    )
   }
 }
