@@ -22,10 +22,8 @@ extension AsyncSequence {
       continuation.finish()
       await onTermination?()
     } catch {
-      if let transform = transformError {
-        if let transformedError = await transform(error) {
-          continuation.finish(throwing: transformedError)
-        }
+      if let transform = transformError, let transformedError = await transform(error) {
+        continuation.finish(throwing: transformedError)
       } else {
         continuation.finish(throwing: error)
       }

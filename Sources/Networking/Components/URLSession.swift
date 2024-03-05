@@ -25,7 +25,6 @@ extension URLSession: NetworkingComponent {
             }
             .redirect(
               into: continuation,
-              onElement: nil,
               mapError: { error in
                 StackError(error, with: .request(request))
               },
