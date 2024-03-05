@@ -18,7 +18,7 @@ struct Numbered: NetworkingModifier {
     ResponseStream<HTTPResponseData> { continuation in
       Task {
         await RequestSequence.$number.withValue(sequence.next()) {
-          await upstream.send(request).redirect(into: continuation)
+          upstream.send(request).redirect(into: continuation)
         }
       }
     }

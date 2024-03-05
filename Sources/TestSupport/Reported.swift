@@ -24,12 +24,13 @@ struct Reported: NetworkingModifier {
     ResponseStream { continuation in
       Task {
         await reporter.didStart(request: request)
-        await upstream.send(request)
+        upstream.send(request)
           .redirect(
             into: continuation,
             onTermination: {
               await reporter.didFinish(request: request)
-            })
+            }
+          )
       }
     }
   }
