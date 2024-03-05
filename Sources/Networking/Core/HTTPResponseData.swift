@@ -35,7 +35,7 @@ public struct HTTPResponseData: Sendable {
       let httpUrlResponse = (urlResponse as? HTTPURLResponse),
       let httpResponse = httpUrlResponse.httpResponse
     else {
-      throw StackError.invalidURLResponse(request, data, urlResponse)
+      throw StackError(invalidURLResponse: urlResponse, request: request, data: data)
     }
     self.init(request: request, data: data, httpUrlResponse: httpUrlResponse, httpResponse: httpResponse)
   }
@@ -54,7 +54,7 @@ public struct HTTPResponseData: Sendable {
       let body = try transform(payload, self)
       return body
     } catch let error as DecodingError {
-      throw StackError.decodeResponse(self, error)
+      throw StackError(decodeResponse: self, error: error)
     }
   }
 }
@@ -182,4 +182,21 @@ private func ~= (lhs: HTTPURLResponse, rhs: HTTPURLResponse) -> Bool {
   && lhs.expectedContentLength == rhs.expectedContentLength
   && lhs.textEncodingName == rhs.textEncodingName
   && lhs.suggestedFilename == rhs.suggestedFilename
+}
+
+// MARK: - Error Handling
+
+extension StackError {
+
+  init(invalidURLResponse urlResponse: URLResponse?, request: HTTPRequestData, data: Data) {
+    self.init(
+      info: .request(request),
+      kind: .invalidURLResponse(data, urlResponse),
+      error: NoUnderlyingError()
+    )
+  }
+
+  init(decodeResponse response: HTTPResponseData, error: Error) {
+    self.init(info: .response(response), kind: .decodingResponse, error: error)
+  }
 }

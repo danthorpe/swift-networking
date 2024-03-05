@@ -1,57 +1,90 @@
 import Foundation
 import Helpers
 
-enum StackError: Error {
-  enum ProgrammingError: Equatable, Sendable {
-    // TBD
+package struct StackError: Error {
+  enum Info {
+    case request(HTTPRequestData)
+    case response(HTTPResponseData)
+  }
+  enum Kind {
+    case createURLRequestFailed
+    case decodingResponse
+    case invalidURLResponse(Data, URLResponse?)
+    case statusCode
+    case timeout
+    case unauthorized
+    case unknown
   }
 
-  case createURLRequestFailed(HTTPRequestData)
-  case decodeResponse(HTTPResponseData, Error)
-  case invalidURLResponse(HTTPRequestData, Data, URLResponse?)
-  case statusCode(HTTPResponseData)
-  case timeout(HTTPRequestData)
-  case unauthorized(HTTPResponseData)
+  let info: Info
+  let kind: Kind
+  let error: Error
 }
 
-extension StackError: NetworkingError {
-  var request: HTTPRequestData {
-    switch self {
-    case .createURLRequestFailed(let request), .invalidURLResponse(let request, _, _),
-      .timeout(let request):
-      return request
-    case .unauthorized(let response), .decodeResponse(let response, _), .statusCode(let response):
-      return response.request
-    }
+// MARK: - Init
+
+extension StackError {
+
+  init(request: HTTPRequestData, kind: Kind, error: Error = NoUnderlyingError()) {
+    self.init(info: .request(request), kind: kind, error: error)
   }
 
-  var response: HTTPResponseData? {
-    switch self {
-    case .createURLRequestFailed, .invalidURLResponse, .timeout:
-      return nil
-    case .unauthorized(let response), .decodeResponse(let response, _), .statusCode(let response):
-      return response
-    }
+  init(response: HTTPResponseData, kind: Kind, error: Error = NoUnderlyingError()) {
+    self.init(info: .response(response), kind: kind, error: error)
   }
+
+  init(_ error: Error, with info: Info) {
+    if let stackError = error as? StackError {
+      self = stackError
+    }
+    self.init(info: info, kind: .unknown, error: error)
+  }
+
+  struct NoUnderlyingError: Error, Equatable { }
 }
 
-extension StackError: Equatable {
-  static func == (lhs: StackError, rhs: StackError) -> Bool {
+// MARK: Conformances
+
+extension StackError.Info: Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool {
     switch (lhs, rhs) {
-    case let (.createURLRequestFailed(lhs), .createURLRequestFailed(rhs)):
+    case let (.request(lhs), .request(rhs)):
       return lhs == rhs
-    case let (.decodeResponse(lhs, lhsE), .decodeResponse(rhs, rhsE)):
-      return lhs == rhs && _isEqual(lhsE, rhsE)
-    case let (.invalidURLResponse(lhs, lhsD, lhsR), .invalidURLResponse(rhs, rhsD, rhsR)):
-      return lhs == rhs && _isEqual(lhsD, rhsD) && lhsR == rhsR
-    case let (.statusCode(lhs), .statusCode(rhs)):
-      return lhs == rhs
-    case let (.timeout(lhs), .timeout(rhs)):
-      return lhs == rhs
-    case let (.unauthorized(lhs), .unauthorized(rhs)):
+    case let (.response(lhs), .response(rhs)):
       return lhs == rhs
     default:
       return false
     }
   }
+}
+
+extension StackError.Kind: Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    switch (lhs, rhs) {
+    case (.createURLRequestFailed, .createURLRequestFailed),
+      (.decodingResponse, .decodingResponse),
+      (.statusCode, .statusCode),
+      (.timeout, .timeout),
+      (.unauthorized, .unauthorized),
+      (.unknown, .unknown):
+      return true
+    case let (.invalidURLResponse(lhsD, lhsR), .invalidURLResponse(rhsD, rhsR)):
+      return lhsD == rhsD && lhsR == rhsR
+    default:
+      return false
+    }
+  }
+}
+
+extension StackError: Equatable {
+  package static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.info == rhs.info && lhs.kind == rhs.kind && _isEqual(lhs.error, rhs.error)
+  }
+}
+
+// MARK: - Pattern Match
+
+func ~= (lhs: StackError.Kind, rhs: Error) -> Bool {
+  guard let stackError = rhs as? StackError else { return false }
+  return stackError.kind == lhs
 }

@@ -44,11 +44,14 @@ private struct Cached: NetworkingModifier {
       }
 
       await upstream.send(request)
-        .redirect(into: continuation, onElement: { element in
-          if !Task.isCancelled, case let .value(response, _) = element {
-            await cache.insert(response, forKey: request, cost: response.cacheCost, duration: timeToLive)
+        .redirect(
+          into: continuation,
+          onElement: { element in
+            if !Task.isCancelled, case let .value(response, _) = element {
+              await cache.insert(response, forKey: request, cost: response.cacheCost, duration: timeToLive)
+            }
           }
-        }, onError: nil, onTermination: nil)
+        )
     }
     return stream
   }

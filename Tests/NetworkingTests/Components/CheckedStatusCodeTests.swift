@@ -40,7 +40,7 @@ final class CheckedStatusCodeTests: XCTestCase {
     let (network, expectedResponse) = configureNetwork(for: .internalServerError)
     await XCTAssertThrowsError(
       try await network.data(expectedResponse.request),
-      matches: StackError.statusCode(expectedResponse)
+      matches: StackError(statusCode: expectedResponse)
     )
   }
 
@@ -48,7 +48,7 @@ final class CheckedStatusCodeTests: XCTestCase {
     let (network, expectedResponse) = configureNetwork(for: .unauthorized)
     await XCTAssertThrowsError(
       try await network.data(expectedResponse.request),
-      matches: StackError.unauthorized(expectedResponse)
+      matches: StackError(unauthorized: expectedResponse)
     )
   }
 }

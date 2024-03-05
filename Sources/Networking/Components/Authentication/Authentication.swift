@@ -46,12 +46,17 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
             continuation.yield(event)
           }
           continuation.finish()
-        } catch let StackError.unauthorized(response) {
+        } catch let error as NetworkingError {
+          guard let response = error.isUnauthorizedResponse else {
+            throw error
+          }
+
           let newRequest = try await refresh(
             unauthorized: &credentials,
             response: response,
             continuation: continuation
           )
+
           await upstream.send(newRequest).redirect(into: continuation)
         } catch {
           continuation.finish(throwing: error)
@@ -75,6 +80,8 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
     }
   }
 }
+
+// MARK: - Errors
 
 public enum AuthenticationError: Error {
   case fetchCredentialsFailed(HTTPRequestData, AuthenticationMethod, Error)

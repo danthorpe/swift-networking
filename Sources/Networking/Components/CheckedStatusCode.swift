@@ -22,9 +22,20 @@ struct CheckedStatusCode: NetworkingModifier {
     // Check for authentication issues
     switch response.status {
     case .unauthorized:
-      throw StackError.unauthorized(response)
+      throw StackError(unauthorized: response)
     default:
-      throw StackError.statusCode(response)
+      throw StackError(statusCode: response)
     }
+  }
+}
+
+// MARK: - Error Handling
+
+extension StackError {
+  init(unauthorized response: HTTPResponseData) {
+    self.init(response: response, kind: .unauthorized)
+  }
+  init(statusCode response: HTTPResponseData) {
+    self.init(response: response, kind: .statusCode)
   }
 }
