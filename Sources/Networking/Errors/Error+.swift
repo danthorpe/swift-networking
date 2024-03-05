@@ -1,5 +1,9 @@
 extension Error {
 
+  var asStackError: StackError? {
+    (self as? StackError)
+  }
+
   public var asNetworkingError: (any NetworkingError)? {
     (self as? any NetworkingError)
   }

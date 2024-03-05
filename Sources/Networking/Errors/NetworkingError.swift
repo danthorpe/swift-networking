@@ -5,6 +5,7 @@ public protocol NetworkingError: Error {
   var request: HTTPRequestData { get }
   var response: HTTPResponseData? { get }
 
+  var isNotConnectedToInternet: Bool { get }
   var requestDidTimeout: HTTPRequestData? { get }
   var isUnauthorizedResponse: HTTPResponseData? { get }
 }
@@ -23,6 +24,13 @@ extension NetworkingError {
     return String(decoding: response.data, as: UTF8.self)
   }
 
+  public var isNotConnectedToInternet: Bool {
+    guard let error = asStackError else {
+      return false
+    }
+    return error.isNotConnectedToInternet
+  }
+
   public var requestDidTimeout: HTTPRequestData? {
     if let response, response.status == .requestTimeout {
       return response.request
@@ -33,7 +41,7 @@ extension NetworkingError {
   }
 
   public var isUnauthorizedResponse: HTTPResponseData? {
-    if let response = (self as? StackError)?.isUnauthorizedResponse {
+    if let response = asStackError?.isUnauthorizedResponse {
       return response
     } else if let response, response.status == .unauthorized {
       return response
