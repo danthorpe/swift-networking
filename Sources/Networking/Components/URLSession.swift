@@ -15,27 +15,21 @@ extension URLSession: NetworkingComponent {
         return
       }
 
-      Task {
-        do {
-          await send(urlRequest)
-            .map { partial in
-              try partial.mapValue { data, response in
-                try HTTPResponseData(request: request, data: data, urlResponse: response)
-              }
-            }
-            .redirect(
-              into: continuation,
-              mapError: { error in
-                StackError(error, with: .request(request))
-              },
-              onTermination: {
-                await instrument?.measureElapsedTime("URLSession")
-              }
-            )
-        } catch {
-          continuation.finish(throwing: StackError(error, with: .request(request)))
+      send(urlRequest)
+        .map { partial in
+          try partial.mapValue { data, response in
+            try HTTPResponseData(request: request, data: data, urlResponse: response)
+          }
         }
-      }
+        .redirect(
+          into: continuation,
+          mapError: { error in
+            StackError(error, with: .request(request))
+          },
+          onTermination: {
+            await instrument?.measureElapsedTime("URLSession")
+          }
+        )
     }
   }
 

@@ -29,7 +29,7 @@ struct Delayed: NetworkingModifier {
           continuation.finish(throwing: error)
         }
 
-        await upstream.send(request).redirect(into: continuation)
+        upstream.send(request).redirect(into: continuation)
       }
     }
   }

@@ -40,7 +40,7 @@ struct Mocked: NetworkingModifier {
     return ResponseStream { continuation in
       Task {
         await instrument?.measureElapsedTime("Mocked")
-        await stub(request).redirect(into: continuation)
+        stub(request).redirect(into: continuation)
       }
     }
   }

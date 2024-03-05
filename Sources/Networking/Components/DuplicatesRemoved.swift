@@ -14,7 +14,7 @@ private struct DuplicatesRemoved: NetworkingModifier {
     ResponseStream { continuation in
       Task {
         let stream = await self.activeRequests.send(upstream: upstream, request: request)
-        await stream.redirect(
+        stream.redirect(
           into: continuation,
           onTermination: {
             if await activeRequests.shouldMeasureElapsedTime {
