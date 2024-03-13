@@ -15,7 +15,7 @@ It's philosophy is centered around the idea that at a high level clients send re
 This library makes use of URLSession, as it provides the _terminal component_ which is ultimately responsible for sending the request. Swift Networking abstracts this detail away, while also providing a lot more functionality than URLSession does.
 
 ## Deep Dive
-If we consider that when a client makes a network request, it is essentially a function: `(Request) async throws -> Response`. We can represent this through a protocol, called `NetworkingComponent`. We can provide a conformance to this protocol on `URLSession`, and use it make network requests. However, before the request is given to `URLSession` there is opportunity to transform it further, perhaps it needs to be modified, or we wish to collect metrics, or maybe even return the Response from another system.
+If we consider that when a client makes a network request, it is essentially a function: `(Request) async throws -> Response`, which can be represented through a protocol, called `NetworkingComponent`. We can provide a conformance to this protocol on `URLSession`, and use it make network requests. However, before the request is given to `URLSession` there is opportunity to transform it further, perhaps it needs to be modified, or we wish to collect metrics, or maybe even return the Response from another system.
 
 Taking this concept a bit further, we can consider a chain of components,
 
@@ -37,4 +37,17 @@ Each of the built-in components provide public extensions on `NetworkingComponen
 let network = URLSession.shared
   .removeDuplicates()
   .logged()
+```
+
+Updating our diagram from above, we can see that the network stack enables us to connect components together, feed in requests, and get responses out.
+
+```
+ ┌─────────┐                                                                     
+ │ Request │─ ─ ─▶┌────────────────────────────────────────────┐                 
+ └─────────┘      │               Network Stack                │       ┌────────┐
+                  │ ┌─────────┐───▶┌─────────┐───▶┌──────────┐ │       │        │
+                  │ │ Logged  │    │ De-dupe │    │URLSession│ │◀─ ─ ─▶│ Server │
+┌──────────┐      │ └─────────┘◀───└─────────┘◀───└──────────┘ │       │        │
+│ Response │◀ ─ ─ └────────────────────────────────────────────┘       └────────┘
+└──────────┘
 ```
