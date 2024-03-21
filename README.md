@@ -56,7 +56,7 @@ Updating our diagram from above, we can see that the network stack enables us to
 ## Built-in Components
 
 The library ships with the following built-in components.
-
+- `Authentication` Can we used to handle network authentication. This is probably the most complex component, and it's usage in an application requires a delegate conformance. Currently supported are Basic and Bearer authentication methods. Future enhancement will be to support OAuth etc. 
 - `Cached` Can be used to cache network responses in memory. A future enhancement would be to support different cache backend systems.
 - `CheckedStatusCode` This is a simple component to sanitise error handling to pick out some basic cases. Currently it is open for customisation, so it more useful as an internal component, but a future enhancement could allow it to be used for custom error handling.
 - `Delayed` Delay requests by a fixed `Duration`. This uses the Swift continuous clock, and it very testable. 
