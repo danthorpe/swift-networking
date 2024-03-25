@@ -1,7 +1,7 @@
 // swift-tools-version: 5.9
 import PackageDescription
 
-var package = Package(name: "danthorpe-networking")
+var package = Package(name: "swift-networking")
 
 // MARK: 💫 Package Customization
 
