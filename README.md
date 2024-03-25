@@ -11,13 +11,15 @@ Swift Networking, or `swift-networking`, is a library for building a flexible ne
 ## What is Swift Networking?
 Swift Networking is a Swift Package, which provides some core tools used to make HTTP network requests. 
 
-It's philosophy is centered around the idea that at a high level clients send requests, and await a response. This is effectively a transformation of data types. With this in-mind, the library provides components which can be composed together to perform this transformation. All of the built-in components are well tested, with test helpers to make it easy to test your own custom components.
+Its philosophy is centered around the idea that at a high level, clients send requests and await a response for each request. 
+
+This, like almost everything in programming, is a transformation of data types, and so lends itself to a functional programming style. With this in-mind, the library provides components which can be composed together to perform this transformation. All of the built-in components are well tested, with test helpers to make it easy to test your own custom components.
 
 ### Why not just use URLSession?
-This library makes use of URLSession, as it provides the _terminal component_ which is ultimately responsible for sending the request. Swift Networking abstracts this detail away, while also providing a lot more functionality than URLSession does.
+This library makes use of URLSession, as it provides the _terminal component_ which is ultimately responsible for sending the request. Swift Networking abstracts this detail away, while also providing a lot more convenience than URLSession. Furthermore, this library provides many useful building blocks which are not provided by URLSession alone.
 
 ## Deep Dive
-If we consider that when a client makes a network request, it is essentially a function: `(Request) async throws -> Response`, which can be represented through a protocol, called `NetworkingComponent`. We can provide a conformance to this protocol on `URLSession`, and use it make network requests. However, before the request is given to `URLSession` there is opportunity to transform it further, perhaps it needs to be modified, or we wish to collect metrics, or maybe even return the Response from another system.
+If we consider that when a client makes a network request, it is essentially a function: `(Request) async throws -> Response`, which can be represented through a protocol called `NetworkingComponent`. We can provide a conformance to this protocol on `URLSession`, and use it make network requests. However, before the request is given to `URLSession` there is opportunity to transform it further, perhaps it needs to be modified, or we wish to collect metrics, or maybe even return the Response from another system.
 
 Taking this concept a bit further, we can consider a chain of components,
 
@@ -76,9 +78,6 @@ extension NetworkClient: DependencyKey {
         let network = URLSession.shared
             .duplicatesRemoved()
             .automaticRetry()
-            .checkedStatusCode()
-            .numbered()
-            .instrument()
 
         return .init(network: {
             network
@@ -130,7 +129,7 @@ The library ships with the following built-in components.
 
 ## Making Requests
 
-The library provides structs called `HTTPRequestData` and `HTTPResponseData`, internally these make use of [Apple's](https://github.com/apple/swift-http-types) `HTTPRequest` and `HTTPResponse` value types.
+The library provides structs called `HTTPRequestData` and `HTTPResponseData`.  Internally these make use of [Apple's](https://github.com/apple/swift-http-types) `HTTPRequest` and `HTTPResponse` value types.
 
 These are the building blocks of the library, and are used to make requests with the stack, like this:
 
@@ -163,7 +162,7 @@ do {
 
 While this is fine, it's very low level and not recommended for most use-cases. Instead applications typically which to decode payload `Data` value into a specific `Coadable` type. This is where the `Request` type can be used.
 
-`Request` is a generic value with composes the `HTTPRequestData` value, along with the ability to decode `Data` into some `Body` type. If the desired `Body` type conforms to `Decodable` this is automatic, but full customization is supported. It's even possible to decode the data to an intermediate "data-transport-object" before converting that the desired `Body` for use as an application domain type.
+`Request` is a generic value which composes the `HTTPRequestData` value, along with the ability to decode `Data` into some `Body` type. If the desired `Body` type conforms to `Decodable` this is automatic, but full customization is supported. It's even possible to decode the data to a decodable intermediate "data-transport-object" before converting that the desired `Body` for use as an application domain type.
 
 ```swift
 // Access the network client
@@ -179,7 +178,7 @@ let request = Request<MyExpectedBody>(http: http) // This convenience uses defau
 let (value, response) = try await networkClient.value(request)
 ``` 
 
-While this work okay, it's a bit fiddly having to create seemingly two request values. Instead, it is recommended to use a constrained extension on the `Request` type.
+While this works okay, it's a bit fiddly having to create seemingly two request values. Instead, it is recommended to use a constrained extension on the `Request` type.
 
 ```swift
 extension Request where Body == MyExpectedBody {
@@ -213,7 +212,7 @@ request.greeting = "Hello World"
 print(request.debugDescription) // POST https://my-server.com/message?greeting=Hello%20World
 ```
 
-But of course, doing this for every request is not desirable, properties of the server should only be configured once, and this is why it is recommended to create an API Client instead of, or in addition to a Network Client.
+But of course, doing this for every request is not desirable, properties of the server should only be configured once, and this is why it is recommended to create an API Client instead of, or in addition to, a Network Client.
 
 Lets assume that we want to figure out the client's geographic location by using http://ipinfo.io/. This is a service which performs geographic information for an IP address. If your application needs to connect to multiple servers, such as 3rd party servers in addition to your own 1st party server, it is a good reason to have a single Network Client with multiple API Clients. In this example, we can create an IpInfo client,
 
@@ -245,11 +244,12 @@ extension DependencyValues {
 
 // And the Live Network Client (could be a separate module)
 
-import LiveNetwork
-import Networking
+import LiveNetwork // Lets assume we have a "live" network client as described above in this module
+import Networking // Import this library, swift-networking 
 
 extension IpInfoClient: DependencyKey {
   static let liveValue: Self = {
+    // Get the network client - to access the standard network stack
     @Dependency(\.networkClient) var client
 
     let network = client
