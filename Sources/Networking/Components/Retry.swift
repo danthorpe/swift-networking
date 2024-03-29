@@ -141,7 +141,7 @@ actor RetryData {
           continuation.finish(throwing: error)
         }
         // Send the request
-        await self.send(upstream: upstream, request: copy)
+        self.send(upstream: upstream, request: copy)
           .redirect(into: continuation)
       }
     }
