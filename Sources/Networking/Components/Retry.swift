@@ -3,6 +3,8 @@ import Foundation
 import Helpers
 
 extension NetworkingComponent {
+  /// Automatically retry when a request fails
+  /// - Returns: some ``NetworkingComponent``
   public func automaticRetry() -> some NetworkingComponent {
     modified(Retry())
   }
