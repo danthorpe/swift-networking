@@ -27,8 +27,8 @@ jobs:
           all_but_latest: true
           access_token: ${{ github.token }}
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout Package
+        uses: actions/checkout@v4
 
       - name: Cache SPM
         uses: actions/cache@v2
