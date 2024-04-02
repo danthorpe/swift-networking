@@ -5,13 +5,13 @@
 name: Docs
 
 on:
-release:
-  types:
-    - published
-push:
-  branches:
-    - main
-workflow_dispatch:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 concurrency:
   group: docs-${{ github.ref }}
