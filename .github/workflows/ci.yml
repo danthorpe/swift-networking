@@ -16,19 +16,16 @@ on:
 env:
   DEVELOPER_DIR: /Applications/Xcode_15.0.app/Contents/Developer
   
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: macos-13
     steps:
-      - name: Cancel Previous Runs
-        if: github.ref != 'refs/heads/main'
-        uses: styfle/cancel-workflow-action@0.10.0
-        with:
-          all_but_latest: true
-          access_token: ${{ github.token }}
-
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout Package
+        uses: actions/checkout@v4
 
       - name: Cache SPM
         uses: actions/cache@v2

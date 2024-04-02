@@ -43,7 +43,7 @@ private struct Cached: NetworkingModifier {
         return
       }
 
-      await upstream.send(request)
+      upstream.send(request)
         .redirect(
           into: continuation,
           onElement: { element in

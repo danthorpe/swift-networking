@@ -3,6 +3,8 @@ import Foundation
 import Helpers
 
 extension NetworkingComponent {
+  /// Automatically retry when a request fails
+  /// - Returns: some ``NetworkingComponent``
   public func automaticRetry() -> some NetworkingComponent {
     modified(Retry())
   }
@@ -141,7 +143,7 @@ actor RetryData {
           continuation.finish(throwing: error)
         }
         // Send the request
-        await self.send(upstream: upstream, request: copy)
+        self.send(upstream: upstream, request: copy)
           .redirect(into: continuation)
       }
     }

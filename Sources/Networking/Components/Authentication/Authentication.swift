@@ -57,7 +57,7 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
             continuation: continuation
           )
 
-          await upstream.send(newRequest).redirect(into: continuation)
+          upstream.send(newRequest).redirect(into: continuation)
         } catch {
           continuation.finish(throwing: error)
         }

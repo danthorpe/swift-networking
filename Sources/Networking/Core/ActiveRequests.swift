@@ -23,7 +23,7 @@ public actor ActiveRequests {
   ) -> SharedStream {
     let shared = ResponseStream<HTTPResponseData> { continuation in
       Task {
-        await stream.redirect(
+        stream.redirect(
           into: continuation,
           onTermination: { @Sendable in
             await self.removeStream(for: request)

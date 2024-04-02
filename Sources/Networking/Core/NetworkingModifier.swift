@@ -5,15 +5,28 @@ import Helpers
 /// Chain networking components by implementing `NetworkingModifier`
 ///
 /// Provide a public interface via an extension on `NetworkingComponent` which calls
-/// through to `modified(_ : some NetworkingModifier)`.
+/// through to ``NetworkingComponent/modified(_:)``.
 public protocol NetworkingModifier {
 
   /// Perform modifications to the input request
-  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData
+  func resolve(upstream: any NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData
 
   /// Perform some modification, before sending the request onto the upstread component, and
   /// doing any post-processing to the resultant stream
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
+  /// - Parameters:
+  ///   - upstream: the `NetworkingComponent` to propagate the request to.
+  ///   - request: the input ``HTTPRequestData`` request
+  /// - Returns: a ``ResponseStream<HTTPResponseData>``
+  func send(upstream: any NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
+}
+
+extension NetworkingComponent {
+  /// Modify the upstream networking component using a networking modifier.
+  /// - Parameter modifier: some ``NetworkingModifier`` value
+  /// - Returns: some `NetworkingComponent`
+  public func modified(_ modifier: some NetworkingModifier) -> some NetworkingComponent {
+    Modified(upstream: self, modifier: modifier)
+  }
 }
 
 extension NetworkingModifier {
@@ -23,12 +36,6 @@ extension NetworkingModifier {
 
   public func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     upstream.send(request)
-  }
-}
-
-extension NetworkingComponent {
-  public func modified(_ modifier: some NetworkingModifier) -> some NetworkingComponent {
-    Modified(upstream: self, modifier: modifier)
   }
 }
 
