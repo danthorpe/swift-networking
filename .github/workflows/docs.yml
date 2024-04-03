@@ -9,6 +9,8 @@ on:
     types:
       - published
   push:
+    paths:
+      - '.github/workflows/docs.yml'    
     branches:
       - main
   workflow_dispatch:
