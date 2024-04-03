@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 extension NetworkingComponent {
-  
+
   /// Make a request decoding the raw Data into the expected `Body` type.
   /// - Parameter request: ``Request`` which is generic over some `Body`
   /// - Returns: a tuple of the body, and attendant ``HTTPResponseData``
@@ -15,7 +15,7 @@ extension NetworkingComponent {
     let body = try request.decode(response)
     return (body, response)
   }
-  
+
   /// Make a request decoding the raw Data into the provided `Body` using the decoder.
   /// - Parameters:
   ///   - request: ``HTTPRequestData``

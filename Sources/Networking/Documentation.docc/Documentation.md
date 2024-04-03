@@ -1,6 +1,6 @@
 # ``Networking``
 
-A delightfully flexible and composable swift networking library. 
+A delightfully flexible and composable swift networking library.
 
 ## Overview
 
@@ -25,5 +25,3 @@ Networking, is a library for building a flexible network stack inside a Swift ap
 - ``BasicCredentials``
 - ``BearerAuthentication``
 - ``BearerCredentials``
-
-

@@ -3,7 +3,7 @@ import HTTPTypes
 import os.log
 
 extension NetworkingComponent {
-  
+
   /// Mutate every request by transforming the property at the keypath.
   /// - Parameters:
   ///   - keypath: `WritableKeyPath` to a property of ``HTTPRequestData``
@@ -23,7 +23,7 @@ extension NetworkingComponent {
       log(logger, request)
     }
   }
-  
+
   /// Mutate every request via the block.
   ///
   /// This is very much a building block, it is used for all

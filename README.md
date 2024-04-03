@@ -1,5 +1,5 @@
 # Swift Networking
-[![Tests](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml/badge.svg)](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml)
+[![Tests](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml/badge.svg)](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 Swift Networking, or `swift-networking`, is a library for building a flexible network stack inside a Swift application. It can be used on any Apple platform. You can use it to provide rich network features such as authenticating, de-duping, throttling and more.
 
@@ -13,9 +13,9 @@ Swift Networking, or `swift-networking`, is a library for building a flexible ne
 Browse the documentation for [main](https://danthorpe.github.io/swift-networking/main/documentation/networking/).
 
 ## 🤔 What is Swift Networking?
-Swift Networking is a Swift Package, which provides some core tools used to make HTTP network requests. 
+Swift Networking is a Swift Package, which provides some core tools used to make HTTP network requests.
 
-Its philosophy is centered around the idea that at a high level, clients send requests and await a response for each request. 
+Its philosophy is centered around the idea that at a high level, clients send requests and await a response for each request.
 
 This, like almost everything in programming, is a transformation of data types, and so lends itself to a functional programming style. With this in-mind, the library provides components which can be composed together to perform this transformation. All of the built-in components are well tested, with test helpers to make it easy to test your own custom components.
 
@@ -28,7 +28,7 @@ If we consider that when a client makes a network request, it is essentially a f
 Taking this concept a bit further, we can consider a chain of components,
 
 ```
-                 ┌────────────────────────────────────────────┐                
+                 ┌────────────────────────────────────────────┐
                  │               Network Stack                │      ┌────────┐
 ┌─────────┐      │ ┌─────────┐    ┌─────────┐    ┌──────────┐ │      │        │
 │ Request │─ ─ ─▶│ │    A    │───▶│    B    │───▶│ Terminal │ │─ ─ ─▶│ Server │
@@ -50,8 +50,8 @@ let network = URLSession.shared
 Updating our diagram from above, we can see that the network stack enables us to connect components together, feed in requests, and get responses out.
 
 ```
- ┌─────────┐                                                                     
- │ Request │─ ─ ─▶┌────────────────────────────────────────────┐                 
+ ┌─────────┐
+ │ Request │─ ─ ─▶┌────────────────────────────────────────────┐
  └─────────┘      │               Network Stack                │       ┌────────┐
                   │ ┌─────────┐───▶┌─────────┐───▶┌──────────┐ │       │        │
                   │ │ Logged  │    │ De-dupe │    │URLSession│ │◀─ ─ ─▶│ Server │
@@ -107,13 +107,13 @@ This is a somewhat barebones network stack, which can be used by accessing `@Dep
 
 The library ships with the following built-in components.
 
-- `Authentication` Can we used to handle network authentication. This is probably the most complex component, and it's usage in an application requires a delegate conformance. Currently supported are Basic and Bearer authentication methods. Future enhancement will be to support OAuth etc. 
+- `Authentication` Can we used to handle network authentication. This is probably the most complex component, and it's usage in an application requires a delegate conformance. Currently supported are Basic and Bearer authentication methods. Future enhancement will be to support OAuth etc.
 
 - `Cached` Can be used to cache network responses in memory. A future enhancement would be to support different cache backend systems.
 
 - `CheckedStatusCode` This is a simple component to sanitise error handling to pick out some basic cases. Currently it is open for customisation, so it more useful as an internal component, but a future enhancement could allow it to be used for custom error handling.
 
-- `Delayed` Delay requests by a fixed `Duration`. This uses the Swift continuous clock, and it very testable. 
+- `Delayed` Delay requests by a fixed `Duration`. This uses the Swift continuous clock, and it very testable.
 
 - `DuplicatesRemoved` The network stack allows concurrent network requests, meaning that it is possible for multiple requests to be active at the same time. This component will prevent any duplicate requests firing, and share the response of the only request executed with all duplicate requests. Be careful with this, it might mask underlying application errors.
 
@@ -127,7 +127,7 @@ The library ships with the following built-in components.
 
 - `Server` A building block component to configure all requests which are sent via the stack. For example, set default request headers, base URL, scheme etc. Typically this allows your application to create just the specific aspects of each request, such as query parameters or body values. Yet all requests will get the default request parameters as configured by the stack. This component can also be chained together, so typically it is used many times which makes each line/invocation a readable and maintainable point of your configuration. Generally speaking, it is best to add the server components after logging, so that they are included in the logged info.
 
-- `Throttled` Can be used to limit the number of concurrent requests. This is very helpful to protect your backend from situations where user behaviour could flood the servers. Additionally requests are added to an internal queue. 
+- `Throttled` Can be used to limit the number of concurrent requests. This is very helpful to protect your backend from situations where user behaviour could flood the servers. Additionally requests are added to an internal queue.
 
 - `URLSession` Currently the only terminal component is for URLSession. Future transports which would fit the request/response could be supported in the future.
 
@@ -148,11 +148,11 @@ do {
 
   // Await the data response
   let response = try await networkClient.data(request)
-  
+
   // Access basic properties
   let originalRequest = response.request
-  let payloadData: Data = response.data // might be empty. 
-  
+  let payloadData: Data = response.data // might be empty.
+
 } catch as NetworkingError {
 
   // Access basic properties
@@ -180,7 +180,7 @@ let request = Request<MyExpectedBody>(http: http) // This convenience uses defau
 
 // Await the value response
 let (value, response) = try await networkClient.value(request)
-``` 
+```
 
 While this works okay, it's a bit fiddly having to create seemingly two request values. Instead, it is recommended to use a constrained extension on the `Request` type.
 
@@ -249,7 +249,7 @@ extension DependencyValues {
 // And the Live Network Client (could be a separate module)
 
 import LiveNetwork // Lets assume we have a "live" network client as described above in this module
-import Networking // Import this library, swift-networking 
+import Networking // Import this library, swift-networking
 
 extension IpInfoClient: DependencyKey {
   static let liveValue: Self = {
@@ -289,5 +289,5 @@ import Dependencies
 @Dependency(\.ipInfoClient) var ipInfoClient
 
 // get the geographic info for the client's IP address
-let ipInfo = try await ipInfoClient.fetch(nil) 
-```  
+let ipInfo = try await ipInfoClient.fetch(nil)
+```

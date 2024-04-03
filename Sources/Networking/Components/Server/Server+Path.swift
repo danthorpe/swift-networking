@@ -16,7 +16,7 @@ extension NetworkingComponent {
       logger?.debug("💁 path -> '\(newPath)' \(request.debugDescription)")
     }
   }
-  
+
   /// Set a path prefix for each request. This is pretty handy for when all requests
   /// start with the same path prefix.
   /// - Parameters:
@@ -31,7 +31,7 @@ extension NetworkingComponent {
       logger?.debug("💁 prefix path -> '\(prefixPath)' \(request.debugDescription)")
     }
   }
-  
+
   /// Set the character set to use for query items in the request
   /// - Parameter allowedCharacters: `CharacterSet` for the characters allowed in query parameters
   /// - Returns: some ``NetworkingComponent``
