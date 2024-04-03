@@ -2,7 +2,7 @@ import Foundation
 import os.log
 
 extension NetworkingComponent {
-  
+
   /// Set the HTTP scheme to use.
   ///
   /// The default scheme used in ``HTTPRequestData`` values are already "https".

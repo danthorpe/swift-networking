@@ -1,7 +1,7 @@
 # Build and deploy DocC to GitHub pages. Based off of @karwa's work here:
 # https://github.com/karwa/swift-url/blob/main/.github/workflows/docs.yml
 # and PointFree's work here:
-# https://github.com/pointfreeco/swift-composable-architecture/blob/main/.github/workflows/documentation.yml  
+# https://github.com/pointfreeco/swift-composable-architecture/blob/main/.github/workflows/documentation.yml
 name: Docs
 
 on:
@@ -34,22 +34,22 @@ jobs:
 
       - name: Build documentation
         run: >
-          rm -rf docs-out/.git;        
+          rm -rf docs-out/.git;
           rm -rf docs-out/main;
           git tag -l --sort=-v:refname | grep -e "\d\+\.\d\+.0" | tail -n +6 | xargs -I {} rm -rf {};
-  
+
           for tag in $(echo "main"; git tag -l --sort=-v:refname | grep -e "\d\+\.\d\+.0" | head -6);
           do
-            if [ -d "docs-out/$tag/data/documentation/networking" ] 
-            then 
+            if [ -d "docs-out/$tag/data/documentation/networking" ]
+            then
               echo "✅ Documentation for $tag already exists.";
-            else 
+            else
               echo "⏳ Generating documentation for Networking @ $tag release.";
               rm -rf "docs-out/$tag";
 
               git checkout .;
               git checkout "$tag";
-  
+
               swift package \
                 --allow-writing-to-directory docs-out/"$tag" \
                 generate-documentation \
@@ -61,10 +61,10 @@ jobs:
                 || echo "⚠️ Documentation skipped for Networking @ $tag.";
             fi;
           done
-  
+
       - name: Fix permissions
         run: 'sudo chown -R $USER docs-out'
-          
+
       - name: Publish documentation to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:

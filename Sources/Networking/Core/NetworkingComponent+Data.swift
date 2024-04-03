@@ -17,7 +17,7 @@ extension NetworkingComponent {
     progress updateProgress: @escaping @Sendable (BytesReceived) async -> Void = { _ in }
   ) async throws -> HTTPResponseData {
     try await data(
-      request, 
+      request,
       progress: updateProgress,
       timeout: .seconds(request.requestTimeoutInSeconds)
     )

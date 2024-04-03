@@ -43,7 +43,7 @@ extension NetworkingComponent {
   ///   - value: `String` value
   /// - Returns: some ``NetworkingComponent``
   @NetworkingComponentBuilder public func server(
-    customHeaderField name: String, 
+    customHeaderField name: String,
     _ value: String
   ) -> some NetworkingComponent {
     if let fieldName = HTTPField.Name(name) {

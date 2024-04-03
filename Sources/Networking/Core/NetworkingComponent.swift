@@ -8,7 +8,7 @@ public protocol NetworkingComponent {
   /// - Returns: an `AsyncThrowingStream`, which consists of a series of ``BytesReceived`` values, followed by a final ``HTTPResponseData`` element.
   func send(_ request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
 
-  /// Get the final resolved request before it would be sent. 
+  /// Get the final resolved request before it would be sent.
   ///
   /// This is very useful to query the overall networking stack to see how a request might be overall transformed.
   ///
