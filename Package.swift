@@ -27,10 +27,7 @@ let 📦 = Module.builder(
     defaultWith: [
       .dependencies,
     ],
-    unitTestsDependsOn: [ ],
-    plugins: [ 
-//      .swiftLint
-    ]
+    unitTestsDependsOn: [ ]
   )
 )
 
@@ -76,19 +73,6 @@ TestSupport <+ 📦 {
   ]
 }
 
-
-/// ✨ These are all special case targets, such as plugins
-/// ------------------------------------------------------------
-
-// MARK: - 🧮 Binary Targets & Plugins
-
-extension Target.PluginUsage {
-  static let swiftLint: Self = .plugin(
-    name: "SwiftLintPlugin", package: "danthorpe-swiftlint-plugin"
-  )
-}
-
-
 /// ------------------------------------------------------------
 /// 👜 Define 3rd party dependencies. Associate these dependencies
 /// with modules using `$0.with = [ ]` property
@@ -103,7 +87,6 @@ package.dependencies = [
   .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
   .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
   .package(url: "https://github.com/danthorpe/danthorpe-utilities", branch: "main"),
-//  .package(url: "https://github.com/danthorpe/danthorpe-swiftlint-plugin", from: "0.1.0"),
   .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
   .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
   .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
