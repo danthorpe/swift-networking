@@ -8,7 +8,11 @@ Swift Networking, or `swift-networking`, is a library for building a flexible ne
 * [Built-in Components](#built-in-components)
 * [How to use this library](#how-to-use-this-library)
 
-## What is Swift Networking?
+## 📚 Documentation
+
+Browse the documentation for [main](https://danthorpe.github.io/swift-networking/main/documentation/networking/).
+
+## 🤔 What is Swift Networking?
 Swift Networking is a Swift Package, which provides some core tools used to make HTTP network requests. 
 
 Its philosophy is centered around the idea that at a high level, clients send requests and await a response for each request. 
@@ -18,7 +22,7 @@ This, like almost everything in programming, is a transformation of data types, 
 ### Why not just use URLSession?
 This library makes use of URLSession, as it provides the _terminal component_ which is ultimately responsible for sending the request. Swift Networking abstracts this detail away, while also providing a lot more convenience than URLSession. Furthermore, this library provides many useful building blocks which are not provided by URLSession alone.
 
-## Deep Dive
+## 🤿 Deep Dive
 If we consider that when a client makes a network request, it is essentially a function: `(Request) async throws -> Response`, which can be represented through a protocol called `NetworkingComponent`. We can provide a conformance to this protocol on `URLSession`, and use it make network requests. However, before the request is given to `URLSession` there is opportunity to transform it further, perhaps it needs to be modified, or we wish to collect metrics, or maybe even return the Response from another system.
 
 Taking this concept a bit further, we can consider a chain of components,
@@ -56,7 +60,7 @@ Updating our diagram from above, we can see that the network stack enables us to
 └──────────┘
 ```
 
-## How to use this library
+## 🛠️ How to use this library
 
 I highly recommend that you make use of [pointfreeco/swift-dependencies](https://github.com/pointfreeco/swift-dependencies) for dependency injection, and client management. This means that you should create a "Network Client" like this:
 
@@ -99,7 +103,7 @@ extension DependencyValues {
 
 This is a somewhat barebones network stack, which can be used by accessing `@Dependency(\.networkClient) var networkClient`.
 
-## Built-in Components
+## 🍭 Built-in Components
 
 The library ships with the following built-in components.
 
@@ -127,7 +131,7 @@ The library ships with the following built-in components.
 
 - `URLSession` Currently the only terminal component is for URLSession. Future transports which would fit the request/response could be supported in the future.
 
-## Making Requests
+## 📮 Making Requests
 
 The library provides structs called `HTTPRequestData` and `HTTPResponseData`.  Internally these make use of [Apple's](https://github.com/apple/swift-http-types) `HTTPRequest` and `HTTPResponse` value types.
 
@@ -200,7 +204,7 @@ With this in place, our code becomes,
 let (value, response) = try await networkClient.value(.myBodyValue())
 ```
 
-## NetworkClient vs APIClient
+## 🧩 NetworkClient vs APIClient
 
 The above example shows usage of a NetworkClient. None of the examples specify anything beyond a path of "hello", which is missing some key info, such as the authority. It defaults to "GET" HTTP method, and "https" scheme. All of these properties can be get/set on the request,
 
