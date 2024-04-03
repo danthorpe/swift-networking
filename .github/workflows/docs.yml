@@ -31,7 +31,6 @@ jobs:
     
       - name: Build documentation
         run: >
-          rm -rf docs-out/.git;
           rm -rf docs-out/main;
           git tag -l --sort=-v:refname | grep -e "\d\+\.\d\+.0" | tail -n +6 | xargs -I {} rm -rf {};
   
@@ -44,7 +43,6 @@ jobs:
               echo "⏳ Generating documentation for Networking @ $tag release.";
               rm -rf "docs-out/$tag";
   
-              git checkout .;
               git checkout "$tag";
   
               swift package \
@@ -60,7 +58,8 @@ jobs:
           done
   
       - name: Fix permissions
-        run: 'sudo chown -R "$USER" docs-out'
+        run: >
+          sudo chown -R $USER docs-out
 
       - name: Configure Pages
         id: pages
