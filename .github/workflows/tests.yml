@@ -2,17 +2,11 @@ name: Tests
 
 on:
   push:
-    paths-ignore:
-      - '.github/**.md'
-      - 'README.md'
     branches:
       - main
   pull_request:
-    paths-ignore:
-      - '.github/**.md'
-      - 'README.md'
     types: [opened, synchronize, reopened, ready_for_review]
-    
+
 env:
   DEVELOPER_DIR: /Applications/Xcode_15.0.app/Contents/Developer
   
