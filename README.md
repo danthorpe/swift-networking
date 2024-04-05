@@ -10,7 +10,7 @@ Swift Networking, or `swift-networking`, is a library for building a flexible ne
 
 ## 📚 Documentation
 
-Browse the documentation for [main](https://danthorpe.github.io/swift-networking/main/documentation/networking/).
+Browse the documentation for [main](https://danthorpe.github.io/swift-networking/main/documentation/networking/), [0.2.0](https://danthorpe.github.io/swift-networking/0.2.0/documentation/networking/).
 
 ## 🤔 What is Swift Networking?
 Swift Networking is a Swift Package, which provides some core tools used to make HTTP network requests.
