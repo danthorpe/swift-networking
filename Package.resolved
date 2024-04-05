@@ -10,24 +10,6 @@
       }
     },
     {
-      "identity" : "danthorpe-swiftlint-plugin",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danthorpe/danthorpe-swiftlint-plugin",
-      "state" : {
-        "revision" : "5fc8c94a1ebf4f459b27a12a0720f29ee9a41499",
-        "version" : "0.1.0"
-      }
-    },
-    {
-      "identity" : "danthorpe-utilities",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/danthorpe/danthorpe-utilities",
-      "state" : {
-        "branch" : "main",
-        "revision" : "41952314b339782450ca6d68e332a6551f50234b"
-      }
-    },
-    {
       "identity" : "swift-algorithms",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-algorithms",
@@ -86,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-custom-dump",
       "state" : {
-        "revision" : "3efbfba0e4e56c7187cc19137ee16b7c95346b79",
-        "version" : "1.1.0"
+        "revision" : "f01efb26f3a192a0e88dcdb7c3c391ec2fc25d9c",
+        "version" : "1.3.0"
       }
     },
     {
@@ -142,6 +124,15 @@
       "state" : {
         "revision" : "3907a9438f5b57d317001dc99f3f11b46882272b",
         "version" : "0.10.0"
+      }
+    },
+    {
+      "identity" : "swift-utilities",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/danthorpe/swift-utilities",
+      "state" : {
+        "revision" : "e8a8fda6566e4708ca24b46406fa3c5aa0ac13d0",
+        "version" : "0.5.0"
       }
     },
     {
