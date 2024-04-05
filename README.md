@@ -107,33 +107,33 @@ This is a somewhat barebones network stack, which can be used by accessing `@Dep
 
 The library ships with the following built-in components.
 
-- `Authentication` Can we used to handle network authentication. This is probably the most complex component, and it's usage in an application requires a delegate conformance. Currently supported are Basic and Bearer authentication methods. Future enhancement will be to support OAuth etc.
+- [`Authentication`](https://danthorpe.github.io/swift-networking/main/documentation/networking#authentication) Can we used to handle network authentication. This is probably the most complex component, and it's usage in an application requires a delegate conformance. Currently supported are Basic and Bearer authentication methods. Future enhancement will be to support OAuth etc.
 
-- `Cached` Can be used to cache network responses in memory. A future enhancement would be to support different cache backend systems.
+- [`Cached`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/cached(in:)) Can be used to cache network responses in memory. A future enhancement would be to support different cache backend systems.
 
-- `CheckedStatusCode` This is a simple component to sanitise error handling to pick out some basic cases. Currently it is open for customisation, so it more useful as an internal component, but a future enhancement could allow it to be used for custom error handling.
+- [`CheckedStatusCode`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/checkedstatuscode()) This is a simple component to sanitise error handling to pick out some basic cases. Currently it is open for customisation, so it more useful as an internal component, but a future enhancement could allow it to be used for custom error handling.
 
-- `Delayed` Delay requests by a fixed `Duration`. This uses the Swift continuous clock, and it very testable.
+- [`Delayed`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/delayed(by:)) Delay requests by a fixed `Duration`. This uses the Swift continuous clock, and it very testable.
 
-- `DuplicatesRemoved` The network stack allows concurrent network requests, meaning that it is possible for multiple requests to be active at the same time. This component will prevent any duplicate requests firing, and share the response of the only request executed with all duplicate requests. Be careful with this, it might mask underlying application errors.
+- [`DuplicatesRemoved`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/duplicatesremoved()) The network stack allows concurrent network requests, meaning that it is possible for multiple requests to be active at the same time. This component will prevent any duplicate requests firing, and share the response of the only request executed with all duplicate requests. Be careful with this, it might mask underlying application errors.
 
-- `Logged` Although fully customisable, this component has sensible defaults to log info about requests as they start and finish using a `Logger`. Additionally, underlying types have properties to enable pretty printing.
+- [`Logged`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/logged(using:signposter:onstart:onfailure:onsuccess:)) Although fully customisable, this component has sensible defaults to log info about requests as they start and finish using a `Logger`. Additionally, underlying types have properties to enable pretty printing.
 
-- `Metrics` This can be included in your network stack to instrument its performance. It can report the overall elapsed time of each request, including a breakdown for each component (which support instrumentation). Currently this just logs metrics to the console. A future improvement would allow a richer reporting mechanism, including session statistics.
+- [`Instrument`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/instrument()) This can be included in your network stack to instrument its performance. It can report the overall elapsed time of each request, including a breakdown for each component (which support instrumentation). Currently this just logs metrics to the console. A future improvement would allow a richer reporting mechanism, including session statistics.
 
-- `Numbered` Adds a monotonically increasing number of every request sent in the current session, i.e. from when the stack is initialised. This is quite handy for logging and debugging. It's also worth noting, that the basic HTTP request type, `HTTPRequestData` uniquely identifies each request too.
+- [`Numbered`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/numbered()) Adds a monotonically increasing number of every request sent in the current session, i.e. from when the stack is initialised. This is quite handy for logging and debugging. It's also worth noting, that the basic HTTP request type, `HTTPRequestData` uniquely identifies each request too.
 
-- `Retry` Automatically retry failed requests. By default each request is retried up to 3 times each after a constant delay of 3 seconds. This can be configured for each request however, with constant, immediate or exponential strategies available. Or create your own by conforming to `RetryingStrategy`.
+- [`Retry`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/automaticretry()) Automatically retry failed requests. By default each request is retried up to 3 times each after a constant delay of 3 seconds. This can be configured for each request however, with constant, immediate or exponential strategies available. Or create your own by conforming to `RetryingStrategy`.
 
-- `Server` A building block component to configure all requests which are sent via the stack. For example, set default request headers, base URL, scheme etc. Typically this allows your application to create just the specific aspects of each request, such as query parameters or body values. Yet all requests will get the default request parameters as configured by the stack. This component can also be chained together, so typically it is used many times which makes each line/invocation a readable and maintainable point of your configuration. Generally speaking, it is best to add the server components after logging, so that they are included in the logged info.
+- [`Server`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent#configuring-the-network-stack-for-your-server) A building block component to configure all requests which are sent via the stack. For example, set default request headers, base URL, scheme etc. Typically this allows your application to create just the specific aspects of each request, such as query parameters or body values. Yet all requests will get the default request parameters as configured by the stack. This component can also be chained together, so typically it is used many times which makes each line/invocation a readable and maintainable point of your configuration. Generally speaking, it is best to add the server components after logging, so that they are included in the logged info.
 
-- `Throttled` Can be used to limit the number of concurrent requests. This is very helpful to protect your backend from situations where user behaviour could flood the servers. Additionally requests are added to an internal queue.
+- [`Throttled`](https://danthorpe.github.io/swift-networking/main/documentation/networking/networkingcomponent/throttled(max:)) Can be used to limit the number of concurrent requests. This is very helpful to protect your backend from situations where user behaviour could flood the servers. Additionally requests are added to an internal queue.
 
-- `URLSession` Currently the only terminal component is for URLSession. Future transports which would fit the request/response could be supported in the future.
+- [`URLSession`](https://danthorpe.github.io/swift-networking/main/documentation/networking/foundation/urlsession) Currently the only terminal component is for URLSession. Future transports which would fit the request/response could be supported in the future.
 
 ## 📮 Making Requests
 
-The library provides structs called `HTTPRequestData` and `HTTPResponseData`.  Internally these make use of [Apple's](https://github.com/apple/swift-http-types) `HTTPRequest` and `HTTPResponse` value types.
+The library provides structs called [`HTTPRequestData`](https://danthorpe.github.io/swift-networking/main/documentation/networking/httprequestdata) and [`HTTPResponseData`](https://danthorpe.github.io/swift-networking/main/documentation/networking/httpresponsedata).  Internally these make use of [Apple's](https://github.com/apple/swift-http-types) `HTTPRequest` and `HTTPResponse` value types.
 
 These are the building blocks of the library, and are used to make requests with the stack, like this:
 
