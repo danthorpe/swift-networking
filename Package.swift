@@ -86,7 +86,7 @@ package.dependencies = [
   .package(url: "https://github.com/apple/swift-async-algorithms", from: "0.1.0"),
   .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
   .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
-  .package(url: "https://github.com/danthorpe/danthorpe-utilities", branch: "main"),
+  .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.5.0"),
   .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
   .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
   .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
@@ -97,13 +97,13 @@ extension Target.Dependency {
     name: "Algorithms", package: "swift-algorithms"
   )
   static let assertionExtras: Target.Dependency = .product(
-    name: "AssertionExtras", package: "danthorpe-utilities"
+    name: "AssertionExtras", package: "swift-utilities"
   )
   static let asyncAlgorithms: Target.Dependency = .product(
     name: "AsyncAlgorithms", package: "swift-async-algorithms"
   )
   static let cache: Target.Dependency = .product(
-    name: "Cache", package: "danthorpe-utilities"
+    name: "Cache", package: "swift-utilities"
   )
   static let concurrencyExtras: Target.Dependency = .product(
     name: "ConcurrencyExtras", package: "swift-concurrency-extras"
@@ -124,7 +124,7 @@ extension Target.Dependency {
     name: "HTTPTypesFoundation", package: "swift-http-types"
   )
   static let shortID: Target.Dependency = .product(
-    name: "ShortID", package: "danthorpe-utilities"
+    name: "ShortID", package: "swift-utilities"
   )
   static let tagged: Target.Dependency = .product(
     name: "Tagged", package: "swift-tagged"
