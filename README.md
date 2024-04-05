@@ -1,5 +1,5 @@
 # Swift Networking
-[![Tests](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml/badge.svg)](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdanthorpe%2Fswift-networking%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/danthorpe/swift-networking) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fdanthorpe%2Fswift-networking%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/danthorpe/swift-networking) [![Tests](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml/badge.svg)](https://github.com/danthorpe/swift-networking/actions/workflows/tests.yml) [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 Swift Networking, or `swift-networking`, is a library for building a flexible network stack inside a Swift application. It can be used on any Apple platform. You can use it to provide rich network features such as authenticating, de-duping, throttling and more.
 
