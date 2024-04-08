@@ -97,14 +97,14 @@ extension HTTPResponseData {
 extension HTTPResponseData: Equatable {
   public static func == (lhs: HTTPResponseData, rhs: HTTPResponseData) -> Bool {
     lhs.request == rhs.request
-    && lhs.data == rhs.data
-    && lhs.rawValue ~= rhs.rawValue // HTTPURLResponse is a reference type
-    && lhs.metadata.allSatisfy { key, lhs in
-      lhs.isEqualTo(rhs.metadata[key]?.value)
-    }
-    && rhs.metadata.allSatisfy { key, rhs in
-      rhs.isEqualTo(lhs.metadata[key]?.value)
-    }
+      && lhs.data == rhs.data
+      && lhs.rawValue ~= rhs.rawValue  // HTTPURLResponse is a reference type
+      && lhs.metadata.allSatisfy { key, lhs in
+        lhs.isEqualTo(rhs.metadata[key]?.value)
+      }
+      && rhs.metadata.allSatisfy { key, rhs in
+        rhs.isEqualTo(lhs.metadata[key]?.value)
+      }
   }
 }
 
@@ -178,10 +178,10 @@ extension Result where Success == HTTPResponseData, Failure: NetworkingError {
 
 private func ~= (lhs: HTTPURLResponse, rhs: HTTPURLResponse) -> Bool {
   lhs.url == rhs.url
-  && lhs.mimeType == rhs.mimeType
-  && lhs.expectedContentLength == rhs.expectedContentLength
-  && lhs.textEncodingName == rhs.textEncodingName
-  && lhs.suggestedFilename == rhs.suggestedFilename
+    && lhs.mimeType == rhs.mimeType
+    && lhs.expectedContentLength == rhs.expectedContentLength
+    && lhs.textEncodingName == rhs.textEncodingName
+    && lhs.suggestedFilename == rhs.suggestedFilename
 }
 
 // MARK: - Error Handling

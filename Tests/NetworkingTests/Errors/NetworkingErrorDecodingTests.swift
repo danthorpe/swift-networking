@@ -17,9 +17,11 @@ final class NetworkingErrorDecodingTests: NetworkingTestCase {
       let message: String
     }
 
-    let data = try XCTUnwrap("""
-{"message":"There is an error"}
-""".data(using: .utf8))
+    let data = try XCTUnwrap(
+      """
+      {"message":"There is an error"}
+      """
+      .data(using: .utf8))
     let error = StubbedNetworkError(
       url: URL(static: "https://example.com"),
       data: data,

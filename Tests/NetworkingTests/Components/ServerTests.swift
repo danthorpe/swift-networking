@@ -147,9 +147,11 @@ final class ServerTests: NetworkingTestCase {
     try await network.data(HTTPRequestData())
     let sentRequestsHeaders = await reporter.requests.map(\.headerFields)
 
-    XCTAssertEqual(sentRequestsHeaders, [
-      HTTPFields([HTTPField(name: customFieldName, value: "custom-value")])
-    ])
+    XCTAssertEqual(
+      sentRequestsHeaders,
+      [
+        HTTPFields([HTTPField(name: customFieldName, value: "custom-value")])
+      ])
   }
 
   func test__set_custom_header__invalid_header_name() async throws {

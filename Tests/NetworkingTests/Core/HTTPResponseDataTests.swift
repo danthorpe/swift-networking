@@ -16,7 +16,7 @@ final class HTTPResponseDataTests: NetworkingTestCase {
   }
 
   func test__failed_result_with_non_networking_error() {
-    struct OtherError: Error, Hashable { }
+    struct OtherError: Error, Hashable {}
     let result: Result<HTTPResponseData, OtherError> = .failure(OtherError())
     XCTAssertNil(result.httpRequest)
   }

@@ -1,6 +1,7 @@
 import Foundation
-import Helpers
 import HTTPTypes
+import Helpers
+
 @testable import Networking
 
 public struct StubbedNetworkError: Error {
@@ -28,12 +29,14 @@ public struct StubbedNetworkError: Error {
   }
 
   public init(request: HTTPRequestData, data: Data = Data(), status: HTTPResponse.Status = .badGateway) {
-    guard let httpUrlResponse = HTTPURLResponse(
-      url: request.url ?? URL(static: "example.com"),
-      statusCode: status.code,
-      httpVersion: "HTTP/1.1",
-      headerFields: nil
-    ) else {
+    guard
+      let httpUrlResponse = HTTPURLResponse(
+        url: request.url ?? URL(static: "example.com"),
+        statusCode: status.code,
+        httpVersion: "HTTP/1.1",
+        headerFields: nil
+      )
+    else {
       fatalError("Unable to create HTTPURLResponse from \(status)")
     }
     self.init(request: request, data: data, response: httpUrlResponse)

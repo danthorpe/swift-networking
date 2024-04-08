@@ -23,7 +23,9 @@ public struct BasicCredentials: Hashable, Sendable, AuthenticatingCredentials, H
     let data = Data(joined.utf8)
     let encoded = data.base64EncodedString()
     let description = "Basic \(encoded)"
-    logger?.info("""
+    logger?
+      .info(
+        """
         🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
         Applying basic credentials: \(description, privacy: .private)
         """)
