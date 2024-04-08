@@ -6,7 +6,7 @@ import XCTest
 
 @testable import Networking
 
-final class HTTPRequestDataTests: XCTestCase { // swiftlint:disable:this type_body_length
+final class HTTPRequestDataTests: XCTestCase {  // swiftlint:disable:this type_body_length
 
   var request: HTTPRequestData! {
     didSet {
@@ -133,10 +133,12 @@ final class HTTPRequestDataTests: XCTestCase { // swiftlint:disable:this type_bo
     XCTAssertNoDifference(request.authority, "example.com")
     XCTAssertNil(request.port)
     XCTAssertNoDifference(request.path, "/example?anotherQuery=hello&query=test")
-    XCTAssertNoDifference(request.queryItems, [
-      URLQueryItem(name: "anotherQuery", value: "hello"),
-      URLQueryItem(name: "query", value: "test"),
-    ])
+    XCTAssertNoDifference(
+      request.queryItems,
+      [
+        URLQueryItem(name: "anotherQuery", value: "hello"),
+        URLQueryItem(name: "query", value: "test"),
+      ])
     check(url: "https://example.com/example?anotherQuery=hello&query=test")
 
     request.queryItems = nil
@@ -334,9 +336,11 @@ final class HTTPRequestDataTests: XCTestCase { // swiftlint:disable:this type_bo
     )
     XCTAssertNoDifference(urlRequest.httpMethod, "POST")
     XCTAssertNoDifference(urlRequest.httpBody, try JSONEncoder().encode(body))
-    XCTAssertNoDifference(urlRequest.allHTTPHeaderFields, [
-      "Content-Type": "application/json; charset=utf-8"
-    ])
+    XCTAssertNoDifference(
+      urlRequest.allHTTPHeaderFields,
+      [
+        "Content-Type": "application/json; charset=utf-8"
+      ])
     check(url: "https://example.com/example")
   }
 }

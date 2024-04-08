@@ -201,9 +201,10 @@ public struct HTTPRequestData: Sendable, Identifiable {
   }
 
   internal mutating func percentEncodeQueryItems() {
-    let encodedQueryItems = components.queryItems?.map {
-      $0.addingPercentEncoding(withAllowedCharacters: _queryItemsAllowedCharacters)
-    }
+    let encodedQueryItems = components.queryItems?
+      .map {
+        $0.addingPercentEncoding(withAllowedCharacters: _queryItemsAllowedCharacters)
+      }
     _queryItems = encodedQueryItems
     mutateViaComponents {
       $0.percentEncodedQueryItems = encodedQueryItems

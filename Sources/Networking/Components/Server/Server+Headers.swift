@@ -52,9 +52,10 @@ extension NetworkingComponent {
         copy[fieldName] = value
         return copy
       } log: { logger, request in
-        logger?.debug(
-          "💁 header \(name) -> '\(value, privacy: .private)' \(request.debugDescription)"
-        )
+        logger?
+          .debug(
+            "💁 header \(name) -> '\(value, privacy: .private)' \(request.debugDescription)"
+          )
       }
     } else {
       self

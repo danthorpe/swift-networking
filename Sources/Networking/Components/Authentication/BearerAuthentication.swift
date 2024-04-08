@@ -20,7 +20,9 @@ public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOpt
     @NetworkEnvironment(\.logger) var logger
     var copy = request
     let description = "Bearer \(token)"
-    logger?.info("""
+    logger?
+      .info(
+        """
         🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
         Applying basic credentials: \(description, privacy: .private)
         """)

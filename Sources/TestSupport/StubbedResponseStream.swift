@@ -1,6 +1,7 @@
 import Clocks
 import Foundation
 import HTTPTypes
+
 @testable import Networking
 
 public struct StubbedResponseStream: Equatable, Sendable {

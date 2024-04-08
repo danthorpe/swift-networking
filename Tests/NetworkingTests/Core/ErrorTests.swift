@@ -2,8 +2,8 @@ import CustomDump
 import Dependencies
 import Foundation
 import ShortID
-import XCTest
 import TestSupport
+import XCTest
 
 @testable import Networking
 

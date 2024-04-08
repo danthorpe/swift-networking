@@ -28,9 +28,11 @@ final class DataBodyTests: NetworkingTestCase {
       additionalHeaders: [.cookie: "secret cookie"]
     )
     let request = try HTTPRequestData(headerFields: [.accept: "application/json"], body: body)
-    XCTAssertEqual(request.headerFields, [
-      .accept: "application/json",
-      .cookie: "secret cookie"
-    ])
+    XCTAssertEqual(
+      request.headerFields,
+      [
+        .accept: "application/json",
+        .cookie: "secret cookie",
+      ])
   }
 }

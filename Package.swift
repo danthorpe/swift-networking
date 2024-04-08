@@ -9,7 +9,7 @@ package.platforms = [
   .macOS(.v13),
   .iOS(.v16),
   .tvOS(.v16),
-  .watchOS(.v9)
+  .watchOS(.v9),
 ]
 
 // MARK: - 🧸 Module Names
@@ -23,55 +23,58 @@ let TestSupport = "TestSupport"
 let 📦 = Module.builder(
   withDefaults: .init(
     name: "Basic Module",
-    dependsOn: [ ],
+    dependsOn: [],
     defaultWith: [
-      .dependencies,
+      .dependencies
     ],
-    unitTestsDependsOn: [ ]
+    unitTestsDependsOn: []
   )
 )
 
 // MARK: - 🎯 Targets
 
-Helpers <+ 📦 {
-  $0.createUnitTests = false
-}
+Helpers
+  <+ 📦 {
+    $0.createUnitTests = false
+  }
 
-Networking <+ 📦 {
-  $0.createProduct = .library(nil)
-  $0.dependsOn = [
-    Helpers
-  ]
-  $0.with = [
-    .algorithms,
-    .asyncAlgorithms,
-    .cache,
-    .concurrencyExtras,
-    .httpTypes,
-    .httpTypesFoundation,
-    .shortID,
-    .tagged
-  ]
-  $0.unitTestsDependsOn = [
-    TestSupport
-  ]
-  $0.unitTestsWith = [
-    .assertionExtras,
-    .concurrencyExtras
-  ]
-}
+Networking
+  <+ 📦 {
+    $0.createProduct = .library(nil)
+    $0.dependsOn = [
+      Helpers
+    ]
+    $0.with = [
+      .algorithms,
+      .asyncAlgorithms,
+      .cache,
+      .concurrencyExtras,
+      .httpTypes,
+      .httpTypesFoundation,
+      .shortID,
+      .tagged,
+    ]
+    $0.unitTestsDependsOn = [
+      TestSupport
+    ]
+    $0.unitTestsWith = [
+      .assertionExtras,
+      .concurrencyExtras,
+    ]
+  }
 
-TestSupport <+ 📦 {
-  $0.createUnitTests = false
-  $0.createProduct = .library(nil)
-  $0.dependsOn = [
-    Networking,
-    Helpers
-  ]
-  $0.with = [
-    .concurrencyExtras
-  ]
-}
+TestSupport
+  <+ 📦 {
+    $0.createUnitTests = false
+    $0.createProduct = .library(nil)
+    $0.dependsOn = [
+      Networking,
+      Helpers,
+    ]
+    $0.with = [
+      .concurrencyExtras
+    ]
+  }
 
 /// ------------------------------------------------------------
 /// 👜 Define 3rd party dependencies. Associate these dependencies
@@ -130,7 +133,6 @@ extension Target.Dependency {
     name: "Tagged", package: "swift-tagged"
   )
 }
-
 
 /// ------------------------------------------------------------
 /// ✂️ Copy everything below this into other Package.swift files
@@ -279,9 +281,9 @@ extension Package {
         .testTarget(
           name: module.name.tests,
           dependencies: [module.name.dependency]
-          + module.unitTestsDependsOn.map { $0.dependency }
-          + module.unitTestsWith
-          + [ ],
+            + module.unitTestsDependsOn.map { $0.dependency }
+            + module.unitTestsWith
+            + [],
           path: path,
           plugins: module.plugins
         )
@@ -294,8 +296,8 @@ extension Package {
         .testTarget(
           name: module.name.snapshotTests,
           dependencies: [module.name.dependency]
-          + module.snapshotTestsDependsOn.map { $0.dependency }
-          + [ ],
+            + module.snapshotTestsDependsOn.map { $0.dependency }
+            + [],
           path: path,
           plugins: module.plugins
         )
@@ -334,7 +336,6 @@ struct ModuleBuilder {
     modules.flatMap { $0.makeGroup() }
   }
 }
-
 
 infix operator <>
 extension String {

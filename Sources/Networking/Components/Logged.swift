@@ -43,7 +43,7 @@ extension NetworkingComponent {
   }
 }
 
-extension Logger: NetworkEnvironmentKey { }
+extension Logger: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var logger: Logger? {
@@ -52,7 +52,7 @@ extension NetworkEnvironmentValues {
   }
 }
 
-extension OSSignposter: NetworkEnvironmentKey { }
+extension OSSignposter: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var signposter: OSSignposter? {

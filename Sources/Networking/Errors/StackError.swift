@@ -40,7 +40,7 @@ extension StackError {
     self.init(info: info, kind: .unknown, error: error)
   }
 
-  struct NoUnderlyingError: Error, Equatable { }
+  struct NoUnderlyingError: Error, Equatable {}
 }
 
 // MARK: Conformances
