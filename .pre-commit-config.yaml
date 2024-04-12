@@ -16,6 +16,6 @@ repos:
       - id: swiftlint
         entry: swiftlint --fix --strict
   - repo: https://github.com/danthorpe/swift-format
-    rev: df588146c1d799b576aa4b502911284fd511f0b3
+    rev: 756fbb36972bd4ddcb6b3923ad38c0f8efda2d89
     hooks:
       - id: swift-format

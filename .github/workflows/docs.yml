@@ -50,15 +50,7 @@ jobs:
               git checkout .;
               git checkout "$tag";
 
-              swift package \
-                --allow-writing-to-directory docs-out/"$tag" \
-                generate-documentation \
-                --target Networking \
-                --output-path docs-out/"$tag" \
-                --transform-for-static-hosting \
-                --hosting-base-path /swift-networking/"$tag" \
-                && echo "✅ Documentation generated for Networking @ $tag release." \
-                || echo "⚠️ Documentation skipped for Networking @ $tag.";
+              make target=Networking tag="$tag" output=docs-out basepath=swift-networking documentation
             fi;
           done
 
