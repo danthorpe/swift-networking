@@ -1,0 +1,45 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci/cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swift-package-test:
+    name: Test Swift Package
+    uses: danthorpe/ci/.github/workflows/swift-package.yml@main
+    secrets: inherit
+    with:
+      matrix: >
+        {
+          "include": [
+            {
+              "os": "macos-14",
+              "swift": "5.9",
+              "xcode": "15.1"
+            },
+            {
+              "os": "macos-14",
+              "swift": "5.10",
+              "xcode": "15.3"
+            }
+          ]
+        }
+
+  docs:
+    name: Docs
+    if: github.event_name == 'push'
+    needs: [swift-package-test]
+    uses: danthorpe/ci/.github/workflows/docs.yml@main
+    with:
+      os: 'macos-14'
+      targets: '["Networking"]'
+      basepath: 'swift-networking'
