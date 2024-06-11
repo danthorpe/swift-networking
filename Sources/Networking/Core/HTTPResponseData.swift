@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import HTTPTypes
 import HTTPTypesFoundation
@@ -44,11 +43,11 @@ public struct HTTPResponseData: Sendable {
     self.request = newRequest
   }
 
-  func decode<Body, Decoder: TopLevelDecoder, Payload: Decodable>(
+  func decode<Body, Payload: Decodable>(
     as payloadType: Payload.Type,
-    decoder: Decoder,
+    decoder: some Decoding<Data>,
     transform: @Sendable (Payload, Self) throws -> Body
-  ) throws -> Body where Decoder.Input == Data {
+  ) throws -> Body {
     do {
       let payload = try decoder.decode(payloadType, from: data)
       let body = try transform(payload, self)

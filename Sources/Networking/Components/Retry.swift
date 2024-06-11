@@ -13,7 +13,7 @@ extension NetworkingComponent {
 struct Retry: NetworkingModifier {
   let data = RetryData()
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     guard request.supportsRetryingRequests else {
@@ -157,17 +157,17 @@ actor RetryData {
 // MARK: Request Option
 
 public enum RetryingStrategyRequestOption: HTTPRequestDataOption {
-  public static var defaultOption: RetryingStrategy? =
+  public static let defaultOption: RetryingStrategy? =
     BackoffRetryStrategy
     .constant(delay: .seconds(3), maxAttemptCount: 3)
 }
 
 struct RetriedOriginalRequestID: Equatable, HTTPRequestDataOption {
-  static var defaultOption: HTTPRequestData.ID?
+  static let defaultOption: HTTPRequestData.ID? = nil
 }
 
 struct RetriedRequestID: Equatable, HTTPRequestDataOption {
-  static var defaultOption: HTTPRequestData.ID?
+  static let defaultOption: HTTPRequestData.ID? = nil
 }
 
 extension HTTPRequestData {
@@ -208,7 +208,7 @@ extension HTTPRequestData {
 
 // MARK: - Retrying Strategy
 
-public protocol RetryingStrategy {
+public protocol RetryingStrategy: Sendable {
   func retryDelay(
     request: HTTPRequestData,
     after attempts: [Result<HTTPResponseData, Error>],
@@ -218,9 +218,9 @@ public protocol RetryingStrategy {
 }
 
 public struct BackoffRetryStrategy: RetryingStrategy {
-  private var block: (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) -> Duration?
+  private var block: @Sendable (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) -> Duration?
   public init(
-    block: @escaping (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) ->
+    block: @escaping @Sendable (HTTPRequestData, [Result<HTTPResponseData, Error>], Date, Calendar) ->
       Duration?
   ) {
     self.block = block

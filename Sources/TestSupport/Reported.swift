@@ -18,7 +18,7 @@ extension NetworkingComponent {
 
 struct Reported: NetworkingModifier {
   let reporter: any NetworkReportingComponent
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     ResponseStream { continuation in

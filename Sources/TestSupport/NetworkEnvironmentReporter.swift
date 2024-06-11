@@ -11,10 +11,10 @@ public actor NetworkEnvironmentReporter<Value: Sendable>: NetworkReportingCompon
   }
 
   public func didStart(request: Networking.HTTPRequestData) {
-    self.start = NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
+    self.start = NetworkEnvironmentValues.current[keyPath: keyPath]
   }
 
   public func didFinish(request: HTTPRequestData) {
-    self.finish = NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
+    self.finish = NetworkEnvironmentValues.current[keyPath: keyPath]
   }
 }

@@ -29,7 +29,7 @@ struct Throttled: NetworkingModifier {
     self.limit = limit
   }
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     guard case .always = request.throttle else {

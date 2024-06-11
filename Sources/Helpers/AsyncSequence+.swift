@@ -3,7 +3,7 @@ import Foundation
 
 // Stream into
 
-extension AsyncSequence {
+extension AsyncSequence where Self: Sendable, Self.Element: Sendable {
   package typealias ProcessElement = @Sendable (Element) async -> Void
   package typealias TransformError = @Sendable (Error) async -> Error?
   package typealias OnTermination = @Sendable () async -> Void
@@ -37,7 +37,7 @@ extension AsyncSequence {
 // MARK: Timeouts
 
 @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-extension AsyncSequence {
+extension AsyncSequence where Self: Sendable, Self.Element: Sendable {
   package func first(beforeTimeout duration: Duration, using clock: any Clock<Duration>) async throws
     -> Element
   {
@@ -47,7 +47,7 @@ extension AsyncSequence {
   package func first(
     beforeTimeout duration: Duration,
     using clock: any Clock<Duration>,
-    where predicate: @escaping (Element) async throws -> Bool
+    where predicate: @escaping @Sendable (Element) async throws -> Bool
   ) async throws -> Element {
     try await withTimeout(after: duration, using: clock) {
       guard let element = try await first(where: predicate) else {
@@ -62,14 +62,14 @@ extension AsyncSequence {
 @available(iOS, deprecated: 16.0)
 @available(watchOS, deprecated: 9.0)
 @available(tvOS, deprecated: 16.0)
-extension AsyncSequence {
+extension AsyncSequence where Self: Sendable, Self.Element: Sendable {
   package func first(beforeTimeout timeInterval: TimeInterval) async throws -> Element {
     try await first(beforeTimeout: timeInterval, where: { _ in true })
   }
 
   package func first(
     beforeTimeout timeInterval: TimeInterval,
-    where predicate: @escaping (Element) async throws -> Bool
+    where predicate: @escaping @Sendable (Element) async throws -> Bool
   ) async throws -> Element {
     try await withTimeout(after: timeInterval) {
       guard let element = try await first(where: predicate) else {

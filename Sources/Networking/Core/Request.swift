@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 import HTTPTypes
 
@@ -13,12 +12,12 @@ public struct Request<Body>: Sendable {
 }
 
 extension Request {
-  public init<Decoder: TopLevelDecoder, Payload: Decodable>(
+  public init<Payload: Decodable>(
     http: HTTPRequestData,
     as payloadType: Payload.Type,
-    decoder: Decoder,
+    decoder: some Decoding<Data>,
     transform: @escaping @Sendable (Payload, HTTPResponseData) throws -> Body
-  ) where Decoder.Input == Data {
+  ) {
     self.init(http: http) { response in
       try response.decode(as: payloadType, decoder: decoder, transform: transform)
     }
@@ -35,10 +34,10 @@ extension Request {
 
 extension Request where Body: Decodable {
 
-  public init<Decoder: TopLevelDecoder>(
+  public init(
     http: HTTPRequestData,
-    decoder: Decoder
-  ) where Decoder.Input == Data {
+    decoder: some Decoding<Data>
+  ) {
     self.init(http: http, as: Body.self, decoder: decoder) { payload, _ in
       payload
     }

@@ -1,7 +1,7 @@
 import Foundation
 
 enum RequestTimeoutInSeconds: HTTPRequestDataOption {
-  static var defaultOption: Int64 = 60
+  static let defaultOption: Int64 = 60
 }
 
 extension HTTPRequestData {

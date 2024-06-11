@@ -92,7 +92,7 @@ final class AuthenticationTests: XCTestCase {
 
   func test__authentication__refresh_token() async throws {
 
-    var isUnauthorized = true
+    let isUnauthorized = LockIsolated(true)
     let reporter = TestReporter()
     let delegate = TestAuthenticationDelegate(
       fetch: { _ in
@@ -113,8 +113,10 @@ final class AuthenticationTests: XCTestCase {
       .mocked(
         .status(.unauthorized),
         check: { _ in
-          defer { isUnauthorized.toggle() }
-          return isUnauthorized
+          defer {
+            isUnauthorized.withValue { $0.toggle() }
+          }
+          return isUnauthorized.value
         }
       )
       .reported(by: reporter)

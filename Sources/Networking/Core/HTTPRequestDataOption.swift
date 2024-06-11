@@ -1,7 +1,7 @@
 import Foundation
 
-public protocol HTTPRequestDataOption {
-  associatedtype Value
+public protocol HTTPRequestDataOption: Sendable {
+  associatedtype Value: Sendable
   static var defaultOption: Value { get }
   static var includeInEqualityEvaluation: Bool { get }
 }

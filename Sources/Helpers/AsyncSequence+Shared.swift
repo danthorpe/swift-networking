@@ -1,13 +1,13 @@
 import Foundation
 
-extension AsyncSequence where Self: Sendable {
+extension AsyncSequence where Self: Sendable, Self.Element: Sendable {
 
   public func shared() -> SharedAsyncSequence<Self> {
     SharedAsyncSequence(self)
   }
 }
 
-public struct SharedAsyncSequence<Base: AsyncSequence> {
+public struct SharedAsyncSequence<Base: AsyncSequence>: Sendable where Base: Sendable, Base.Element: Sendable {
 
   fileprivate typealias Stream = AsyncThrowingStream<Base.Element, Error>
 
@@ -86,8 +86,6 @@ public struct SharedAsyncSequence<Base: AsyncSequence> {
     self.coordinator = Coordinator(base)
   }
 }
-
-extension SharedAsyncSequence: Sendable where Base: Sendable {}
 
 extension SharedAsyncSequence: AsyncSequence {
   public typealias AsyncIterator = AsyncThrowingStream<Base.Element, Error>.Iterator

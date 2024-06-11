@@ -217,4 +217,8 @@ final class RetryStrategyTests: XCTestCase {
   }
 }
 
+#if swift(>=6)
+extension String: @retroactive Error {}
+#else
 extension String: Error {}
+#endif

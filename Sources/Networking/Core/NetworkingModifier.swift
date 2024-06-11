@@ -6,10 +6,10 @@ import Helpers
 ///
 /// Provide a public interface via an extension on `NetworkingComponent` which calls
 /// through to ``NetworkingComponent/modified(_:)``.
-public protocol NetworkingModifier {
+public protocol NetworkingModifier: Sendable {
 
   /// Perform modifications to the input request
-  func resolve(upstream: any NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData
+  func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData
 
   /// Perform some modification, before sending the request onto the upstread component, and
   /// doing any post-processing to the resultant stream
@@ -17,7 +17,7 @@ public protocol NetworkingModifier {
   ///   - upstream: the `NetworkingComponent` to propagate the request to.
   ///   - request: the input ``HTTPRequestData`` request
   /// - Returns: a ``ResponseStream<HTTPResponseData>``
-  func send(upstream: any NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData>
 }
 
 extension NetworkingComponent {
@@ -30,11 +30,11 @@ extension NetworkingComponent {
 }
 
 extension NetworkingModifier {
-  public func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+  public func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     upstream.resolve(request)
   }
 
-  public func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  public func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     upstream.send(request)
   }
 }
