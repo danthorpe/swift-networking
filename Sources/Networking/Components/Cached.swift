@@ -9,7 +9,7 @@ extension NetworkingComponent {
 }
 
 public enum CacheOption: HTTPRequestDataOption {
-  public static var defaultOption: Self = .always(60)
+  public static let defaultOption: Self = .always(60)
   case always(TimeInterval)
   case never
 }
@@ -24,7 +24,7 @@ extension HTTPRequestData {
 private struct Cached: NetworkingModifier {
   var cache: Cache<HTTPRequestData, HTTPResponseData>
   @NetworkEnvironment(\.logger) var logger
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
     guard case let .always(timeToLive) = request.cacheOption else {
       return upstream.send(request)
     }
@@ -68,7 +68,7 @@ struct CachedMetadata {
 }
 
 private enum CachedResponseMetadataKey: HTTPResponseMetadata {
-  static var defaultMetadata: CachedMetadata?
+  static let defaultMetadata: CachedMetadata? = nil
 }
 
 extension HTTPResponseData {

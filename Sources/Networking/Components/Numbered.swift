@@ -12,7 +12,7 @@ public struct RequestSequence {
 struct Numbered: NetworkingModifier {
   private let sequence = SequenceNumber(value: 0)
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     ResponseStream<HTTPResponseData> { continuation in

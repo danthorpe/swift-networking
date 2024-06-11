@@ -8,7 +8,7 @@ extension NetworkingComponent {
 }
 
 struct CheckedStatusCode: NetworkingModifier {
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     ResponseStream<HTTPResponseData>(

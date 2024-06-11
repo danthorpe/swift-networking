@@ -1,7 +1,7 @@
 import Foundation
 
 private enum QueryItemsAllowedCharacters: HTTPRequestDataOption {
-  public static var defaultOption: CharacterSet = .urlQueryAllowed
+  public static let defaultOption: CharacterSet = .urlQueryAllowed
 }
 
 extension HTTPRequestData {

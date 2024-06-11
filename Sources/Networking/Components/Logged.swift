@@ -1,10 +1,11 @@
+import ConcurrencyExtras
 import Dependencies
 import os.log
 import os.signpost
 
-public typealias LogStart = @Sendable (HTTPRequestData) async -> Void
-public typealias LogFailure = @Sendable (HTTPRequestData, Error) async -> Void
-public typealias LogSuccess = @Sendable (HTTPRequestData, HTTPResponseData, BytesReceived) async ->
+public typealias LogStart = @Sendable (Logger, HTTPRequestData) async -> Void
+public typealias LogFailure = @Sendable (Logger, HTTPRequestData, Error) async -> Void
+public typealias LogSuccess = @Sendable (Logger, HTTPRequestData, HTTPResponseData, BytesReceived) async ->
   Void
 
 extension NetworkingComponent {
@@ -16,19 +17,19 @@ extension NetworkingComponent {
     onFailure: LogFailure? = nil,
     onSuccess: LogSuccess? = nil
   ) -> some NetworkingComponent {
-    let signposter = signposter ?? OSSignposter(logger: logger)
-    return modified(
+    modified(
       Logged(
-        signposter: signposter,
-        onStart: onStart ?? {
-          logger.info("↗️ \($0.debugDescription)")
-          logger.debug("\($0.prettyPrintedHeaders, privacy: .private)")
-          logger.debug("\($0.prettyPrintedBody)")
+        logger: logger,
+        signposter: signposter ?? OSSignposter(logger: logger),
+        onStart: onStart ?? { logger, request in
+          logger.info("↗️ \(request.debugDescription)")
+          logger.debug("\(request.prettyPrintedHeaders, privacy: .private)")
+          logger.debug("\(request.prettyPrintedBody)")
         },
-        onFailure: onFailure ?? { request, error in
+        onFailure: onFailure ?? { logger, request, error in
           logger.warning("⚠️ \(request.debugDescription), error: \(String(describing: error))")
         },
-        onSuccess: onSuccess ?? { request, response, _ in
+        onSuccess: onSuccess ?? { logger, request, response, _ in
           logger.info("🆗 \(response.debugDescription)")
           if response.isNotCached {
             logger.debug("\(response.prettyPrintedHeaders, privacy: .private)")
@@ -43,7 +44,7 @@ extension NetworkingComponent {
   }
 }
 
-extension Logger: NetworkEnvironmentKey {}
+extension Logger: @unchecked Sendable, NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var logger: Logger? {
@@ -52,7 +53,7 @@ extension NetworkEnvironmentValues {
   }
 }
 
-extension OSSignposter: NetworkEnvironmentKey {}
+extension OSSignposter: @unchecked Sendable, NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var signposter: OSSignposter? {
@@ -66,12 +67,13 @@ struct Logged: NetworkingModifier {
   typealias OnFailure = LogFailure
   typealias OnSuccess = LogSuccess
 
+  let logger: Logger
   let signposter: OSSignposter
   let onStart: OnStart
   let onFailure: OnFailure
   let onSuccess: OnSuccess
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     ResponseStream<HTTPResponseData> { continuation in
@@ -81,18 +83,18 @@ struct Logged: NetworkingModifier {
         defer {
           signposter.endInterval("Start Network Request", state)
         }
-        await onStart(request)
+        await onStart(logger, request)
         do {
           for try await element in upstream.send(request) {
             if case let .value(response, bytesReceived) = element {
-              await onSuccess(response.request, response, bytesReceived)
+              await onSuccess(logger, response.request, response, bytesReceived)
             }
             continuation.yield(element)
           }
           signposter.emitEvent("End Network Request", id: id, "Success")
           continuation.finish()
         } catch {
-          await onFailure(request, error)
+          await onFailure(logger, request, error)
           signposter.emitEvent("End Network Request", id: id, "Failure")
           continuation.finish(throwing: error)
         }

@@ -1,4 +1,3 @@
-import Combine
 import Foundation
 
 extension NetworkingComponent {
@@ -23,11 +22,11 @@ extension NetworkingComponent {
   ///   - specializedDecoder: a `TopLevelDecoder` where `Input` is `Data`
   /// - Returns: a tuple of the body, and attendant ``HTTPResponseData``
   /// - Throws: ``NetworkingError``
-  public func value<Body: Decodable, Decoder: TopLevelDecoder>(
+  public func value<Body: Decodable>(
     _ request: HTTPRequestData,
     as bodyType: Body.Type,
-    decoder specializedDecoder: Decoder
-  ) async throws -> (body: Body, response: HTTPResponseData) where Decoder.Input == Data {
-    try await value(Request<Body>(http: request, decoder: specializedDecoder))
+    decoder: some Decoding<Data>
+  ) async throws -> (body: Body, response: HTTPResponseData) {
+    try await value(Request<Body>(http: request, decoder: decoder))
   }
 }

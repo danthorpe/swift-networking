@@ -1,12 +1,11 @@
-import Combine
 import Foundation
 
 extension NetworkingError {
 
-  public func decodeResponseBody<ErrorMessage: Decodable, Decoder: TopLevelDecoder>(
+  public func decodeResponseBody<ErrorMessage: Decodable>(
     as errorMessageType: ErrorMessage.Type,
-    using decoder: Decoder
-  ) -> ErrorMessage? where Decoder.Input == Data {
+    using decoder: some Decoding<Data>
+  ) -> ErrorMessage? {
     guard let response, false == response.data.isEmpty else {
       return nil
     }

@@ -1,5 +1,5 @@
 private enum ExpectedContentLength: HTTPRequestDataOption {
-  static var defaultOption: Int64?
+  static let defaultOption: Int64? = nil
 }
 
 extension HTTPRequestData {

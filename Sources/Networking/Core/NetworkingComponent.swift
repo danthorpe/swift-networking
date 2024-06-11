@@ -1,7 +1,7 @@
 import Foundation
 import Helpers
 
-public protocol NetworkingComponent {
+public protocol NetworkingComponent: Sendable {
 
   /// Send the networking request and receive a stream of events back.
   /// - Parameter request: ``HTTPRequestData`` to send

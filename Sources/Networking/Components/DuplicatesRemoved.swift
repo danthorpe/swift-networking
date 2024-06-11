@@ -8,7 +8,7 @@ extension NetworkingComponent {
 
 private struct DuplicatesRemoved: NetworkingModifier {
   let activeRequests = ActiveRequests()
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     ResponseStream { continuation in

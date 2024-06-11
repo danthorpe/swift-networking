@@ -3,7 +3,7 @@ import Foundation
 public struct TimeoutError: Error, Hashable, Sendable {}
 
 @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
-public func withTimeout<ReturnValue>(
+public func withTimeout<ReturnValue: Sendable>(
   after duration: Duration,
   using clock: any Clock<Duration>,
   do work: @escaping @Sendable () async throws -> ReturnValue
@@ -19,7 +19,7 @@ public func withTimeout<ReturnValue>(
 @available(iOS, deprecated: 16.0)
 @available(watchOS, deprecated: 9.0)
 @available(tvOS, deprecated: 16.0)
-public func withTimeout<ReturnValue>(
+public func withTimeout<ReturnValue: Sendable>(
   after duration: TimeInterval,
   do work: @escaping @Sendable () async throws -> ReturnValue
 ) async throws -> ReturnValue {
@@ -30,7 +30,7 @@ public func withTimeout<ReturnValue>(
   }
 }
 
-private func withTimeout<ReturnValue>(
+private func withTimeout<ReturnValue: Sendable>(
   do work: @escaping @Sendable () async throws -> ReturnValue,
   taskWhichTimesout: @escaping @Sendable () async throws -> ReturnValue
 ) async throws -> ReturnValue {
@@ -40,7 +40,7 @@ private func withTimeout<ReturnValue>(
   return value
 }
 
-private func firstReturnValue<ReturnValue>(
+private func firstReturnValue<ReturnValue: Sendable>(
   from tasks: [@Sendable () async throws -> ReturnValue]
 ) async throws -> ReturnValue? {
   try await withThrowingTaskGroup(of: ReturnValue.self) { group in

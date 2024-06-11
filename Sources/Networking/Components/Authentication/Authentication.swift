@@ -12,7 +12,7 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
   typealias Credentials = Delegate.Credentials
   let delegate: Delegate
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     guard let method = request.authenticationMethod, method == Credentials.method else {

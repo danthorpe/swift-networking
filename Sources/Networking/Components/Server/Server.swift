@@ -12,14 +12,14 @@ extension NetworkingComponent {
   ///   - log: a closure which can be used to log info, receiving an
   ///   optional Logger if it's configured.
   /// - Returns: some ``NetworkingComponent``
-  public func server<Value>(
-    mutate keypath: WritableKeyPath<HTTPRequestData, Value>,
-    with transform: @escaping (Value) -> Value,
-    log: @escaping (Logger?, HTTPRequestData) -> Void
+  public func server<Value: Sendable>(
+    mutate keyPath: WritableKeyPath<HTTPRequestData, Value>,
+    with transform: @escaping @Sendable (Value) -> Value,
+    log: @escaping @Sendable (Logger?, HTTPRequestData) -> Void
   ) -> some NetworkingComponent {
     server { request in
       @NetworkEnvironment(\.logger) var logger
-      request[keyPath: keypath] = transform(request[keyPath: keypath])
+      request[keyPath: keyPath] = transform(request[keyPath: keyPath])
       log(logger, request)
     }
   }
@@ -32,17 +32,21 @@ extension NetworkingComponent {
   /// - Parameter mutateRequest: a closure which receives the ``HTTPRequestData`` to mutate
   /// - Returns: some ``NetworkingComponent``
   public func server(
-    mutateRequest: @escaping (inout HTTPRequestData) -> Void
+    mutateRequest: @escaping @Sendable (inout HTTPRequestData) -> Void
   ) -> some NetworkingComponent {
     modified(MutateRequest(mutate: mutateRequest))
   }
 }
 
 struct MutateRequest: NetworkingModifier {
-  let mutate: (inout HTTPRequestData) -> Void
-  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+  let mutate: @Sendable (inout HTTPRequestData) -> Void
+  func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     var copy = request
     mutate(&copy)
     return copy
+  }
+
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    upstream.send(request)
   }
 }

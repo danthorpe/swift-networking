@@ -1,32 +1,26 @@
+import ConcurrencyExtras
 import Foundation
 
 extension NetworkingComponent {
   func networkEnvironment<Value: Sendable>(
     _ keyPath: WritableKeyPath<NetworkEnvironmentValues, Value>,
-    _ value: @escaping () -> Value
+    _ value: @escaping @Sendable () -> Value
   ) -> some NetworkingComponent {
-    modified(NetworkEnvironmentWritingModifier(keyPath: keyPath, value: value))
+    let _keyPath = UncheckedSendable(keyPath)
+    return modified(
+      NetworkEnvironmentWritingModifier {
+        $0[keyPath: _keyPath.value] = value()
+      })
   }
 }
 
-private struct NetworkEnvironmentWritingModifier<
-  Value: Sendable
->: NetworkingModifier {
-  let keyPath: WritableKeyPath<NetworkEnvironmentValues, Value>
-  let value: () -> Value
-  init(
-    keyPath: WritableKeyPath<NetworkEnvironmentValues, Value>,
-    value: @escaping () -> Value
-  ) {
-    self.keyPath = keyPath
-    self.value = value
-  }
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+private struct NetworkEnvironmentWritingModifier: NetworkingModifier {
+  let update: @Sendable (inout NetworkEnvironmentValues) -> Void
+
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
-    var values = NetworkEnvironmentValues.environmentValues
-    values[keyPath: keyPath] = value()
-    return NetworkEnvironmentValues.$environmentValues.withValue(values) {
+    withNetworkEnvironment(update) {
       upstream.send(request)
     }
   }
@@ -41,7 +35,7 @@ public struct NetworkEnvironment<Value>: @unchecked Sendable {
   private let keyPath: KeyPath<NetworkEnvironmentValues, Value>
 
   public var wrappedValue: Value {
-    NetworkEnvironmentValues.environmentValues[keyPath: keyPath]
+    NetworkEnvironmentValues.current[keyPath: keyPath]
   }
 
   public init(
@@ -52,7 +46,7 @@ public struct NetworkEnvironment<Value>: @unchecked Sendable {
 }
 
 public struct NetworkEnvironmentValues: Sendable {
-  @TaskLocal public static var environmentValues = Self()
+  @TaskLocal public static var current = Self()
   private var storage: [ObjectIdentifier: AnySendable] = [:]
 
   public subscript<Key: NetworkEnvironmentKey>(
@@ -70,6 +64,18 @@ public struct NetworkEnvironmentValues: Sendable {
     set {
       self.storage[ObjectIdentifier(key)] = AnySendable(newValue)
     }
+  }
+}
+
+@discardableResult
+func withNetworkEnvironment<R>(
+  _ updateNetworkEnvironmentForOperation: (inout NetworkEnvironmentValues) throws -> Void,
+  operation: () throws -> R
+) rethrows -> R {
+  var environment = NetworkEnvironmentValues.current
+  try updateNetworkEnvironmentForOperation(&environment)
+  return try NetworkEnvironmentValues.$current.withValue(environment) {
+    try operation()
   }
 }
 

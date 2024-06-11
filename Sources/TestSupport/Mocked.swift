@@ -3,7 +3,7 @@ import Networking
 extension NetworkingComponent {
   public func mocked(
     _ stub: StubbedResponseStream,
-    check: @escaping (HTTPRequestData) -> Bool
+    check: @escaping @Sendable (HTTPRequestData) -> Bool
   ) -> some NetworkingComponent {
     modified(Mocked(mock: check, with: stub))
   }
@@ -17,21 +17,21 @@ extension NetworkingComponent {
 }
 
 struct Mocked: NetworkingModifier {
-  let mock: (HTTPRequestData) -> Bool
+  let mock: @Sendable (HTTPRequestData) -> Bool
   let stub: StubbedResponseStream
 
   @NetworkEnvironment(\.instrument) var instrument
 
-  init(mock: @escaping (HTTPRequestData) -> Bool, with stubbedResponse: StubbedResponseStream) {
+  init(mock: @escaping @Sendable (HTTPRequestData) -> Bool, with stubbedResponse: StubbedResponseStream) {
     self.mock = mock
     self.stub = stubbedResponse
   }
 
-  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+  func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     request  // Note: We actually do not want to resolve the request to be mocked
   }
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     guard mock(request) else {
@@ -59,11 +59,11 @@ extension NetworkingComponent {
 struct CustomMocked: NetworkingModifier {
   let block: @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<HTTPResponseData>
 
-  func resolve(upstream: NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+  func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     request  // Note: We actually do not want to resolve the request to be mocked
   }
 
-  func send(upstream: NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
+  func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
     block(upstream, request)

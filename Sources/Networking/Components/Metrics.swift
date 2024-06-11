@@ -37,11 +37,10 @@ private actor NetworkingInstrument {
     @NetworkEnvironment(\.logger) var logger
     let total = measurements.total
     logger?.info("⏱️ \(label) \(duration.description) total: \(total.description)")
-
   }
 }
 
-public struct ElapsedTimeMeasurement: Equatable {
+public struct ElapsedTimeMeasurement: Equatable, Sendable {
   public let label: String
   public let duration: Duration
   let instant: AnyClock<Duration>.Instant
@@ -53,9 +52,9 @@ public struct ElapsedTimeMeasurement: Equatable {
   }
 }
 
-public struct NetworkingInstrumentClient {
-  public var elapsedTimeMeasurements: @Sendable () async -> [ElapsedTimeMeasurement]
-  public var measureElapsedTime: @Sendable (String) async -> Void
+public struct NetworkingInstrumentClient: Sendable {
+  public let elapsedTimeMeasurements: @Sendable () async -> [ElapsedTimeMeasurement]
+  public let measureElapsedTime: @Sendable (String) async -> Void
 }
 
 extension [ElapsedTimeMeasurement] {

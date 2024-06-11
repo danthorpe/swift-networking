@@ -27,7 +27,8 @@ let 📦 = Module.builder(
     defaultWith: [
       .dependencies
     ],
-    unitTestsDependsOn: []
+    unitTestsDependsOn: [],
+    swiftSettings: .concurrency
   )
 )
 
@@ -138,6 +139,23 @@ extension Target.Dependency {
 /// ✂️ Copy everything below this into other Package.swift files
 /// to re-create the same DSL capabilities.
 /// ------------------------------------------------------------
+
+// MARK: - 🚦 Swift Settings
+
+extension [SwiftSetting] {
+  #if swift(>=6)
+  static let concurrency: Self = [
+    .enableUpcomingFeature("StrictConcurrency"),
+    .enableUpcomingFeature("InferSendableFromCaptures"),
+  ]
+  #else
+  static let concurrency: Self = [
+    .enableExperimentalFeature("GlobalConcurrency"),
+    .enableExperimentalFeature("StrictConcurrency"),
+    .enableExperimentalFeature("InferSendableFromCaptures"),
+  ]
+  #endif
+}
 
 // MARK: - 🪄 Package Helpers
 
