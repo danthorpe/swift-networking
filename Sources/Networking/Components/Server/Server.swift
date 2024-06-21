@@ -38,9 +38,36 @@ extension NetworkingComponent {
   }
 }
 
-struct MutateRequest: NetworkingModifier {
+// MARK: - Option to opt out of Server based mutations
+
+/// A `HTTPRequestDataOption` which is used to determine whether "server mutations"
+/// will impact a specific `HTTPRequestData`.
+///
+/// Server mutations are networking modifiers added to the stack by using
+/// the `.server()` APIs. Their purpose is to set properties of every request
+/// which is sent, such as the server authority.
+///
+/// However, in some cases, it is useful to be able to bypass all of these
+/// modifications, and send the request exactly as specified. To do this,
+/// set the option to `.disabled`.
+public enum ServerMutationsOption: HTTPRequestDataOption {
+  public static let defaultOption: Self = .enabled
+  case enabled
+  case disabled
+}
+
+extension HTTPRequestData {
+  public var serverMutations: ServerMutationsOption {
+    get { self[option: ServerMutationsOption.self] }
+    set { self[option: ServerMutationsOption.self] = newValue }
+  }
+}
+
+private struct MutateRequest: NetworkingModifier {
   let mutate: @Sendable (inout HTTPRequestData) -> Void
+
   func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
+    guard case .enabled = request.serverMutations else { return request }
     var copy = request
     mutate(&copy)
     return copy

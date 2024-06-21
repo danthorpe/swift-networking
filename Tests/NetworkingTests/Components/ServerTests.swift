@@ -184,4 +184,22 @@ final class ServerTests: NetworkingTestCase {
 
     XCTAssertNoDifference(sentRequestsURL, URL(static: "https://example.com/?message=hello%2Bworld"))
   }
+
+  func test__set_server_mutation_option__disabled() async throws {
+    let reporter = TestReporter()
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(authority: "sample.com")
+      .logged(using: Logger())
+
+    var request = HTTPRequestData(authority: "api-sample.com", path: "auth")
+    request.serverMutations = .disabled
+
+    try await network.data(request)
+    let sentRequests = await reporter.requests
+    XCTAssertEqual(sentRequests.map(\.authority), ["api-sample.com"])
+    XCTAssertEqual(sentRequests.map(\.path), ["/auth"])
+  }
 }
