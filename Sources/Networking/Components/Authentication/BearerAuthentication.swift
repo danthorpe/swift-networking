@@ -19,14 +19,14 @@ public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOpt
   public func apply(to request: HTTPRequestData) -> HTTPRequestData {
     @NetworkEnvironment(\.logger) var logger
     var copy = request
-    let description = "Bearer \(token)"
+    let authenticationValue = "Bearer \(token)"
     logger?
       .info(
         """
         🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
-        Applying basic credentials: \(description, privacy: .private)
+        Applying bearer credentials: \(authenticationValue, privacy: .private)
         """)
-    copy.headerFields[.authorization] = description
+    copy.headerFields[.authorization] = authenticationValue
     return copy
   }
 }

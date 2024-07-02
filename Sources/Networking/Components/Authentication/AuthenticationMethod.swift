@@ -14,3 +14,9 @@ extension HTTPRequestData {
     set { self[option: AuthenticationMethod.self] = newValue }
   }
 }
+
+extension NetworkingComponent {
+  public func server(authenticationMethod: AuthenticationMethod) -> some NetworkingComponent {
+    server { $0.authenticationMethod = authenticationMethod }
+  }
+}
