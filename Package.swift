@@ -52,6 +52,7 @@ Networking
       .concurrencyExtras,
       .httpTypes,
       .httpTypesFoundation,
+      .protected,
       .shortID,
       .tagged,
     ]
@@ -126,6 +127,9 @@ extension Target.Dependency {
   )
   static let httpTypesFoundation: Target.Dependency = .product(
     name: "HTTPTypesFoundation", package: "swift-http-types"
+  )
+  static let protected: Target.Dependency = .product(
+    name: "Protected", package: "swift-utilities"
   )
   static let shortID: Target.Dependency = .product(
     name: "ShortID", package: "swift-utilities"

@@ -1,5 +1,6 @@
 import ConcurrencyExtras
 import Foundation
+import Protected
 
 extension NetworkingComponent {
   func networkEnvironment<Value: Sendable>(
@@ -46,7 +47,7 @@ public struct NetworkEnvironment<Value>: @unchecked Sendable {
 }
 
 public struct NetworkEnvironmentValues: Sendable {
-  @TaskLocal public static var current = Self()
+  @Protected public static var current = Self()
   private var storage: [ObjectIdentifier: AnySendable] = [:]
 
   public subscript<Key: NetworkEnvironmentKey>(
@@ -72,11 +73,8 @@ func withNetworkEnvironment<R>(
   _ updateNetworkEnvironmentForOperation: (inout NetworkEnvironmentValues) throws -> Void,
   operation: () throws -> R
 ) rethrows -> R {
-  var environment = NetworkEnvironmentValues.current
-  try updateNetworkEnvironmentForOperation(&environment)
-  return try NetworkEnvironmentValues.$current.withValue(environment) {
-    try operation()
-  }
+  try NetworkEnvironmentValues.$current.write(updateNetworkEnvironmentForOperation)
+  return try operation()
 }
 
 private struct AnySendable: @unchecked Sendable {

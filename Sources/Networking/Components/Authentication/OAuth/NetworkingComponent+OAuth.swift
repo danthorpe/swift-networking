@@ -1,16 +1,20 @@
 import AuthenticationServices
 import ConcurrencyExtras
+import Helpers
 
 extension NetworkingComponent {
 
   public func authenticated(
     oauth: any OAuthSystem
   ) -> some NetworkingComponent {
-    let delegate = OAuth.Delegate(system: oauth)
+    let delegate = OAuth.Delegate(
+      upstream: self,
+      system: oauth
+    )
     return withNetworkEnvironment {
       $0.oauth = delegate
     } operation: {
-      authenticated(with: delegate)
+      authenticated(with: BearerAuthentication(delegate: delegate))
         .server(authenticationMethod: .bearer)
     }
   }
@@ -24,15 +28,27 @@ extension NetworkingComponent {
     }
     return try await perform(oauth)
   }
+
+  public func oauth<System: OAuthSystem, ReturnValue>(
+    perform: (System) async throws -> ReturnValue
+  ) async throws -> ReturnValue {
+    @NetworkEnvironment(\.oauth) var oauth
+    guard let oauth, let system = oauth as? System else {
+      throw OAuth.Error.oauthNotInstalled
+    }
+    return try await perform(system)
+  }
 }
 
 extension OAuth {
   fileprivate actor Delegate: OAuthProxy, NetworkEnvironmentKey, AuthenticationDelegate {
+    let upstream: any NetworkingComponent
     var system: any OAuthSystem
 
     var presentationContext: (any ASWebAuthenticationPresentationContextProviding) = DefaultPresentationContext()
 
-    init(system: any OAuthSystem) {
+    init(upstream: any NetworkingComponent, system: any OAuthSystem) {
+      self.upstream = upstream
       self.system = system
     }
 
@@ -42,60 +58,38 @@ extension OAuth {
       self.presentationContext = presentationContext
     }
 
-    func authorize(
-      server newServer: String? = nil,
-      scope newScope: String? = nil
-    ) async throws {
-      if let newServer, newServer.isNotEmpty {
-        system.authorizationServer = newServer
-      }
+    func authorize() async throws {
 
-      if let newScope, newScope.isNotEmpty {
-        system.scope = newScope
-      }
+      let url = try system.authorizationURL()
 
-      // Construct a URL
-      guard var components = URLComponents(string: system.authorizationServer) else {
-        throw Error.invalidAuthorizationService(system.authorizationServer)
-      }
+      let callbackURL = try await ASWebAuthenticationSession.start(
+        url: url,
+        presentationContext: UncheckedSendable(presentationContext),
+        callbackURLScheme: system.callbackScheme
+      )
 
-      components.queryItems = [
-        URLQueryItem(name: "client_id", value: system.clientId)
-      ]
+      let code = try system.validate(callback: callbackURL)
 
-      if let scope = system.scope {
-        components.queryItems = [
-          URLQueryItem(name: "scope", value: scope)
-        ]
-      }
-
-      guard let url = components.url else {
-        throw Error.invalidAuthorizationURL(components)
-      }
-
-      //      let callbackURL: URL
-      if #available(iOS 17.4, macOS 14.4, tvOS 17.4, watchOS 10.4, visionOS 1.1, *) {
-        let callbackURL = try await ASWebAuthenticationSession.start(
-          url: url,
-          presentationContext: UncheckedSendable(presentationContext),
-          callback: system.callback
-        )
-      } else {
-
-      }
+      try await system.requestTokenExchange(
+        code: code,
+        using: upstream
+      )
     }
 
     func fetch(
       for request: HTTPRequestData
     ) async throws -> BearerCredentials {
-      throw "TODO"
+      if nil != system.credentials {
+        try await authorize()
+      }
+      return try system.getBearerCredentials()
     }
 
     func refresh(
       unauthorized: BearerCredentials,
       from response: HTTPResponseData
     ) async throws -> BearerCredentials {
-      throw "TODO"
+      throw ErrorMessage(message: "TODO: Refresh")
     }
   }
 }
