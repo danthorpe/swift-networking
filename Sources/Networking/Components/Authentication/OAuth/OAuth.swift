@@ -1,19 +1,9 @@
+import ConcurrencyExtras
 import Foundation
+import Protected
 
-public enum OAuth { /* Namespace */  }
-
-extension OAuth {
-  public enum ClientSecret: Sendable {
-    case secret(String)
-    case pkce
-  }
-
-  public enum Error: Swift.Error, Equatable {
-    case oauthNotInstalled
-    case failedToCreateSecureRandomData
-    case failedToCreateCodeChallengeForVerifier(String)
-    case invalidAuthorizationService(String)
-    case invalidAuthorizationURL(URLComponents)
-    //    case webAuthenticationSessionError(any Swift.Error)
-  }
+/// OAuth namespace
+public enum OAuth {
+  /// Namespace for available OAuth systems which ship with the library
+  public enum AvailableSystems {}
 }

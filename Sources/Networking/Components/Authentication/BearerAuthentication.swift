@@ -4,19 +4,12 @@ extension AuthenticationMethod {
   public static let bearer = AuthenticationMethod(rawValue: "Bearer")
 }
 
-public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOption,
-  AuthenticatingCredentials
-{
-  public static let method: AuthenticationMethod = .bearer
-  public static let defaultOption: Self? = nil
+public protocol BearerAuthenticatingCredentials: AuthenticatingCredentials {}
 
-  public let token: String
+extension BearerAuthenticatingCredentials {
+  public static var method: AuthenticationMethod { .bearer }
 
-  public init(token: String) {
-    self.token = token
-  }
-
-  public func apply(to request: HTTPRequestData) -> HTTPRequestData {
+  public func apply(token: String, to request: HTTPRequestData) -> HTTPRequestData {
     @NetworkEnvironment(\.logger) var logger
     var copy = request
     let authenticationValue = "Bearer \(token)"
@@ -28,6 +21,20 @@ public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOpt
         """)
     copy.headerFields[.authorization] = authenticationValue
     return copy
+  }
+}
+
+public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOption, BearerAuthenticatingCredentials {
+  public static let defaultOption: Self? = nil
+
+  public let token: String
+
+  public init(token: String) {
+    self.token = token
+  }
+
+  public func apply(to request: HTTPRequestData) -> HTTPRequestData {
+    apply(token: token, to: request)
   }
 }
 

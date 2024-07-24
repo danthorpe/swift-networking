@@ -6,29 +6,37 @@ import Helpers
 // MARK: - Public API
 
 public protocol OAuthSystem<Credentials>: Sendable {
-  associatedtype Credentials
+  associatedtype Credentials: BearerAuthenticatingCredentials, Sendable
 
-  var callbackScheme: String { get }
+  var callback: String { get }
 
-  var clientSecret: OAuth.ClientSecret { get }
+  func buildAuthorizationURL(
+    state: String,
+    codeChallenge: String
+  ) throws -> URL
 
-  var credentials: Credentials? { get }
+  func validate(
+    callback: URL,
+    state expectedState: String
+  ) throws -> String
 
-  func authorizationURL() throws -> URL
-
-  func validate(callback: URL) throws -> String
-
-  func requestTokenExchange(
+  func requestCredentials(
     code: String,
+    codeVerifier: String,
     using upstream: any NetworkingComponent
-  ) async throws
-
-  func getBearerCredentials() throws -> BearerCredentials
+  ) async throws -> Credentials
 }
 
 // MARK: - Default Implementations
 
 extension OAuthSystem {
+
+  package var callbackScheme: String {
+    guard let components = URLComponents(string: callback), let scheme = components.scheme else {
+      return callback
+    }
+    return scheme
+  }
 
   public func extractValueFrom(_ callback: URL, forQueryNamed queryName: String) throws -> String {
     guard
@@ -40,20 +48,10 @@ extension OAuthSystem {
     }
     return value
   }
-
-  public func validate(callback: URL) throws -> String {
-    try extractValueFrom(callback, forQueryNamed: "code")
-  }
 }
 
-// MARK: - Implementation Details
-
-// MARK: - Requests etc
-
-// MARK: - Temporary
-
 extension URL {
-  public func extractValueForQueryParameterNamed(_ queryName: String) -> String? {
+  fileprivate func extractValueForQueryParameterNamed(_ queryName: String) -> String? {
     guard
       let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
       let queryItems = components.queryItems,

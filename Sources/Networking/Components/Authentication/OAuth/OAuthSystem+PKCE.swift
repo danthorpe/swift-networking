@@ -1,17 +1,17 @@
 import CryptoKit
 import Foundation
 
-extension OAuthSystem {
+extension OAuth {
 
-  public func generateNewState() throws -> String {
+  static func generateNewState() throws -> String {
     try _base64URLEncode(octets: _octets(count: 12))
   }
 
-  public func generateNewCodeVerifier(length: Int = 43) throws -> String {
+  static func generateNewCodeVerifier(length: Int = 43) throws -> String {
     try _generateCodeVerifier()
   }
 
-  public func codeChallengeFor(verifier: String) throws -> String {
+  static func codeChallengeFor(verifier: String) throws -> String {
     try _codeChallengeFor(verifier: verifier)
   }
 }

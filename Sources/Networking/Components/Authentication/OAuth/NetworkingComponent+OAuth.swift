@@ -1,53 +1,47 @@
 import AuthenticationServices
 import ConcurrencyExtras
 import Helpers
+import Protected
 
 extension NetworkingComponent {
 
-  public func authenticated(
-    oauth: any OAuthSystem
+  public func authenticated<Credentials: BearerAuthenticatingCredentials>(
+    oauth: some OAuthSystem<Credentials>
   ) -> some NetworkingComponent {
-    let delegate = OAuth.Delegate(
+    let delegate = OAuth.Delegate<Credentials>(
       upstream: self,
       system: oauth
     )
-    return withNetworkEnvironment {
-      $0.oauth = delegate
-    } operation: {
-      authenticated(with: BearerAuthentication(delegate: delegate))
-        .server(authenticationMethod: .bearer)
-    }
+    OAuth.InstalledSystems.set(oauth: delegate)
+    return authenticated(
+      with: HeaderBasedAuthentication(delegate: delegate)
+    )
+    .server(authenticationMethod: .bearer)
   }
 
-  public func oauth<ReturnValue>(
+  public func oauth<ReturnValue, Credentials: BearerAuthenticatingCredentials>(
+    of credentialsType: Credentials.Type,
     perform: (any OAuthProxy) async throws -> ReturnValue
   ) async throws -> ReturnValue {
-    @NetworkEnvironment(\.oauth) var oauth
-    guard let oauth else {
+    guard let oauth = OAuth.InstalledSystems.oauth(as: Credentials.self) else {
       throw OAuth.Error.oauthNotInstalled
     }
     return try await perform(oauth)
   }
-
-  public func oauth<System: OAuthSystem, ReturnValue>(
-    perform: (System) async throws -> ReturnValue
-  ) async throws -> ReturnValue {
-    @NetworkEnvironment(\.oauth) var oauth
-    guard let oauth, let system = oauth as? System else {
-      throw OAuth.Error.oauthNotInstalled
-    }
-    return try await perform(system)
-  }
 }
 
 extension OAuth {
-  fileprivate actor Delegate: OAuthProxy, NetworkEnvironmentKey, AuthenticationDelegate {
+  fileprivate actor Delegate<
+    Credentials: BearerAuthenticatingCredentials
+  >: OAuthProxy, AuthenticationDelegate {
     let upstream: any NetworkingComponent
-    var system: any OAuthSystem
+    var system: any OAuthSystem<Credentials>
 
     var presentationContext: (any ASWebAuthenticationPresentationContextProviding) = DefaultPresentationContext()
 
-    init(upstream: any NetworkingComponent, system: any OAuthSystem) {
+    var credentials: Credentials?
+
+    init(upstream: any NetworkingComponent, system: some OAuthSystem<Credentials>) {
       self.upstream = upstream
       self.system = system
     }
@@ -60,7 +54,16 @@ extension OAuth {
 
     func authorize() async throws {
 
-      let url = try system.authorizationURL()
+      let state = try OAuth.generateNewState()
+      let codeVerifier = try OAuth.generateNewCodeVerifier()
+      let codeChallenge = try OAuth.codeChallengeFor(
+        verifier: codeVerifier
+      )
+
+      let url = try system.buildAuthorizationURL(
+        state: state,
+        codeChallenge: codeChallenge
+      )
 
       let callbackURL = try await ASWebAuthenticationSession.start(
         url: url,
@@ -68,35 +71,67 @@ extension OAuth {
         callbackURLScheme: system.callbackScheme
       )
 
-      let code = try system.validate(callback: callbackURL)
+      let code = try system.validate(callback: callbackURL, state: state)
 
-      try await system.requestTokenExchange(
+      self.credentials = try await system.requestCredentials(
         code: code,
+        codeVerifier: codeVerifier,
         using: upstream
       )
     }
 
     func fetch(
       for request: HTTPRequestData
-    ) async throws -> BearerCredentials {
-      if nil != system.credentials {
-        try await authorize()
+    ) async throws -> Credentials {
+      if let credentials {
+        return credentials
       }
-      return try system.getBearerCredentials()
+      try await authorize()
+      guard let credentials else {
+        throw ErrorMessage(message: "Failed to fetch credentials")
+      }
+      return credentials
     }
 
     func refresh(
-      unauthorized: BearerCredentials,
+      unauthorized: Credentials,
       from response: HTTPResponseData
-    ) async throws -> BearerCredentials {
+    ) async throws -> Credentials {
       throw ErrorMessage(message: "TODO: Refresh")
     }
   }
 }
 
-extension NetworkEnvironmentValues {
-  fileprivate var oauth: OAuth.Delegate? {
-    get { self[OAuth.Delegate.self] }
-    set { self[OAuth.Delegate.self] = newValue }
+extension OAuth {
+  fileprivate struct InstalledSystems: Sendable {
+    @Protected static var current = Self()
+    private var storage: [ObjectIdentifier: AnySendable] = [:]
+
+    private subscript<Credentials: BearerAuthenticatingCredentials>(
+      key: Credentials.Type
+    ) -> OAuth.Delegate<Credentials>? {
+      get {
+        guard
+          let base = self.storage[ObjectIdentifier(key)]?.base,
+          let value = base as? OAuth.Delegate<Credentials>
+        else { return nil }
+        return value
+      }
+      set {
+        self.storage[ObjectIdentifier(key)] = AnySendable(newValue)
+      }
+    }
+
+    static func oauth<Credentials: BearerAuthenticatingCredentials>(
+      as credentials: Credentials.Type
+    ) -> OAuth.Delegate<Credentials>? {
+      Self.current[Credentials.self]
+    }
+
+    static func set<Credentials: BearerAuthenticatingCredentials>(
+      oauth delegate: some OAuth.Delegate<Credentials>
+    ) {
+      Self.current[Credentials.self] = delegate
+    }
   }
 }
