@@ -93,7 +93,12 @@ extension OAuth.AvailableSystems.Spotify: OAuthSystem {
   }
 }
 
+extension AuthenticationMethod {
+  public static let spotify = AuthenticationMethod(rawValue: "spotify")
+}
+
 extension OAuth.AvailableSystems.Spotify.Credentials: BearerAuthenticatingCredentials {
+  public static let method: AuthenticationMethod = .spotify
   public func apply(to request: HTTPRequestData) -> HTTPRequestData {
     apply(token: accessToken, to: request)
   }

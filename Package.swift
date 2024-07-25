@@ -155,7 +155,7 @@ extension [SwiftSetting] {
   #else
   static let concurrency: Self = [
     .enableExperimentalFeature("GlobalConcurrency"),
-    .enableExperimentalFeature("StrictConcurrency"),
+    .enableExperimentalFeature("TargetedConcurrency"),
     .enableExperimentalFeature("InferSendableFromCaptures"),
   ]
   #endif

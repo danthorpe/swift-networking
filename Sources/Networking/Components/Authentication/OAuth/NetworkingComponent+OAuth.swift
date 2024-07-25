@@ -6,22 +6,25 @@ import Protected
 extension NetworkingComponent {
 
   public func authenticated<Credentials: BearerAuthenticatingCredentials>(
-    oauth: some OAuthSystem<Credentials>
+    oauth: some OAuthSystem<Credentials>,
+    credentials: Credentials? = nil,
+    didUpdateCredentials: @escaping @Sendable (Credentials) -> Void = { _ in }
   ) -> some NetworkingComponent {
     let delegate = OAuth.Delegate<Credentials>(
       upstream: self,
-      system: oauth
+      system: oauth,
+      credentials: credentials,
+      didUpdateCredentials: didUpdateCredentials
     )
     OAuth.InstalledSystems.set(oauth: delegate)
     return authenticated(
       with: HeaderBasedAuthentication(delegate: delegate)
     )
-    .server(authenticationMethod: .bearer)
   }
 
   public func oauth<ReturnValue, Credentials: BearerAuthenticatingCredentials>(
     of credentialsType: Credentials.Type,
-    perform: (any OAuthProxy) async throws -> ReturnValue
+    perform: (any OAuthProxy<Credentials>) async throws -> ReturnValue
   ) async throws -> ReturnValue {
     guard let oauth = OAuth.InstalledSystems.oauth(as: Credentials.self) else {
       throw OAuth.Error.oauthNotInstalled
@@ -34,16 +37,36 @@ extension OAuth {
   fileprivate actor Delegate<
     Credentials: BearerAuthenticatingCredentials
   >: OAuthProxy, AuthenticationDelegate {
+
     let upstream: any NetworkingComponent
     var system: any OAuthSystem<Credentials>
 
     var presentationContext: (any ASWebAuthenticationPresentationContextProviding) = DefaultPresentationContext()
+    var didUpdateCredentials: (Credentials) -> Void = { _ in }
+    var credentials: Credentials? {
+      didSet {
+        if let credentials { didUpdateCredentials(credentials) }
+      }
+    }
 
-    var credentials: Credentials?
-
-    init(upstream: any NetworkingComponent, system: some OAuthSystem<Credentials>) {
+    init(
+      upstream: any NetworkingComponent,
+      system: some OAuthSystem<Credentials>,
+      credentials: Credentials? = nil,
+      didUpdateCredentials: @escaping (Credentials) -> Void = { _ in }
+    ) {
       self.upstream = upstream
       self.system = system
+      self.credentials = credentials
+      self.didUpdateCredentials = didUpdateCredentials
+    }
+
+    func set(credentials: Credentials) {
+      self.credentials = credentials
+    }
+
+    func set(didUpdateCredentials: @escaping @Sendable (Credentials) -> Void) {
+      self.didUpdateCredentials = didUpdateCredentials
     }
 
     func set(
