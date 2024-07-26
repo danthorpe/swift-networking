@@ -12,20 +12,11 @@ extension ASWebAuthenticationSession {
     callbackURLScheme: String
   ) async throws -> URL {
     try await withCheckedThrowingContinuation { continuation in
-      let session: ASWebAuthenticationSession
-      if #available(iOS 17.4, macOS 14.4, tvOS 17.4, watchOS 10.4, visionOS 1.1, *) {
-        session = ASWebAuthenticationSession(
-          url: url,
-          callback: .customScheme(callbackURLScheme),
-          completionHandler: handleCallback(continuation: continuation)
-        )
-      } else {
-        session = ASWebAuthenticationSession(
-          url: url,
-          callbackURLScheme: callbackURLScheme,
-          completionHandler: handleCallback(continuation: continuation)
-        )
-      }
+      let session = ASWebAuthenticationSession(
+        url: url,
+        callbackURLScheme: callbackURLScheme,
+        completionHandler: handleCallback(continuation: continuation)
+      )
       session.presentationContextProvider = presentationContext.value
       session.start()
     }
@@ -37,12 +28,11 @@ extension ASWebAuthenticationSession {
     { url, error in
       guard let url else {
         if let error {
-          print(String(describing: error))
           continuation.resume(throwing: error)
         } else {
           continuation.resume(
             throwing: ErrorMessage(
-              message: "TODO: ASWebAuthentication returned with missing URL and no Error"
+              message: "ASWebAuthentication returned with missing URL and no Error"
             )
           )
         }
