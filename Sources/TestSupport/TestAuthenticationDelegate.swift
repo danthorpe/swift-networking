@@ -2,31 +2,30 @@ import Networking
 import Protected
 import XCTestDynamicOverlay
 
-public final class TestAuthenticationDelegate<Credentials: AuthenticatingCredentials>: @unchecked
-  Sendable
-{
-  public typealias Fetch = @Sendable (HTTPRequestData) async throws -> Credentials
+public actor TestAuthenticationDelegate<Credentials: AuthenticatingCredentials>: Sendable {
+  public typealias Authorize = @Sendable () async throws -> Credentials
   public typealias Refresh = @Sendable (Credentials, HTTPResponseData) async throws -> Credentials
 
-  @Protected public var fetchCount: Int = 0
-  @Protected public var refreshCount: Int = 0
+  public var authorizeCount: Int = 0
+  public var refreshCount: Int = 0
 
-  public var fetch: Fetch
-  public var refresh: Refresh
+  public var performAuthorize: Authorize
+  public var performRefresh: Refresh
 
   public init(
-    fetch: @escaping Fetch = unimplemented("TestAuthenticationDelegate.fetch"),
+    authorize: @escaping Authorize = unimplemented("TestAuthenticationDelegate.authorize"),
     refresh: @escaping Refresh = unimplemented("TestAuthenticationDelegate.refresh")
   ) {
-    self.fetch = fetch
-    self.refresh = refresh
+    self.performAuthorize = authorize
+    self.performRefresh = refresh
   }
 }
 
 extension TestAuthenticationDelegate: AuthenticationDelegate {
-  public func fetch(for request: HTTPRequestData) async throws -> Credentials {
-    fetchCount += 1
-    return try await fetch(request)
+
+  public func authorize() async throws -> Credentials {
+    authorizeCount += 1
+    return try await performAuthorize()
   }
 
   public func refresh(
@@ -34,6 +33,6 @@ extension TestAuthenticationDelegate: AuthenticationDelegate {
     from response: HTTPResponseData
   ) async throws -> Credentials {
     refreshCount += 1
-    return try await refresh(credentials, response)
+    return try await performRefresh(credentials, response)
   }
 }

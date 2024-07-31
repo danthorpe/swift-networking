@@ -44,6 +44,14 @@ extension HTTPRequestData {
   }
 }
 
-public typealias BasicAuthentication<
-  Delegate: AuthenticationDelegate
-> = HeaderBasedAuthentication<Delegate> where Delegate.Credentials == BasicCredentials
+extension AuthenticationDelegate {
+  public static func basic(
+    _ delegate: some AuthenticationDelegate<BasicCredentials>
+  ) -> some AuthenticationDelegate<BasicCredentials> {
+    AnyAuthenticationDelegate(
+      delegate: ThreadSafeAuthenticationDelegate(
+        delegate: delegate
+      )
+    )
+  }
+}

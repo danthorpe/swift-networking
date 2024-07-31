@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.10
 import PackageDescription
 
 var package = Package(name: "swift-networking")
@@ -25,7 +25,8 @@ let 📦 = Module.builder(
     name: "Basic Module",
     dependsOn: [],
     defaultWith: [
-      .dependencies
+      .dependencies,
+      .dependenciesMacros,
     ],
     unitTestsDependsOn: [],
     swiftSettings: .concurrency
@@ -116,6 +117,9 @@ extension Target.Dependency {
   static let dependencies: Target.Dependency = .product(
     name: "Dependencies", package: "swift-dependencies"
   )
+  static let dependenciesMacros: Target.Dependency = .product(
+    name: "DependenciesMacros", package: "swift-dependencies"
+  )
   static let deque: Target.Dependency = .product(
     name: "DequeModule", package: "swift-collections"
   )
@@ -149,8 +153,7 @@ extension Target.Dependency {
 extension [SwiftSetting] {
   #if swift(>=6)
   static let concurrency: Self = [
-    .enableUpcomingFeature("StrictConcurrency"),
-    .enableUpcomingFeature("InferSendableFromCaptures"),
+    // Already enabled
   ]
   #else
   static let concurrency: Self = [

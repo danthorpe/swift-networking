@@ -1,5 +1,19 @@
 import Foundation
 
+extension NetworkingComponent {
+  public func authenticated<Credentials: BearerAuthenticatingCredentials>(
+    withBearer delegate: some AuthenticationDelegate<Credentials>
+  ) -> some NetworkingComponent {
+    authenticated(
+      with: AnyAuthenticationDelegate(
+        delegate: ThreadSafeAuthenticationDelegate(
+          delegate: delegate
+        )
+      )
+    )
+  }
+}
+
 extension AuthenticationMethod {
   public static let bearer = AuthenticationMethod(rawValue: "Bearer")
 }
@@ -47,7 +61,3 @@ extension HTTPRequestData {
     }
   }
 }
-
-public typealias BearerAuthentication<
-  Delegate: AuthenticationDelegate
-> = HeaderBasedAuthentication<Delegate> where Delegate.Credentials == BearerCredentials
