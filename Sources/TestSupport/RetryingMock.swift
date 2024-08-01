@@ -1,8 +1,5 @@
-import AssertionExtras
-import Dependencies
 import Foundation
 import Networking
-import os.log
 
 package actor RetryingMock {
   package var stubs: [StubbedResponseStream]
