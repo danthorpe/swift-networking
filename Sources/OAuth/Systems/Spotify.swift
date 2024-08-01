@@ -1,8 +1,10 @@
 import Foundation
+import HTTPTypes
+import Networking
 
 extension OAuth.AvailableSystems {
   public struct Spotify: Sendable {
-    public struct Credentials: Decodable, Sendable {
+    public struct Credentials: Codable, Sendable {
       public enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case expiresIn = "expires_in"
@@ -70,6 +72,25 @@ extension OAuth.AvailableSystems.Spotify: OAuthSystem {
       "grant_type=authorization_code" + "&code=\(code)" + "&redirect_uri=\(callback)" + "&client_id=\(clientId)"
       + "&code_verifier=\(codeVerifier)"
 
+    return try await post(body: requestBody, using: upstream)
+  }
+
+  public func refresh(
+    credentials: Credentials,
+    using upstream: any NetworkingComponent
+  ) async throws -> Credentials {
+
+    let requestBody =
+      "grant_type=refresh_token" + "&refresh_token=\(credentials.refreshToken)" + "&client_id=\(clientId)"
+
+    return try await post(body: requestBody, using: upstream)
+  }
+
+  private func post(
+    body requestBody: String,
+    using upstream: any NetworkingComponent
+  ) async throws -> Credentials {
+
     let requestData = requestBody.data(using: .utf8)
 
     var http = HTTPRequestData(
@@ -84,7 +105,7 @@ extension OAuth.AvailableSystems.Spotify: OAuthSystem {
     )
 
     if let contentLength = requestData?.count {
-      http.headerFields.append([.contentLength: "\(contentLength)"])
+      http.headerFields.append(HTTPField(name: .contentLength, value: "\(contentLength)"))
     }
 
     http.serverMutations = .disabled

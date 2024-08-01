@@ -4,19 +4,19 @@ import Foundation
 ///
 /// This type can assist by providing thread-safety, requiring only
 /// that a basic struct implementing authorization logic be required.
-actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>: AuthenticationDelegate {
+package actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>: AuthenticationDelegate {
   private enum State {
     case idle
     case fetching(Task<Delegate.Credentials, Error>)
     case authorized(Delegate.Credentials)
   }
 
-  let delegate: Delegate
+  package let delegate: Delegate
   private var state: State = .idle
 
   @NetworkEnvironment(\.logger) var logger
 
-  init(delegate: Delegate) {
+  package init(delegate: Delegate) {
     self.delegate = delegate
   }
 
@@ -24,7 +24,21 @@ actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>: Authen
     self.state = state
   }
 
-  func authorize() async throws -> Delegate.Credentials {
+  package func set(credentials: Delegate.Credentials) async {
+    switch state {
+    case .idle, .authorized:
+      set(state: .authorized(credentials))
+    case let .fetching(task):
+      task.cancel()
+      set(state: .authorized(credentials))
+    }
+  }
+
+  package func removeCredentials() async {
+    set(state: .idle)
+  }
+
+  package func authorize() async throws -> Delegate.Credentials {
     switch state {
     case let .authorized(credentials):
       return credentials
@@ -37,7 +51,7 @@ actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>: Authen
     }
   }
 
-  func refresh(
+  package func refresh(
     unauthorized credentials: Delegate.Credentials,
     from response: HTTPResponseData
   ) async throws -> Delegate.Credentials {

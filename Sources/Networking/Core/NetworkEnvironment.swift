@@ -1,5 +1,6 @@
 import ConcurrencyExtras
 import Foundation
+import Helpers
 
 extension NetworkingComponent {
   func networkEnvironment<Value: Sendable>(
@@ -76,13 +77,5 @@ func withNetworkEnvironment<R>(
   try updateNetworkEnvironmentForOperation(&environment)
   return try NetworkEnvironmentValues.$current.withValue(environment) {
     try operation()
-  }
-}
-
-struct AnySendable: @unchecked Sendable {
-  let base: Any
-  @inlinable
-  init<Base: Sendable>(_ base: Base) {
-    self.base = base
   }
 }

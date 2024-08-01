@@ -2,6 +2,7 @@ import AuthenticationServices
 import ConcurrencyExtras
 import Foundation
 import Helpers
+import Networking
 
 // MARK: - Public API
 
@@ -23,6 +24,11 @@ public protocol OAuthSystem<Credentials>: Sendable {
   func requestCredentials(
     code: String,
     codeVerifier: String,
+    using upstream: any NetworkingComponent
+  ) async throws -> Credentials
+
+  func refresh(
+    credentials: Credentials,
     using upstream: any NetworkingComponent
   ) async throws -> Credentials
 }

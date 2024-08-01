@@ -2,6 +2,7 @@ import AuthenticationServices
 import ConcurrencyExtras
 import Dependencies
 import Helpers
+import Networking
 import Protected
 
 extension NetworkingComponent {
@@ -95,7 +96,10 @@ extension OAuth.Delegate: AuthenticationDelegate {
     unauthorized: Credentials,
     from response: HTTPResponseData
   ) async throws -> Credentials {
-    throw ErrorMessage(message: "TODO: Refresh")
+    try await system.refresh(
+      credentials: unauthorized,
+      using: upstream
+    )
   }
 }
 
@@ -111,20 +115,26 @@ extension OAuth {
       self.delegate = delegate
     }
 
+    func set(credentials: Credentials) async {
+      await delegate.set(credentials: credentials)
+    }
+
     func set(presentationContext: any ASWebAuthenticationPresentationContextProviding) async {
       await delegate.delegate.delegate.set(presentationContext: presentationContext)
     }
 
     func subscribeToCredentialsDidChange(_ credentialsDidChange: (Credentials) async -> Void) async {
-      do {
-        for try await credentials in await delegate.delegate.credentials {
-          await credentialsDidChange(credentials)
-        }
-      } catch {}
+      for await credentials in await delegate.delegate.credentials {
+        await credentialsDidChange(credentials)
+      }
     }
 
     func signIn() async throws {
       _ = try await delegate.authorize()
+    }
+
+    func signOut() async {
+      await delegate.removeCredentials()
     }
   }
 }

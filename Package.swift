@@ -14,8 +14,9 @@ package.platforms = [
 
 // MARK: - 🧸 Module Names
 
-let Networking = "Networking"
 let Helpers = "Helpers"
+let Networking = "Networking"
+let OAuth = "OAuth"
 let TestSupport = "TestSupport"
 
 // MARK: - 🔑 Builders
@@ -63,6 +64,15 @@ Networking
     $0.unitTestsWith = [
       .assertionExtras,
       .concurrencyExtras,
+    ]
+  }
+
+OAuth
+  <+ 📦 {
+    $0.createProduct = .library(nil)
+    $0.dependsOn = [
+      Helpers,
+      Networking,
     ]
   }
 
