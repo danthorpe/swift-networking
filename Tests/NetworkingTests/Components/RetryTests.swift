@@ -9,22 +9,6 @@ import os.log
 
 final class RetryTests: XCTestCase {
 
-  final class RetryingMock {
-    var stubs: [StubbedResponseStream]
-    init(stubs: [StubbedResponseStream]) {
-      self.stubs = stubs.reversed()
-    }
-
-    func send(upstream: NetworkingComponent, request: HTTPRequestData) throws -> ResponseStream<
-      HTTPResponseData
-    > {
-      guard let stub = stubs.popLast() else {
-        throw "Exhausted supply of stub responses"
-      }
-      return stub(request)
-    }
-  }
-
   func test__basic_retry() async throws {
     let clock = ImmediateClock()
     let data = try XCTUnwrap("Hello".data(using: .utf8))
@@ -47,7 +31,7 @@ final class RetryTests: XCTestCase {
       let network = TerminalNetworkingComponent()
         .mocked { upstream, request in
           do {
-            return try retryingMock.send(upstream: upstream, request: request)
+            return try await retryingMock.send(upstream: upstream, request: request)
           } catch {
             XCTFail(String(describing: error))
             return .finished(throwing: error)
@@ -59,7 +43,9 @@ final class RetryTests: XCTestCase {
       let response = try await network.data(request, timeout: .seconds(60), using: TestClock())
 
       XCTAssertEqual(response.data, data)
-      XCTAssertTrue(retryingMock.stubs.isEmpty)
+
+      let stubs = await retryingMock.stubs
+      XCTAssertTrue(stubs.isEmpty)
     }
   }
 
