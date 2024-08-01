@@ -1,5 +1,6 @@
 import Foundation
 import HTTPTypes
+import Helpers
 import os.log
 
 extension NetworkingComponent {
@@ -19,8 +20,12 @@ extension NetworkingComponent {
   ) -> some NetworkingComponent {
     server { request in
       @NetworkEnvironment(\.logger) var logger
-      request[keyPath: keyPath] = transform(request[keyPath: keyPath])
-      log(logger, request)
+      let oldValue = request[keyPath: keyPath]
+      let newValue = transform(oldValue)
+      request[keyPath: keyPath] = newValue
+      if !_isEqual(oldValue, newValue) {
+        log(logger, request)
+      }
     }
   }
 

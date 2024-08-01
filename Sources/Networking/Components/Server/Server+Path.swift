@@ -26,7 +26,10 @@ extension NetworkingComponent {
   /// - Returns: some ``NetworkingComponent``
   public func server(prefixPath: String, delimiter: String = "/") -> some NetworkingComponent {
     server(mutate: \.path) { path in
-      delimiter + prefixPath + path
+      if path.hasPrefix(delimiter + prefixPath) {
+        return path
+      }
+      return delimiter + prefixPath + path
     } log: { logger, request in
       logger?.debug("💁 prefix path -> '\(prefixPath)' \(request.debugDescription)")
     }

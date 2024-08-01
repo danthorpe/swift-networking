@@ -48,7 +48,7 @@ struct Mocked: NetworkingModifier {
 
 extension NetworkingComponent {
   public func mocked(
-    _ block: @escaping @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<
+    _ block: @escaping @Sendable (NetworkingComponent, HTTPRequestData) async -> ResponseStream<
       HTTPResponseData
     >
   ) -> some NetworkingComponent {
@@ -57,7 +57,7 @@ extension NetworkingComponent {
 }
 
 struct CustomMocked: NetworkingModifier {
-  let block: @Sendable (NetworkingComponent, HTTPRequestData) -> ResponseStream<HTTPResponseData>
+  let block: @Sendable (NetworkingComponent, HTTPRequestData) async -> ResponseStream<HTTPResponseData>
 
   func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
     request  // Note: We actually do not want to resolve the request to be mocked
@@ -66,6 +66,10 @@ struct CustomMocked: NetworkingModifier {
   func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
-    block(upstream, request)
+    ResponseStream { continuation in
+      Task {
+        await block(upstream, request).redirect(into: continuation)
+      }
+    }
   }
 }

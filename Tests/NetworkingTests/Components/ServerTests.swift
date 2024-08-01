@@ -115,6 +115,26 @@ final class ServerTests: NetworkingTestCase {
     XCTAssertEqual(sentRequests.map(\.path), ["/v1"])
   }
 
+  func test__set_path_prefix__with_retries() async throws {
+    let reporter = TestReporter()
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.ok(), check: { _ in true })
+      .reported(by: reporter)
+      .server(prefixPath: "v1")
+      .logged(using: Logger())
+
+    var original = HTTPRequestData()
+    var response = try await network.data(original)
+
+    // Retry sending the request as determined in the response
+    try await network.data(response.request)
+
+    let sentRequests = await reporter.requests
+    let sentRequestsPaths = await reporter.requests.map(\.path)
+    XCTAssertEqual(sentRequestsPaths, ["/v1", "/v1"])
+  }
+
   func test__set_headers() async throws {
     let reporter = TestReporter()
 
