@@ -7,9 +7,13 @@ import Networking
 // MARK: - Public API
 
 public protocol OAuthSystem<Credentials>: Sendable {
-  associatedtype Credentials: BearerAuthenticatingCredentials, Sendable
+  associatedtype Credentials: OAuthCredentials
 
-  var callback: String { get }
+  var clientId: String { get }
+
+  var redirectURI: String { get }
+
+  var scope: String? { get }
 
   func buildAuthorizationURL(
     state: String,
@@ -27,8 +31,8 @@ public protocol OAuthSystem<Credentials>: Sendable {
     using upstream: any NetworkingComponent
   ) async throws -> Credentials
 
-  func refresh(
-    credentials: Credentials,
+  func refreshCredentials(
+    _ credentials: Credentials,
     using upstream: any NetworkingComponent
   ) async throws -> Credentials
 }
@@ -38,8 +42,8 @@ public protocol OAuthSystem<Credentials>: Sendable {
 extension OAuthSystem {
 
   package var callbackScheme: String {
-    guard let components = URLComponents(string: callback), let scheme = components.scheme else {
-      return callback
+    guard let components = URLComponents(string: redirectURI), let scheme = components.scheme else {
+      return redirectURI
     }
     return scheme
   }

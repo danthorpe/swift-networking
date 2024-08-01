@@ -74,6 +74,9 @@ OAuth
       Helpers,
       Networking,
     ]
+    $0.unitTestsDependsOn = [
+      TestSupport
+    ]
   }
 
 TestSupport

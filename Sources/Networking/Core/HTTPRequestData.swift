@@ -97,6 +97,17 @@ public struct HTTPRequestData: Sendable, Identifiable {
 
   init(
     id: ID,
+    body: Data?,
+    request: HTTPRequest
+  ) {
+    self.id = id
+    self.body = body
+    self._request = .init(projectedValue: request)
+    syncFromComponents()
+  }
+
+  init(
+    id: ID,
     method: HTTPRequest.Method = Defaults.method,
     scheme: String = Defaults.scheme,
     authority: String = Defaults.authority,
@@ -104,17 +115,17 @@ public struct HTTPRequestData: Sendable, Identifiable {
     headerFields: HTTPFields = [:],
     body: Data? = nil
   ) {
-    self.id = id
-    self.body = body
-    self._request = .init(
-      projectedValue: .init(
+    self.init(
+      id: id,
+      body: body,
+      request: .init(
         method: method,
         scheme: scheme,
         authority: authority,
         path: path,
         headerFields: headerFields
-      ))
-    syncFromComponents()
+      )
+    )
   }
 
   public init(
