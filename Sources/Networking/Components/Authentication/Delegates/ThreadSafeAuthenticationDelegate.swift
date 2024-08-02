@@ -5,14 +5,14 @@ import Foundation
 /// This type can assist by providing thread-safety, requiring only
 /// that a basic struct implementing authorization logic be required.
 package actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>: AuthenticationDelegate {
-  private enum State {
+  package enum State {
     case idle
     case fetching(Task<Delegate.Credentials, Error>)
     case authorized(Delegate.Credentials)
   }
 
   package let delegate: Delegate
-  private var state: State = .idle
+  package private(set) var state: State = .idle
 
   @NetworkEnvironment(\.logger) var logger
 
@@ -99,3 +99,5 @@ package actor ThreadSafeAuthenticationDelegate<Delegate: AuthenticationDelegate>
     }
   }
 }
+
+extension ThreadSafeAuthenticationDelegate.State: Equatable where Delegate.Credentials: Equatable {}

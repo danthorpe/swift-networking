@@ -47,6 +47,7 @@ extension OAuth.Delegate: AuthenticationDelegate {
     )
 
     let callbackURL = try await webAuthenticationSession.start(
+      state: state,
       authorizationURL: url,
       presentationContext: UncheckedSendable(presentationContext),
       callbackURLScheme: system.callbackScheme

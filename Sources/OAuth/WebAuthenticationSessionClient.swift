@@ -7,6 +7,7 @@ import Foundation
 struct WebAuthenticationSessionClient {
   var start:
     @MainActor (
+      _ state: String,
       _ authorizationURL: URL,
       _ presentationContext: UncheckedSendable<ASWebAuthenticationPresentationContextProviding>,
       _ callbackURLScheme: String
@@ -14,7 +15,7 @@ struct WebAuthenticationSessionClient {
 }
 
 extension WebAuthenticationSessionClient: DependencyKey {
-  static let liveValue = WebAuthenticationSessionClient { authorizationURL, context, callback in
+  static let liveValue = WebAuthenticationSessionClient { _, authorizationURL, context, callback in
     try await ASWebAuthenticationSession.start(
       url: authorizationURL,
       presentationContext: context,
