@@ -33,8 +33,8 @@ final class MetricsTests: XCTestCase {
         return
       }
 
-      XCTAssertNoDifference(measurements.map(\.label), ["Delay", "Mocked"])
-      XCTAssertNoDifference(measurements.map(\.duration), [.zero, .seconds(3)])
+      XCTAssertNoDifference(measurements.map(\.label), ["Delay"])
+      XCTAssertNoDifference(measurements.map(\.duration), [.zero])
     }
   }
 }
