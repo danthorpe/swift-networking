@@ -1,30 +1,35 @@
 import Networking
 
 extension NetworkingComponent {
+
   public func mocked(
     _ stub: StubbedResponseStream,
     check: @escaping @Sendable (HTTPRequestData) -> Bool
   ) -> some NetworkingComponent {
-    modified(Mocked(mock: check, with: stub))
+    mocked { check($0) ? stub : nil }
   }
 
   public func mocked(
     _ request: HTTPRequestData,
     stub: StubbedResponseStream
   ) -> some NetworkingComponent {
-    mocked(stub) { $0 ~= request }
+    mocked { $0 ~= request ? stub : nil }
+  }
+
+  public func mocked(
+    _ stub: @escaping @Sendable (HTTPRequestData) -> StubbedResponseStream?
+  ) -> some NetworkingComponent {
+    modified(Mocked(mock: stub))
   }
 }
 
 struct Mocked: NetworkingModifier {
-  let mock: @Sendable (HTTPRequestData) -> Bool
-  let stub: StubbedResponseStream
+  let mock: @Sendable (HTTPRequestData) -> StubbedResponseStream?
 
   @NetworkEnvironment(\.instrument) var instrument
 
-  init(mock: @escaping @Sendable (HTTPRequestData) -> Bool, with stubbedResponse: StubbedResponseStream) {
+  init(mock: @escaping @Sendable (HTTPRequestData) -> StubbedResponseStream?) {
     self.mock = mock
-    self.stub = stubbedResponse
   }
 
   func resolve(upstream: some NetworkingComponent, request: HTTPRequestData) -> HTTPRequestData {
@@ -34,7 +39,7 @@ struct Mocked: NetworkingModifier {
   func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<
     HTTPResponseData
   > {
-    guard mock(request) else {
+    guard let stub = mock(request) else {
       return upstream.send(request)
     }
     return ResponseStream { continuation in
