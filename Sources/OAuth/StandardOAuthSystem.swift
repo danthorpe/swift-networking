@@ -84,7 +84,7 @@ extension StandardOAuthSystem {
     body requestBody: String
   ) async throws -> Credentials {
 
-    guard let url = URL(string: tokenEndpoint) else {
+    guard let url = URL(string: tokenEndpoint), validate(url: url) else {
       throw OAuth.Error.invalidTokenEndpoint(tokenEndpoint)
     }
 

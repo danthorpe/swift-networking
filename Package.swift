@@ -24,15 +24,9 @@ let TestSupport = "TestSupport"
 let 📦 = Module.builder(
   withDefaults: .init(
     name: "Basic Module",
-    dependsOn: [],
     defaultWith: [
       .dependencies,
       .dependenciesMacros,
-      .concurrencyExtras,
-    ],
-    unitTestsDependsOn: [],
-    unitTestsWith: [
-      .assertionExtras,
       .concurrencyExtras,
     ],
     swiftSettings: .concurrency
@@ -65,6 +59,10 @@ Networking
     $0.unitTestsDependsOn = [
       TestSupport
     ]
+    $0.unitTestsWith = [
+      .assertionExtras,
+      .concurrencyExtras,
+    ]
   }
 
 OAuth
@@ -76,6 +74,10 @@ OAuth
     ]
     $0.unitTestsDependsOn = [
       TestSupport
+    ]
+    $0.unitTestsWith = [
+      .assertionExtras,
+      .concurrencyExtras,
     ]
   }
 
