@@ -28,8 +28,13 @@ let 📦 = Module.builder(
     defaultWith: [
       .dependencies,
       .dependenciesMacros,
+      .concurrencyExtras,
     ],
     unitTestsDependsOn: [],
+    unitTestsWith: [
+      .assertionExtras,
+      .concurrencyExtras,
+    ],
     swiftSettings: .concurrency
   )
 )
@@ -51,7 +56,6 @@ Networking
       .algorithms,
       .asyncAlgorithms,
       .cache,
-      .concurrencyExtras,
       .httpTypes,
       .httpTypesFoundation,
       .protected,
@@ -60,10 +64,6 @@ Networking
     ]
     $0.unitTestsDependsOn = [
       TestSupport
-    ]
-    $0.unitTestsWith = [
-      .assertionExtras,
-      .concurrencyExtras,
     ]
   }
 
@@ -86,9 +86,6 @@ TestSupport
     $0.dependsOn = [
       Networking,
       Helpers,
-    ]
-    $0.with = [
-      .concurrencyExtras
     ]
   }
 

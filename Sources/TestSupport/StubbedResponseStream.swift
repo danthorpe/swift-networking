@@ -73,6 +73,14 @@ public struct StubbedResponseStream: Equatable, Sendable {
 extension StubbedResponseStream {
   public static func ok(
     _ configuration: Configuration = .default,
+    body: any HTTPRequestBody,
+    headerFields: HTTPFields = [:]
+  ) throws -> Self {
+    try .ok(configuration, data: body.encode(), headerFields: headerFields + body.additionalHeaders)
+  }
+
+  public static func ok(
+    _ configuration: Configuration = .default,
     data: Data = Data(),
     headerFields: HTTPFields = [:]
   ) -> Self {

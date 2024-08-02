@@ -3,11 +3,8 @@ import HTTPTypes
 import Networking
 
 public protocol StandardOAuthSystem<Credentials>: OAuthSystem {
-
   var authorizationEndpoint: String { get }
-
   var tokenEndpoint: String { get }
-
 }
 
 extension StandardOAuthSystem {
@@ -16,9 +13,7 @@ extension StandardOAuthSystem {
     state: String,
     codeChallenge: String
   ) throws -> URL {
-    guard var components = URLComponents(string: authorizationEndpoint) else {
-      throw OAuth.Error.invalidAuthorizationEndpoint(authorizationEndpoint)
-    }
+    var components = try authorizationComponents()
 
     components.queryItems = [
       URLQueryItem(name: "client_id", value: clientId),
@@ -35,7 +30,7 @@ extension StandardOAuthSystem {
       )
     }
 
-    guard let url = components.url else {
+    guard let url = components.url, validate(url: url) else {
       throw OAuth.Error.invalidAuthorizationURL(components)
     }
 
@@ -59,9 +54,14 @@ extension StandardOAuthSystem {
     using upstream: any NetworkingComponent
   ) async throws -> Credentials {
     try await post(
-      body:
-        "grant_type=authorization_code&code=\(code)&redirect_uri=\(redirectURI)&client_id=\(clientId)&code_verifier=\(codeVerifier)",
-      using: upstream
+      using: upstream,
+      body: """
+        grant_type=authorization_code\
+        &code=\(code)\
+        &redirect_uri=\(redirectURI)\
+        &client_id=\(clientId)\
+        &code_verifier=\(codeVerifier)
+        """
     )
   }
 
@@ -70,14 +70,18 @@ extension StandardOAuthSystem {
     using upstream: any NetworkingComponent
   ) async throws -> Credentials {
     try await post(
-      body: "grant_type=refresh_token&refresh_token=\(credentials.refreshToken)&client_id=\(clientId)",
-      using: upstream
+      using: upstream,
+      body: """
+        grant_type=refresh_token\
+        &refresh_token=\(credentials.refreshToken)\
+        &client_id=\(clientId)
+        """
     )
   }
 
   private func post(
-    body requestBody: String,
-    using upstream: any NetworkingComponent
+    using upstream: any NetworkingComponent,
+    body requestBody: String
   ) async throws -> Credentials {
 
     guard let url = URL(string: tokenEndpoint) else {
@@ -102,5 +106,20 @@ extension StandardOAuthSystem {
     http.serverMutations = .disabled
 
     return try await upstream.value(http, as: Credentials.self, decoder: JSONDecoder()).body
+  }
+
+  func authorizationComponents() throws -> URLComponents {
+    guard
+      let url = URL(string: authorizationEndpoint),
+      validate(url: url),
+      let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+    else {
+      throw OAuth.Error.invalidAuthorizationEndpoint(authorizationEndpoint)
+    }
+    return components
+  }
+
+  func validate(url: URL) -> Bool {
+    false == url.scheme.isEmptyOrNil && false == url.host().isEmptyOrNil
   }
 }
