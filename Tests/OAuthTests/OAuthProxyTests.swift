@@ -9,25 +9,7 @@ import XCTestDynamicOverlay
 
 @testable import OAuth
 
-final class OAuthProxyTests: NetworkingTestCase {
-
-  var stub: StubOAuthSystem!
-
-  override func setUp() {
-    super.setUp()
-    stub = StubOAuthSystem(
-      authorizationEndpoint: "https://accounts.example.com/authorize",
-      tokenEndpoint: "https://accounts.example.com/api/token",
-      clientId: "some-client-id",
-      redirectURI: "some-redirect-uri://callback",
-      scope: "some-scope"
-    )
-  }
-
-  override func tearDown() {
-    stub = nil
-    super.tearDown()
-  }
+final class OAuthProxyTests: OAuthTestCase {
 
   func test__proxy() async throws {
 

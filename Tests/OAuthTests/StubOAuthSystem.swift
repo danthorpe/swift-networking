@@ -1,5 +1,10 @@
 import Foundation
+import Networking
 import OAuth
+
+extension AuthenticationMethod {
+  static let stub = AuthenticationMethod(rawValue: "stub")
+}
 
 struct StubOAuthSystem: StandardOAuthSystem {
   struct Credentials: OAuthCredentials, Equatable {
