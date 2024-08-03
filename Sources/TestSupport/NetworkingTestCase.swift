@@ -23,6 +23,7 @@ open class NetworkingTestCase: XCTestCase {
   ) {
     withDependencies {
       $0.shortID = shortIdGenerator ?? .incrementing
+      $0.traceParentGenerator = .incrementing
       $0.continuousClock = continuousClock ?? TestClock()
       updateValuesForOperation(&$0)
     } operation: {
