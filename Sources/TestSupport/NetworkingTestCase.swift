@@ -31,4 +31,19 @@ open class NetworkingTestCase: XCTestCase {
       }
     }
   }
+
+  public func withTestDependencies(
+    _ updateValuesForOperation: (inout DependencyValues) -> Void = { _ in },
+    operation: () async throws -> Void
+  ) async throws {
+    try await withDependencies {
+      $0.shortID = shortIdGenerator ?? .incrementing
+      $0.continuousClock = continuousClock ?? TestClock()
+      updateValuesForOperation(&$0)
+    } operation: {
+      try await withMainSerialExecutor {
+        try await operation()
+      }
+    }
+  }
 }

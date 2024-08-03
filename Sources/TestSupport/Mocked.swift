@@ -20,15 +20,19 @@ extension NetworkingComponent {
 
   /// Evaluate the request, returning a stub to use for mocking, or nil to pass through without mocking
   public func mocked(
-    _ mock: @escaping @Sendable (HTTPRequestData) -> StubbedResponseStream?
+    _ mock: @escaping @Sendable (HTTPRequestData) throws -> StubbedResponseStream?
   ) -> some NetworkingComponent {
     mocked { upstream, request in
       ResponseStream { continuation in
         Task {
-          if let stub = mock(request) {
-            stub(request).redirect(into: continuation)
-          } else {
-            upstream.send(request).redirect(into: continuation)
+          do {
+            if let stub = try mock(request) {
+              stub(request).redirect(into: continuation)
+            } else {
+              upstream.send(request).redirect(into: continuation)
+            }
+          } catch {
+            continuation.finish(throwing: error)
           }
         }
       }

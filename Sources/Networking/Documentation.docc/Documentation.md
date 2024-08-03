@@ -16,12 +16,10 @@ Networking, is a library for building a flexible network stack inside a Swift ap
 ### Authentication
 
 - ``NetworkingComponent/authenticated(with:)``
+- ``AuthenticationError``
 - ``AuthenticationDelegate``
 - ``AuthenticatingCredentials``
 - ``AuthenticationMethod``
-- ``AuthenticationError``
-- ``HeaderBasedAuthentication``
-- ``BasicAuthentication``
+- ``AnyAuthenticationDelegate``
 - ``BasicCredentials``
-- ``BearerAuthentication``
 - ``BearerCredentials``

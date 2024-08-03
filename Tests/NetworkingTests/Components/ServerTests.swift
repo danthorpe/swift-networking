@@ -124,14 +124,14 @@ final class ServerTests: NetworkingTestCase {
       .server(prefixPath: "v1")
       .logged(using: Logger())
 
-    var original = HTTPRequestData()
-    var response = try await network.data(original)
+    let original = HTTPRequestData()
+    let response = try await network.data(original)
 
     // Retry sending the request as determined in the response
     try await network.data(response.request)
 
     let sentRequests = await reporter.requests
-    let sentRequestsPaths = await reporter.requests.map(\.path)
+    let sentRequestsPaths = sentRequests.map(\.path)
     XCTAssertEqual(sentRequestsPaths, ["/v1", "/v1"])
   }
 

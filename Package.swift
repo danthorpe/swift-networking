@@ -14,8 +14,9 @@ package.platforms = [
 
 // MARK: - 🧸 Module Names
 
-let Networking = "Networking"
 let Helpers = "Helpers"
+let Networking = "Networking"
+let OAuth = "OAuth"
 let TestSupport = "TestSupport"
 
 // MARK: - 🔑 Builders
@@ -23,11 +24,11 @@ let TestSupport = "TestSupport"
 let 📦 = Module.builder(
   withDefaults: .init(
     name: "Basic Module",
-    dependsOn: [],
     defaultWith: [
-      .dependencies
+      .dependencies,
+      .dependenciesMacros,
+      .concurrencyExtras,
     ],
-    unitTestsDependsOn: [],
     swiftSettings: .concurrency
   )
 )
@@ -49,11 +50,27 @@ Networking
       .algorithms,
       .asyncAlgorithms,
       .cache,
-      .concurrencyExtras,
       .httpTypes,
       .httpTypesFoundation,
+      .protected,
       .shortID,
       .tagged,
+    ]
+    $0.unitTestsDependsOn = [
+      TestSupport
+    ]
+    $0.unitTestsWith = [
+      .assertionExtras,
+      .concurrencyExtras,
+    ]
+  }
+
+OAuth
+  <+ 📦 {
+    $0.createProduct = .library(nil)
+    $0.dependsOn = [
+      Helpers,
+      Networking,
     ]
     $0.unitTestsDependsOn = [
       TestSupport
@@ -71,9 +88,6 @@ TestSupport
     $0.dependsOn = [
       Networking,
       Helpers,
-    ]
-    $0.with = [
-      .concurrencyExtras
     ]
   }
 
@@ -115,6 +129,9 @@ extension Target.Dependency {
   static let dependencies: Target.Dependency = .product(
     name: "Dependencies", package: "swift-dependencies"
   )
+  static let dependenciesMacros: Target.Dependency = .product(
+    name: "DependenciesMacros", package: "swift-dependencies"
+  )
   static let deque: Target.Dependency = .product(
     name: "DequeModule", package: "swift-collections"
   )
@@ -126,6 +143,9 @@ extension Target.Dependency {
   )
   static let httpTypesFoundation: Target.Dependency = .product(
     name: "HTTPTypesFoundation", package: "swift-http-types"
+  )
+  static let protected: Target.Dependency = .product(
+    name: "Protected", package: "swift-utilities"
   )
   static let shortID: Target.Dependency = .product(
     name: "ShortID", package: "swift-utilities"
@@ -145,13 +165,12 @@ extension Target.Dependency {
 extension [SwiftSetting] {
   #if swift(>=6)
   static let concurrency: Self = [
-    .enableUpcomingFeature("StrictConcurrency"),
-    .enableUpcomingFeature("InferSendableFromCaptures"),
+    // Already enabled
   ]
   #else
   static let concurrency: Self = [
     .enableExperimentalFeature("GlobalConcurrency"),
-    .enableExperimentalFeature("StrictConcurrency"),
+    .enableExperimentalFeature("TargetedConcurrency"),
     .enableExperimentalFeature("InferSendableFromCaptures"),
   ]
   #endif

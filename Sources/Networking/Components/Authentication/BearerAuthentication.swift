@@ -1,13 +1,44 @@
 import Foundation
 
+extension NetworkingComponent {
+  public func authenticated<Credentials: BearerAuthenticatingCredentials>(
+    withBearer delegate: some AuthenticationDelegate<Credentials>
+  ) -> some NetworkingComponent {
+    authenticated(
+      with: AnyAuthenticationDelegate(
+        delegate: ThreadSafeAuthenticationDelegate(
+          delegate: delegate
+        )
+      )
+    )
+  }
+}
+
 extension AuthenticationMethod {
   public static let bearer = AuthenticationMethod(rawValue: "Bearer")
 }
 
-public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOption,
-  AuthenticatingCredentials
-{
-  public static let method: AuthenticationMethod = .bearer
+public protocol BearerAuthenticatingCredentials: AuthenticatingCredentials {}
+
+extension BearerAuthenticatingCredentials {
+  public static var method: AuthenticationMethod { .bearer }
+
+  public func apply(token: String, to request: HTTPRequestData) -> HTTPRequestData {
+    @NetworkEnvironment(\.logger) var logger
+    var copy = request
+    let authenticationValue = "Bearer \(token)"
+    logger?
+      .info(
+        """
+        🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
+        Applying bearer credentials: \(authenticationValue, privacy: .private)
+        """)
+    copy.headerFields[.authorization] = authenticationValue
+    return copy
+  }
+}
+
+public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOption, BearerAuthenticatingCredentials {
   public static let defaultOption: Self? = nil
 
   public let token: String
@@ -17,17 +48,7 @@ public struct BearerCredentials: Hashable, Sendable, Codable, HTTPRequestDataOpt
   }
 
   public func apply(to request: HTTPRequestData) -> HTTPRequestData {
-    @NetworkEnvironment(\.logger) var logger
-    var copy = request
-    let description = "Bearer \(token)"
-    logger?
-      .info(
-        """
-        🔐 \(request.prettyPrintedIdentifier, privacy: .public) \
-        Applying basic credentials: \(description, privacy: .private)
-        """)
-    copy.headerFields[.authorization] = description
-    return copy
+    apply(token: token, to: request)
   }
 }
 
@@ -40,7 +61,3 @@ extension HTTPRequestData {
     }
   }
 }
-
-public typealias BearerAuthentication<
-  Delegate: AuthenticationDelegate
-> = HeaderBasedAuthentication<Delegate> where Delegate.Credentials == BearerCredentials

@@ -7,25 +7,27 @@ import XCTest
 
 @testable import Networking
 
-final class HeaderBasedAuthenticationTests: XCTestCase {
+final class ThreadSafeAuthenticationDelegateTests: XCTestCase {
 
-  func test__given_requires_credentials__delegate_is_triggered() async throws {
+  func test__given_authorize__delegate_is_triggered() async throws {
     var request = HTTPRequestData(id: "1")
     request.authenticationMethod = .bearer
 
     let delelgate = TestAuthenticationDelegate(
-      fetch: { [request] in
-        XCTAssertEqual(request, $0)
-        return BearerCredentials(token: "some token")
+      authorize: {
+        BearerCredentials(token: "some token")
       }
     )
 
-    let authenticator = HeaderBasedAuthentication(delegate: delelgate)
+    let authenticator = ThreadSafeAuthenticationDelegate(
+      delegate: delelgate
+    )
 
-    let newRequest = try await authenticator.fetch(for: request).apply(to: request)
+    let newRequest = try await authenticator.authorize().apply(to: request)
 
     XCTAssertEqual(newRequest.headerFields[.authorization], "Bearer some token")
-    XCTAssertEqual(delelgate.fetchCount, 1)
+    let authorizeCount = await delelgate.authorizeCount
+    XCTAssertEqual(authorizeCount, 1)
   }
 
   func test__given_delegate_throws_error() async throws {
@@ -35,33 +37,37 @@ final class HeaderBasedAuthenticationTests: XCTestCase {
     request.authenticationMethod = .bearer
 
     let delelgate = TestAuthenticationDelegate<BearerCredentials>(
-      fetch: { _ in
+      authorize: {
         throw CustomError()
       }
     )
 
-    let authenticator = HeaderBasedAuthentication(delegate: delelgate)
+    let authenticator = ThreadSafeAuthenticationDelegate(
+      delegate: delelgate
+    )
 
     await XCTAssertThrowsError(
       try await authenticator.fetch(for: request),
-      matches: AuthenticationError.fetchCredentialsFailed(request, .bearer, CustomError())
+      matches: CustomError()
     )
   }
 
   func test__requests_are_queued_until_delegate_responds() async throws {
 
     let delelgate = TestAuthenticationDelegate(
-      fetch: { _ in
-        return BearerCredentials(token: "some token")
+      authorize: {
+        BearerCredentials(token: "some token")
       }
     )
 
-    let authenticator = HeaderBasedAuthentication(delegate: delelgate)
+    let authenticator = ThreadSafeAuthenticationDelegate(
+      delegate: delelgate
+    )
 
     @Sendable func check(authority: String) async throws -> HTTPRequestData {
       var request = HTTPRequestData(authority: "example.com")
       request.authenticationMethod = .bearer
-      return try await authenticator.fetch(for: request).apply(to: request)
+      return try await authenticator.authorize().apply(to: request)
     }
 
     try await withDependencies {
@@ -90,9 +96,11 @@ final class HeaderBasedAuthenticationTests: XCTestCase {
         }
 
         let authorization = Set(requests.compactMap(\.headerFields[.authorization]))
+        let authorizeCount = await delelgate.authorizeCount
         XCTAssertEqual(authorization, ["Bearer some token"])
-        XCTAssertEqual(delelgate.fetchCount, 1)
+        XCTAssertEqual(authorizeCount, 1)
       }
     }
   }
+
 }
