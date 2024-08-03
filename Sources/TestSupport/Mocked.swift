@@ -2,6 +2,13 @@ import Networking
 
 extension NetworkingComponent {
 
+  /// Mock all requests with a stub
+  public func mocked(
+    all stub: StubbedResponseStream
+  ) -> some NetworkingComponent {
+    mocked(stub) { _ in true }
+  }
+
   /// Mock a given request with a stub
   public func mocked(
     _ request: HTTPRequestData,
