@@ -48,7 +48,7 @@ extension HTTPRequestData {
   }
 }
 
-public struct TraceParent: Sendable, HTTPRequestDataOption {
+public struct TraceParent: Sendable, Hashable, HTTPRequestDataOption {
   public static var defaultOption: Self?
 
   // Current version of the spec only supports 01 flag
@@ -100,7 +100,7 @@ extension DependencyValues {
 }
 
 extension TraceParentGenerator {
-  public static let incrementing = {
+  public static var incrementing: TraceParentGenerator {
     let traceId = UniqueIdentifier.Generator.incrementing(.secureBytes(length: 16, format: .hex))
     let parentId = UniqueIdentifier.Generator.incrementing(.secureBytes(length: 8, format: .hex))
     return TraceParentGenerator {
@@ -109,5 +109,5 @@ extension TraceParentGenerator {
         parentId: parentId()
       )
     }
-  }()
+  }
 }
