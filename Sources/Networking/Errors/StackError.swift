@@ -14,6 +14,7 @@ package struct StackError: Error {
     case timeout
     case unauthorized
     case unknown
+    case unimplemented
   }
 
   let info: Info
