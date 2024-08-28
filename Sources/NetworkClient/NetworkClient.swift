@@ -4,7 +4,7 @@ import Networking
 
 @DependencyClient
 public struct NetworkClient: Sendable {
-  public var networkClient: @Sendable () -> any NetworkingComponent = { Networking.Unimplemented() }
+  public var network: @Sendable () -> any NetworkingComponent = { UnimplementedNetwork() }
 }
 
 extension NetworkClient: TestDependencyKey {

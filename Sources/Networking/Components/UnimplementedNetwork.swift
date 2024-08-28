@@ -1,4 +1,4 @@
-public struct Unimplemented: NetworkingComponent {
+public struct UnimplementedNetwork: NetworkingComponent {
 
   public init() {}
 
