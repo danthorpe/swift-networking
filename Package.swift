@@ -15,6 +15,7 @@ package.platforms = [
 // MARK: - 🧸 Module Names
 
 let Helpers = "Helpers"
+let NetworkClient = "NetworkClient"
 let Networking = "Networking"
 let OAuth = "OAuth"
 let TestSupport = "TestSupport"
@@ -38,6 +39,24 @@ let 📦 = Module.builder(
 Helpers
   <+ 📦 {
     $0.createUnitTests = false
+  }
+
+NetworkClient
+  <+ 📦 {
+    $0.createProduct = .library(nil)
+    $0.createUnitTests = false
+    $0.dependsOn = [
+      Networking
+    ]
+  }
+
+NetworkClient.live
+  <+ 📦 {
+    $0.createProduct = .library(nil)
+    $0.createUnitTests = false
+    $0.dependsOn = [
+      NetworkClient
+    ]
   }
 
 Networking
@@ -184,6 +203,7 @@ extension String {
   }
   var snapshotTests: String { "\(self)SnapshotTests" }
   var tests: String { "\(self)Tests" }
+  var live: String { "\(self)Live" }
 }
 
 struct Module {
