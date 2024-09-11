@@ -1,13 +1,12 @@
 import ComposableArchitecture
 import ComposableLoadable
-import SpotifyClient
 import Tagged
 
 @Reducer
-package struct SignedInFeature {
+struct SignedInFeature {
 
   @ObservableState
-  package struct State {
+  struct State {
     @ObservationStateIgnored
     @LoadableStateOf<ProfileFeature> var me
 
@@ -22,21 +21,21 @@ package struct SignedInFeature {
       self._followedArtists = followedArtists
     }
 
-    package init() {
+    init() {
       self.init(me: .pending, followedArtists: .pending)
     }
   }
 
-  package enum Action {
+  enum Action {
     case me(LoadingActionOf<ProfileFeature>)
     case followedArtists(LoadingActionWith<EmptyLoadRequest, ArtistsFeature>)
   }
 
   @Dependency(\.spotify) var spotify
 
-  package init() {}
+  init() {}
 
-  package var body: some ReducerOf<Self> {
+  var body: some ReducerOf<Self> {
     Reduce { _, action in
       switch action {
       case .me:
@@ -54,17 +53,20 @@ package struct SignedInFeature {
       )
     }
     .loadable(\.$followedArtists, action: \.followedArtists) {
-      ArtistsFeature()
+      Reduce(ArtistsFeature.body)
     } load: { _ in
       let artists = try await spotify.followedArtists(nil, nil).artists
-      return ArtistsFeature.State(
-        artists: PaginationFeature<Artist>
-          .State(
-            selection: artists.items.first!.id,
-            next: artists.cursors.after,
-            elements: artists.items
-          )
-      )
+      guard artists.items.isEmpty else {
+        return .artists(
+          PaginationFeature<Artist>
+            .State(
+              selection: artists.items.first!.id,
+              next: artists.cursors.after,
+              elements: artists.items
+            )
+        )
+      }
+      return .empty
     }
   }
 }

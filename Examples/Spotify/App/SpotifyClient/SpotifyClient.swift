@@ -6,24 +6,24 @@ import Networking
 import OAuth
 import os.log
 
-package struct Spotify {
+struct Spotify {
   @DependencyClient
-  package struct Client: Sendable {
+  struct Client: Sendable {
     package var credentialsDidChange:
       @Sendable () -> AsyncThrowingStream<OAuth.AvailableSystems.Spotify.Credentials, Error> = {
         AsyncThrowingStream.never
       }
-    package var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
-    package var me: @Sendable () async throws -> User
-    package var setExistingCredentials: @Sendable (OAuth.AvailableSystems.Spotify.Credentials) async throws -> Void
-    package var signIn:
+    var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
+    var me: @Sendable () async throws -> User
+    var setExistingCredentials: @Sendable (OAuth.AvailableSystems.Spotify.Credentials) async throws -> Void
+    var signIn:
       @Sendable (_ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?) async throws -> Void
-    package var signOut: @Sendable () async throws -> Void
+    var signOut: @Sendable () async throws -> Void
   }
 }
 
 extension DependencyValues {
-  package var spotify: Spotify.Client {
+  var spotify: Spotify.Client {
     get { self[Spotify.Client.self] }
     set { self[Spotify.Client.self] = newValue }
   }
@@ -53,7 +53,7 @@ extension Spotify {
 }
 
 extension Spotify.Client: DependencyKey {
-  package static let liveValue = Spotify.Client(
+  static let liveValue = Spotify.Client(
     credentialsDidChange: {
       AsyncThrowingStream { continuation in
         Task {

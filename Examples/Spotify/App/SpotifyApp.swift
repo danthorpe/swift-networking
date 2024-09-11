@@ -1,4 +1,3 @@
-import SpotifyExample
 import SwiftUI
 
 @main

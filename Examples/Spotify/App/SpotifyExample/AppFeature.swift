@@ -1,9 +1,6 @@
 import ComposableArchitecture
 import Foundation
 import OAuth
-import SignedIn
-import SignedOut
-import SpotifyClient
 
 @Reducer
 struct AppFeature {

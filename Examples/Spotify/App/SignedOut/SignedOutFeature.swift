@@ -1,32 +1,31 @@
 import ComposableArchitecture
 import Foundation
 import OAuth
-import SpotifyClient
 
 @Reducer
-package struct SignedOutFeature {
+struct SignedOutFeature {
 
   @ObservableState
-  package enum State {
+  enum State {
     case pending
     case active
     case failed(Error)
     case success
   }
 
-  package enum Action: ViewAction {
+  enum Action: ViewAction {
     case signInResponse(TaskResult<Void>)
     case view(View)
-    package enum View {
+    enum View {
       case signInButtonTapped
     }
   }
 
-  package init() {}
+  init() {}
 
   @Dependency(\.spotify) var spotify
 
-  package var body: some ReducerOf<Self> {
+  var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .signInResponse(.success):

@@ -2,18 +2,17 @@ import ComposableArchitecture
 import ComposableLoadable
 import SwiftUI
 
-package struct SignedInView: View {
+struct SignedInView: View {
   let store: StoreOf<SignedInFeature>
 
-  package init(store: StoreOf<SignedInFeature>) {
+  init(store: StoreOf<SignedInFeature>) {
     self.store = store
   }
 
-  package var body: some View {
+  var body: some View {
     LoadableView(
       loadOnAppear: store.scope(state: \.$me, action: \.me)
     ) { _ in
-      //      Text("Hello, \(profileStore.me.displayName)")
       loadArtists
     } onError: { error, _ in
       Text("Error fetching profile: \(error)")
@@ -26,7 +25,7 @@ package struct SignedInView: View {
     LoadableView(
       loadOnAppear: store.scope(state: \.$followedArtists, action: \.followedArtists)
     ) { artistsStore in
-      Text("First artist: \(artistsStore.artists.elements.first?.name ?? "no artists")")
+      ArtistsView(store: artistsStore)
     } onError: { error, _ in
       Text("Error fetching artists: \(error)")
     } onActive: { _ in

@@ -1,8 +1,7 @@
 import ComposableLoadable
-import SpotifyClient
 
 extension Spotify.Client {
-  func paginateFollowedArtists(
+  @Sendable func paginateFollowedArtists(
     _ request: PaginationFeature<Artist>.PageRequest
   ) async throws -> PaginationFeature<Artist>.Page {
     let artists = try await followedArtists(request.cursor, nil).artists
