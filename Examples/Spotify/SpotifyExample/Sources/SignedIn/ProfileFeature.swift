@@ -4,11 +4,9 @@ import SpotifyClient
 
 @Reducer
 package struct ProfileFeature {
-
   @ObservableState
   package struct State: Loadable {
     package typealias Request = EmptyLoadRequest
-
-    var me: Spotify.User
+    var me: User
   }
 }

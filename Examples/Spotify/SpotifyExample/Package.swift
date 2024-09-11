@@ -60,6 +60,7 @@ SpotifyExample
     $0.createProduct = .library()
     $0.with = [
       .composableArchitecture,
+      .composableLoadable,
       .networking,
       // Ideally, this would be added directly to the application, but
       // it's not possible to add a package which is a direct

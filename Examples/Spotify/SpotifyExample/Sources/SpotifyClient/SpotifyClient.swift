@@ -13,7 +13,8 @@ package struct Spotify {
       @Sendable () -> AsyncThrowingStream<OAuth.AvailableSystems.Spotify.Credentials, Error> = {
         AsyncThrowingStream.never
       }
-    package var me: @Sendable () async throws -> Spotify.User
+    package var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
+    package var me: @Sendable () async throws -> User
     package var setExistingCredentials: @Sendable (OAuth.AvailableSystems.Spotify.Credentials) async throws -> Void
     package var signIn:
       @Sendable (_ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?) async throws -> Void
@@ -40,7 +41,7 @@ extension Spotify {
         oauth: .spotify(
           clientId: "b4937bc99da547b4b90559f5024d8467",
           callback: "swift-networking-oauth-demo://spotify",
-          scope: "user-read-email user-read-private"
+          scope: "user-read-email user-read-private user-follow-read"
         )
       )
   }()
@@ -69,6 +70,16 @@ extension Spotify.Client: DependencyKey {
       }
       .shared()
       .eraseToThrowingStream()
+    },
+    followedArtists: { after, limit in
+      try await Spotify.api
+        .value(
+          .followedArtists(
+            after: after,
+            limit: limit
+          )
+        )
+        .body
     },
     me: {
       try await Spotify.api.value(.me).body
