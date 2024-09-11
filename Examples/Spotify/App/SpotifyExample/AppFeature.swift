@@ -15,6 +15,7 @@ struct AppFeature {
   enum Action {
     case credentialsDidChange(OAuth.AvailableSystems.Spotify.Credentials)
     case signedInSuccess
+    case signedOutSuccess
     case view(View)
     case signedIn(SignedInFeature.Action)
     case signedOut(SignedOutFeature.Action)
@@ -47,6 +48,15 @@ struct AppFeature {
         }
         state = .signedIn(SignedInFeature.State())
         return .none
+      case .signedOutSuccess:
+        self.credentials = nil
+        state = .signedOut(SignedOutFeature.State.pending)
+        return .none
+      case .signedIn(.delegate(.performLogout)):
+        return .run { send in
+          try await spotify.signOut()
+          await send(.signedOutSuccess)
+        }
       case .signedIn:
         return .none
       case .signedOut:

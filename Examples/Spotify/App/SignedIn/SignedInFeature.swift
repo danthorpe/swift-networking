@@ -8,27 +8,30 @@ struct SignedInFeature {
   @ObservableState
   struct State {
     @ObservationStateIgnored
-    @LoadableStateOf<ProfileFeature> var me
-
-    @ObservationStateIgnored
     @LoadableStateWith<EmptyLoadRequest, ArtistsFeature> var followedArtists
 
     init(
-      me: LoadableStateOf<ProfileFeature>,
       followedArtists: LoadableStateWith<EmptyLoadRequest, ArtistsFeature>
     ) {
-      self._me = me
       self._followedArtists = followedArtists
     }
 
     init() {
-      self.init(me: .pending, followedArtists: .pending)
+      self.init(followedArtists: .pending)
     }
   }
 
-  enum Action {
-    case me(LoadingActionOf<ProfileFeature>)
+  enum Action: ViewAction {
+    case delegate(Delegate)
     case followedArtists(LoadingActionWith<EmptyLoadRequest, ArtistsFeature>)
+    case view(View)
+
+    enum View {
+      case logoutButtonTapped
+    }
+    enum Delegate {
+      case performLogout
+    }
   }
 
   @Dependency(\.spotify) var spotify
@@ -38,24 +41,18 @@ struct SignedInFeature {
   var body: some ReducerOf<Self> {
     Reduce { _, action in
       switch action {
-      case .me:
+      case .delegate:
         return .none
       case .followedArtists:
         return .none
+      case .view(.logoutButtonTapped):
+        return .send(.delegate(.performLogout))
       }
-    }
-    .loadable(\.$me, action: \.me) {
-      ProfileFeature()
-    } load: { _ in
-      let user = try await spotify.me()
-      return ProfileFeature.State(
-        me: user
-      )
     }
     .loadable(\.$followedArtists, action: \.followedArtists) {
       Reduce(ArtistsFeature.body)
     } load: { _ in
-      let artists = try await spotify.followedArtists(nil, nil).artists
+      let artists = try await spotify.followedArtists().artists
       guard artists.items.isEmpty else {
         return .artists(
           PaginationFeature<Artist>

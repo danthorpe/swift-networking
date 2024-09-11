@@ -19,6 +19,10 @@ struct Spotify {
     var signIn:
       @Sendable (_ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?) async throws -> Void
     var signOut: @Sendable () async throws -> Void
+
+    func followedArtists(after cursor: String? = nil) async throws -> Artists {
+      try await followedArtists(after: cursor, limit: 10)
+    }
   }
 }
 
@@ -40,7 +44,7 @@ extension Spotify {
       .authenticated(
         oauth: .spotify(
           clientId: "b4937bc99da547b4b90559f5024d8467",
-          callback: "swift-networking-oauth-demo://spotify",
+          callback: "swift-networking-spotify-example://callback",
           scope: "user-read-email user-read-private user-follow-read"
         )
       )

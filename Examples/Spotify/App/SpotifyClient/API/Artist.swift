@@ -19,6 +19,12 @@ struct Image: Sendable, Equatable, Codable {
   let width: Int
 }
 
+extension Artist: Comparable {
+  static func < (lhs: Self, rhs: Self) -> Bool {
+    lhs.popularity < rhs.popularity
+  }
+}
+
 struct Artists: Sendable, Equatable, Codable {
   let artists: PagedList<Artist>
 }
