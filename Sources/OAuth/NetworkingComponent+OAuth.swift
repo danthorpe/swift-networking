@@ -22,7 +22,8 @@ extension NetworkingComponent {
     OAuth.InstalledSystems.set(
       oauth: OAuth.Proxy(delegate: delegate)
     )
-    return authenticated(with: delegate)
+    return server(authenticationMethod: Credentials.method)
+      .authenticated(with: delegate)
   }
 
   public func oauth<ReturnValue: Sendable, Credentials: OAuthCredentials>(
