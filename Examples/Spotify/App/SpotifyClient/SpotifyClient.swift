@@ -40,7 +40,6 @@ extension Spotify {
       .logged(using: Logger(subsystem: "works.dan.networking.examples.spotify", category: "Spotify API"))
       .server(prefixPath: "v1")
       .server(authority: "api.spotify.com")
-      .server(authenticationMethod: .spotify)
       .authenticated(
         oauth: .spotify(
           clientId: "b4937bc99da547b4b90559f5024d8467",
