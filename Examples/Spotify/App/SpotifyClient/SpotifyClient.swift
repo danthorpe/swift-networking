@@ -9,10 +9,9 @@ import os.log
 struct Spotify {
   @DependencyClient
   struct Client: Sendable {
-    package var credentialsDidChange:
-      @Sendable () -> AsyncThrowingStream<OAuth.AvailableSystems.Spotify.Credentials, Error> = {
-        AsyncThrowingStream.never
-      }
+    var credentialsDidChange: @Sendable () -> AsyncThrowingStream<OAuth.AvailableSystems.Spotify.Credentials, Error> = {
+      AsyncThrowingStream.never
+    }
     var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
     var me: @Sendable () async throws -> User
     var setExistingCredentials: @Sendable (OAuth.AvailableSystems.Spotify.Credentials) async throws -> Void
