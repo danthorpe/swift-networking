@@ -12,16 +12,17 @@ struct AppFeature {
     case signedIn(SignedInFeature.State)
   }
 
-  enum Action {
+  enum Action: ViewAction {
     case credentialsDidChange(OAuth.AvailableSystems.Spotify.Credentials)
     case signedInSuccess
     case signedOutSuccess
-    case view(View)
     case signedIn(SignedInFeature.Action)
     case signedOut(SignedOutFeature.Action)
+    case view(View)
 
     enum View {
       case onTask
+      case signOutButtonTapped
     }
   }
 
@@ -39,28 +40,29 @@ struct AppFeature {
     }
     Reduce { state, action in
       switch action {
+
       case let .credentialsDidChange(newCredentials):
         self.credentials = newCredentials
         return .none
+
       case .signedInSuccess:
         if case .signedIn = state {
           return .none
         }
         state = .signedIn(SignedInFeature.State())
         return .none
+
       case .signedOutSuccess:
         self.credentials = nil
         state = .signedOut(SignedOutFeature.State.pending)
         return .none
-      case .signedIn(.delegate(.performLogout)):
-        return .run { send in
-          try await spotify.signOut()
-          await send(.signedOutSuccess)
-        }
+
       case .signedIn:
         return .none
+
       case .signedOut:
         return .none
+
       case .view(.onTask):
         let resolvePendingState: Effect<Action>
 
@@ -86,6 +88,12 @@ struct AppFeature {
             }
           }
         )
+
+      case .view(.signOutButtonTapped):
+        return .run { send in
+          try await spotify.signOut()
+          await send(.signedOutSuccess)
+        }
       }
     }
   }

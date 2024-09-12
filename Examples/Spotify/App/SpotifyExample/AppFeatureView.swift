@@ -1,12 +1,13 @@
 import ComposableArchitecture
 import SwiftUI
 
-public struct AppFeatureView {
+@ViewAction(for: AppFeature.self)
+struct AppFeatureView {
   let store: StoreOf<AppFeature>
   init(store: StoreOf<AppFeature>) {
     self.store = store
   }
-  public init() {
+  init() {
     self.init(
       store: Store(
         initialState: .pending
@@ -16,9 +17,9 @@ public struct AppFeatureView {
 }
 
 extension AppFeatureView: View {
-  public var body: some View {
+  var body: some View {
     contentView
-      .task { await store.send(.view(.onTask)).finish() }
+      .task { await send(.onTask).finish() }
   }
 
   @ViewBuilder
@@ -27,8 +28,15 @@ extension AppFeatureView: View {
     case .pending:
       ProgressView()
     case .signedIn:
-      if let store = store.scope(state: \.signedIn, action: \.signedIn) {
-        SignedInView(store: store)
+      if let signedInStore = store.scope(state: \.signedIn, action: \.signedIn) {
+        SignedInView(store: signedInStore)
+          .toolbar {
+            ToolbarItemGroup(placement: .bottomBar) {
+              Button("Sign Out") {
+                send(.signOutButtonTapped)
+              }
+            }
+          }
       }
     case .signedOut:
       if let store = store.scope(state: \.signedOut, action: \.signedOut) {

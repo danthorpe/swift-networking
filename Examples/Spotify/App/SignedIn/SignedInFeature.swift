@@ -21,17 +21,8 @@ struct SignedInFeature {
     }
   }
 
-  enum Action: ViewAction {
-    case delegate(Delegate)
+  enum Action {
     case followedArtists(LoadingActionWith<EmptyLoadRequest, ArtistsFeature>)
-    case view(View)
-
-    enum View {
-      case logoutButtonTapped
-    }
-    enum Delegate {
-      case performLogout
-    }
   }
 
   @Dependency(\.spotify) var spotify
@@ -41,12 +32,8 @@ struct SignedInFeature {
   var body: some ReducerOf<Self> {
     Reduce { _, action in
       switch action {
-      case .delegate:
-        return .none
       case .followedArtists:
         return .none
-      case .view(.logoutButtonTapped):
-        return .send(.delegate(.performLogout))
       }
     }
     .loadable(\.$followedArtists, action: \.followedArtists) {
