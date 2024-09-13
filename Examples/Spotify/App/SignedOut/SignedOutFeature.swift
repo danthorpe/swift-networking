@@ -6,10 +6,10 @@ import OAuth
 struct SignedOutFeature {
 
   @ObservableState
-  enum State {
+  enum State: Equatable {
     case pending
     case active
-    case failed(Error)
+    case failed
     case success
   }
 
@@ -32,7 +32,9 @@ struct SignedOutFeature {
         state = .success
         return .none
       case let .signInResponse(.failure(error)):
-        state = .failed(error)
+        // TODO: Create a specific equatable Error Type
+        print("Error performing sign in: \(String(describing: error))")
+        state = .failed
         return .none
       case .view(.signInButtonTapped):
         return .run { _ in

@@ -6,7 +6,7 @@ import Tagged
 struct SignedInFeature {
 
   @ObservableState
-  struct State {
+  struct State: Equatable {
     @ObservationStateIgnored
     @LoadableStateWith<EmptyLoadRequest, ArtistsFeature> var followedArtists
 

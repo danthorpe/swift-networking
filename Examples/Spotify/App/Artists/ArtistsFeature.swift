@@ -2,8 +2,8 @@ import ComposableArchitecture
 import ComposableLoadable
 import Foundation
 
-@Reducer
-enum ArtistsFeature {
+@Reducer(state: .equatable, action: .equatable)
+enum ArtistsFeature: Equatable {
   @ReducerCaseIgnored
   case empty
   case artists(PaginationFeature<Artist>)

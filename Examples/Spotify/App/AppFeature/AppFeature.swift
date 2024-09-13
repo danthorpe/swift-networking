@@ -6,7 +6,7 @@ import OAuth
 struct AppFeature {
 
   @ObservableState
-  enum State {
+  enum State: Equatable {
     case pending
     case signedOut(SignedOutFeature.State)
     case signedIn(SignedInFeature.State)
