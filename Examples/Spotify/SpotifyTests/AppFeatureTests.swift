@@ -52,6 +52,9 @@ final class AppFeatureTests: XCTestCase {
       await self.credentialsDidChangeChannel.send(.mock)
     }
     await store.send(.signedOut(.view(.signInButtonTapped)))
+    await store.receive(\.signedOut.signInResponse, .success(true)) {
+      $0 = .signedOut(.success)
+    }
     await store.receive(\.credentialsDidChange, .mock)
     await store.receive(\.signedInSuccess) {
       $0 = .signedIn(SignedInFeature.State())

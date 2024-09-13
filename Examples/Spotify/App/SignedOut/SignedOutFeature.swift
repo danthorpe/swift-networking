@@ -14,7 +14,7 @@ struct SignedOutFeature {
   }
 
   enum Action: ViewAction {
-    case signInResponse(TaskResult<Void>)
+    case signInResponse(TaskResult<Bool>)
     case view(View)
     enum View {
       case signInButtonTapped
@@ -37,8 +37,11 @@ struct SignedOutFeature {
         state = .failed
         return .none
       case .view(.signInButtonTapped):
-        return .run { _ in
+        return .run { send in
           try await spotify.signIn(nil)
+          await send(.signInResponse(.success(true)))
+        } catch: { error, send in
+          await send(.signInResponse(.failure(error)))
         }
       }
     }
