@@ -44,15 +44,6 @@ extension Artist {
 
 // MARK: - Test Helpers
 
-extension TestDependencyKey {
-  /// Override any property of a TestDependency.
-  func override<Property>(_ keyPath: WritableKeyPath<Self, Property>, with property: Property) -> Self {
-    var copy = self
-    copy[keyPath: keyPath] = property
-    return copy
-  }
-}
-
 extension URL {
   init(static staticString: StaticString) {
     guard let url = URL(string: String(describing: staticString)) else {

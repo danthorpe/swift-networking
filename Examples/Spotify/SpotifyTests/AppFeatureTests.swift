@@ -18,10 +18,9 @@ final class AppFeatureTests: XCTestCase {
   override func invokeTest() {
     withDependencies { [weak self] in
       guard let this = self else { return }
-      $0.spotify = Spotify.Client()
-        .override(\.credentialsDidChange) {
-          this.credentialsDidChangeChannel.eraseToThrowingStream()
-        }
+      $0.spotify.credentialsDidChange = {
+        this.credentialsDidChangeChannel.eraseToThrowingStream()
+      }
     } operation: {
       super.invokeTest()
     }
