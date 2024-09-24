@@ -22,6 +22,13 @@ extension OAuth.AvailableSystems {
       public let refreshToken: String
       public let scope: String?
       public let tokenType: String
+      public init(accessToken: String, expiresIn: Int, refreshToken: String, scope: String?, tokenType: String) {
+        self.accessToken = accessToken
+        self.expiresIn = expiresIn
+        self.refreshToken = refreshToken
+        self.scope = scope
+        self.tokenType = tokenType
+      }
     }
 
     public let authorizationEndpoint = "https://accounts.spotify.com/authorize"

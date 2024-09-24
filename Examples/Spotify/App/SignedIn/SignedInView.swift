@@ -10,9 +10,7 @@ struct SignedInView: View {
   }
 
   var body: some View {
-    NavigationView {
-      contentView
-    }
+    contentView
   }
 
   var contentView: some View {

@@ -31,7 +31,7 @@ extension AppFeatureView: View {
       if let signedInStore = store.scope(state: \.signedIn, action: \.signedIn) {
         SignedInView(store: signedInStore)
           .toolbar {
-            ToolbarItemGroup(placement: .bottomBar) {
+            ToolbarItemGroup(placement: .automatic) {
               Button("Sign Out") {
                 send(.signOutButtonTapped)
               }

@@ -7,14 +7,16 @@ import OAuth
 import os.log
 
 struct Spotify {
+  typealias Credentials = OAuth.AvailableSystems.Spotify.Credentials
+
   @DependencyClient
   struct Client: Sendable {
-    var credentialsDidChange: @Sendable () -> AsyncThrowingStream<OAuth.AvailableSystems.Spotify.Credentials, Error> = {
+    var credentialsDidChange: @Sendable () -> AsyncThrowingStream<Credentials, Error> = {
       AsyncThrowingStream.never
     }
     var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
     var me: @Sendable () async throws -> User
-    var setExistingCredentials: @Sendable (OAuth.AvailableSystems.Spotify.Credentials) async throws -> Void
+    var setExistingCredentials: @Sendable (Credentials) async throws -> Void
     var signIn:
       @Sendable (_ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?) async throws -> Void
     var signOut: @Sendable () async throws -> Void
@@ -31,6 +33,12 @@ extension DependencyValues {
     set { self[Spotify.Client.self] = newValue }
   }
 }
+
+extension Spotify.Client: TestDependencyKey {
+  static let testValue = Spotify.Client()
+}
+
+// MARK: - Live Implementation
 
 extension Spotify {
   static let api: any NetworkingComponent = {

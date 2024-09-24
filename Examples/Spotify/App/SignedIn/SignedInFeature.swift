@@ -6,7 +6,7 @@ import Tagged
 struct SignedInFeature {
 
   @ObservableState
-  struct State {
+  struct State: Equatable {
     @ObservationStateIgnored
     @LoadableStateWith<EmptyLoadRequest, ArtistsFeature> var followedArtists
 
@@ -30,27 +30,22 @@ struct SignedInFeature {
   init() {}
 
   var body: some ReducerOf<Self> {
-    Reduce { _, action in
-      switch action {
-      case .followedArtists:
-        return .none
+    EmptyReducer()
+      .loadable(\.$followedArtists, action: \.followedArtists) {
+        Reduce(ArtistsFeature.body)
+      } load: { _ in
+        let artists = try await spotify.followedArtists().artists
+        guard artists.items.isEmpty else {
+          return .artists(
+            PaginationFeature<Artist>
+              .State(
+                selection: artists.items.first!.id,
+                next: artists.cursors.after,
+                elements: artists.items
+              )
+          )
+        }
+        return .empty
       }
-    }
-    .loadable(\.$followedArtists, action: \.followedArtists) {
-      Reduce(ArtistsFeature.body)
-    } load: { _ in
-      let artists = try await spotify.followedArtists().artists
-      guard artists.items.isEmpty else {
-        return .artists(
-          PaginationFeature<Artist>
-            .State(
-              selection: artists.items.first!.id,
-              next: artists.cursors.after,
-              elements: artists.items
-            )
-        )
-      }
-      return .empty
-    }
   }
 }
