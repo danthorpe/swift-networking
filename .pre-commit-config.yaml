@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -11,11 +11,11 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
   - repo: https://github.com/realm/SwiftLint
-    rev: 0.54.0
+    rev: 0.57.1
     hooks:
       - id: swiftlint
         entry: swiftlint --fix --strict
-  - repo: https://github.com/danthorpe/swift-format
-    rev: 756fbb36972bd4ddcb6b3923ad38c0f8efda2d89
+  - repo: https://github.com/swiftlang/swift-format
+    rev: swift-6.1-DEVELOPMENT-SNAPSHOT-2024-11-21-a
     hooks:
       - id: swift-format
