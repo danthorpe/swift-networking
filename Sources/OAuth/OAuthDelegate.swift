@@ -11,7 +11,7 @@ extension OAuth {
     let upstream: any NetworkingComponent
     var system: any OAuthSystem<Credentials>
 
-    var presentationContext: (any ASWebAuthenticationPresentationContextProviding) = DefaultPresentationContext()
+    var presentationContext: (any ASWebAuthenticationPresentationContextProviding)?
 
     @Dependency(\.webAuthenticationSession) var webAuthenticationSession
 
@@ -45,6 +45,10 @@ extension OAuth.Delegate: AuthenticationDelegate {
       state: state,
       codeChallenge: codeChallenge
     )
+
+    guard let presentationContext else {
+      throw OAuth.Error.presentationContextNotSet
+    }
 
     let callbackURL = try await webAuthenticationSession.start(
       state: state,
