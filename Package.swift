@@ -1,7 +1,13 @@
-// swift-tools-version: 5.9
-import PackageDescription
+// swift-tools-version: 6.0
+@preconcurrency import PackageDescription
 
-var package = Package(name: "swift-networking")
+var package = Package(
+  name: "swift-networking",
+  swiftLanguageModes: [
+    .v5,
+    .version("6"),
+  ]
+)
 
 // MARK: 💫 Package Customization
 
@@ -191,7 +197,7 @@ extension Target.Dependency {
 extension [SwiftSetting] {
   #if swift(>=6)
   static let concurrency: Self = [
-    // Already enabled
+    .enableUpcomingFeature("InferSendableFromCaptures")
   ]
   #else
   static let concurrency: Self = [
@@ -405,7 +411,7 @@ infix operator <>
 extension String {
 
   /// Adds the string as a module to the package, using the provided module
-  static func <+ (lhs: String, rhs: Module) {
+  @MainActor static func <+ (lhs: String, rhs: Module) {
     var module = rhs
     module.name = lhs
     package.add(module: module)
@@ -416,7 +422,7 @@ infix operator <+
 extension String {
 
   /// Adds the string as a module to the package, allowing for inline customization
-  static func <> (lhs: String, rhs: Module.Builder) {
+  @MainActor static func <> (lhs: String, rhs: Module.Builder) {
     var module = Module(name: lhs)
     rhs(&module)
     package.add(module: module)
