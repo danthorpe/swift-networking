@@ -43,6 +43,11 @@ final class OAuthDelegateTests: OAuthTestCase {
         .server(authenticationMethod: .stub)
         .authenticated(oauth: stub)
 
+      // Configure Network
+      try await network.stubOAuthSystem {
+        await $0.set(presentationContext: DefaultPresentationContext())
+      }
+
       // Make a request to protected resource
       var request = HTTPRequestData(path: "/protected-resource")
       request.authenticationMethod = .stub

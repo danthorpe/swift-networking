@@ -37,8 +37,8 @@ struct SignedOutFeature {
         state = .failed
         return .none
       case .view(.signInButtonTapped):
-        return .run { send in
-          try await spotify.signIn(nil)
+        return .run { @MainActor send in
+          try await spotify.signIn(presentationContext: DefaultPresentationContext())
           await send(.signInResponse(.success(true)))
         } catch: { error, send in
           await send(.signInResponse(.failure(error)))
