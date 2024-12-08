@@ -49,7 +49,7 @@ extension HTTPRequestData {
 }
 
 public struct TraceParent: Sendable, Hashable, HTTPRequestDataOption {
-  public static var defaultOption: Self?
+  public static let defaultOption: Self? = nil
 
   // Current version of the spec only supports 01 flag
   // Future versions of the spec will require support for bit-field mask

@@ -164,9 +164,6 @@ extension Target.Dependency {
   static let deque: Target.Dependency = .product(
     name: "DequeModule", package: "swift-collections"
   )
-  static let orderedCollections: Target.Dependency = .product(
-    name: "OrderedCollections", package: "swift-collections"
-  )
   static let httpTypes: Target.Dependency = .product(
     name: "HTTPTypes", package: "swift-http-types"
   )
@@ -197,7 +194,7 @@ extension Target.Dependency {
 extension [SwiftSetting] {
   #if swift(>=6)
   static let concurrency: Self = [
-    .enableUpcomingFeature("InferSendableFromCaptures")
+    // Already enabled
   ]
   #else
   static let concurrency: Self = [

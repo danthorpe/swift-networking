@@ -11,7 +11,7 @@ extension OAuth {
     let upstream: any NetworkingComponent
     var system: any OAuthSystem<Credentials>
 
-    var presentationContext: (any ASWebAuthenticationPresentationContextProviding)?
+    var presentationContext: (any ASWebAuthenticationPresentationContextProviding & Sendable)?
 
     @Dependency(\.webAuthenticationSession) var webAuthenticationSession
 
@@ -24,7 +24,7 @@ extension OAuth {
     }
 
     func set(
-      presentationContext: any ASWebAuthenticationPresentationContextProviding
+      presentationContext: any ASWebAuthenticationPresentationContextProviding & Sendable
     ) {
       self.presentationContext = presentationContext
     }

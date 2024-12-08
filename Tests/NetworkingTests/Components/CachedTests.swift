@@ -14,7 +14,7 @@ struct CachedTests: TestableNetwork {
   @Test func test__basics() async throws {
     let reporter = TestReporter()
     let data = try #require("Hello".data(using: .utf8))
-    let cache = Cache<AnyHashable, HTTPResponseData>()
+    let cache = Cache<HTTPRequestData, HTTPResponseData>()
     let request = HTTPRequestData(id: "1", path: "message")
     let network = TerminalNetworkingComponent()
       .mocked(request, stub: .ok(data: data))
@@ -46,7 +46,7 @@ struct CachedTests: TestableNetwork {
     request.cacheOption = .never
 
     let data = try #require("Hello".data(using: .utf8))
-    let cache = Cache<AnyHashable, HTTPResponseData>()
+    let cache = Cache<HTTPRequestData, HTTPResponseData>()
     let network = TerminalNetworkingComponent()
       .mocked(request, stub: .ok(data: data))
       .reported(by: reporter)

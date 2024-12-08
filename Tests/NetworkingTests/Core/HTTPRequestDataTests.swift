@@ -363,7 +363,7 @@ struct HTTPRequestDataTests: TestableNetwork {  // swiftlint:disable:this type_b
 }
 
 private struct TestOption: HTTPRequestDataOption {
-  static var defaultOption: String = "Hello World"
+  static let defaultOption: String = "Hello World"
 }
 
 extension HTTPRequestData {
@@ -374,7 +374,7 @@ extension HTTPRequestData {
 }
 
 private struct TestEqualOption: HTTPRequestDataOption {
-  static var defaultOption: String = "Hello World"
+  static let defaultOption: String = "Hello World"
   static var includeInEqualityEvaluation: Bool { true }
 }
 

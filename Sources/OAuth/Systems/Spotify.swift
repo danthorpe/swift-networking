@@ -51,8 +51,8 @@ extension OAuthSystem where Self == OAuth.AvailableSystems.Spotify {
 }
 
 extension NetworkingComponent {
-  public func spotify<ReturnValue>(
-    perform: (any OAuthProxy<OAuth.AvailableSystems.Spotify.Credentials>) async throws -> ReturnValue
+  public func spotify<ReturnValue: Sendable>(
+    perform: @Sendable (any OAuthProxy<OAuth.AvailableSystems.Spotify.Credentials>) async throws -> ReturnValue
   ) async throws -> ReturnValue {
     try await oauth(of: OAuth.AvailableSystems.Spotify.Credentials.self, perform: perform)
   }

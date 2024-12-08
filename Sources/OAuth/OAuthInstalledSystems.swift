@@ -1,6 +1,7 @@
 import AuthenticationServices
 import ConcurrencyExtras
 import Dependencies
+import DependenciesMacros
 import Helpers
 import Networking
 import Protected
@@ -17,6 +18,7 @@ extension OAuth {
     }
   }
 
+  @DependencyClient
   public struct InstalledSystems: Sendable {
     var set: @Sendable (_ container: Container) -> Void
     var get: @Sendable (_ key: ObjectIdentifier) -> Container?
@@ -37,8 +39,8 @@ extension OAuth {
   }
 }
 
-extension OAuth.InstalledSystems: DependencyKey {
-  public static var liveValue: OAuth.InstalledSystems = .basic()
+extension OAuth.InstalledSystems: TestDependencyKey {
+  public static let testValue = OAuth.InstalledSystems()
 
   public static func basic() -> Self {
     let storage = LockIsolated<[ObjectIdentifier: OAuth.Container]>([:])

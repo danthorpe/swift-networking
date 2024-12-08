@@ -35,7 +35,7 @@ open class NetworkingTestCase: XCTestCase {
 
   public func withTestDependencies(
     _ updateValuesForOperation: (inout DependencyValues) -> Void = { _ in },
-    operation: () async throws -> Void
+    operation: @Sendable () async throws -> Void
   ) async throws {
     try await withDependencies {
       $0.shortID = shortIdGenerator ?? .incrementing
