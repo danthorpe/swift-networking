@@ -2,39 +2,37 @@ import CustomDump
 import Foundation
 import ShortID
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class HTTPResponseDataTests: NetworkingTestCase {
-  override func invokeTest() {
-    withTestDependencies {
-      $0.shortID = .constant(ShortID())
-    } operation: {
-      super.invokeTest()
-    }
-  }
+@Suite(.tags(.basics))
+struct HTTPResponseDataTests: TestableNetwork {
 
-  func test__failed_result_with_non_networking_error() {
+  @Test func test__failed_result_with_non_networking_error() {
     struct OtherError: Error, Hashable {}
     let result: Result<HTTPResponseData, OtherError> = .failure(OtherError())
-    XCTAssertNil(result.httpRequest)
+    #expect(result.httpRequest == nil)
   }
 
-  func test__failed_result_with_networking_error() {
-    var request = HTTPRequestData()
+  @Test func test__failed_result_with_networking_error() {
+    var request = withTestDependencies {
+      HTTPRequestData()
+    }
     request.url = URL(static: "https://example.com/failure")
     let networkingError = StubbedNetworkError(
       request: request
     )
     let result: Result<HTTPResponseData, StubbedNetworkError> = .failure(networkingError)
-    XCTAssertNoDifference(result.request, request)
+    #expect(result.request == request)
   }
 
-  func test__result_with_success() throws {
-    let data = "Hello World".data(using: .utf8) ?? Data()
+  @Test func test__result_with_success() throws {
+    let data = try #require("Hello World".data(using: .utf8))
     let url = URL(static: "https://example.com/failure")
-    var request = HTTPRequestData()
+    var request = withTestDependencies {
+      HTTPRequestData()
+    }
     request.url = url
     let response = try HTTPResponseData(
       request: request,
@@ -46,8 +44,7 @@ final class HTTPResponseDataTests: NetworkingTestCase {
         headerFields: nil
       )
     )
-
-    XCTAssertNoDifference(Result<HTTPResponseData, Error>.success(response).httpRequest, request)
-    XCTAssertNoDifference(Result<HTTPResponseData, StackError>.success(response).request, request)
+    #expect(Result<HTTPResponseData, Error>.success(response).httpRequest == request)
+    #expect(Result<HTTPResponseData, StackError>.success(response).request == request)
   }
 }

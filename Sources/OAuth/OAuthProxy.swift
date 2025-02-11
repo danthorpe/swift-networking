@@ -2,7 +2,7 @@ import AuthenticationServices
 import Networking
 
 public protocol OAuthProxy<Credentials>: Actor {
-  associatedtype Credentials: BearerAuthenticatingCredentials, Sendable
+  associatedtype Credentials: OAuthCredentials, Sendable
 
   func set(presentationContext: any ASWebAuthenticationPresentationContextProviding) async
   func set(credentials: Credentials) async
