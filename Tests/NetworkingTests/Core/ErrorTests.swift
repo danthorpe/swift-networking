@@ -3,54 +3,51 @@ import Dependencies
 import Foundation
 import ShortID
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class ErrorTests: NetworkingTestCase {
+struct ErrorTests: TestableNetwork {
 
-  override func invokeTest() {
-    withTestDependencies {
-      $0.shortID = .constant(ShortID())
-    } operation: {
-      super.invokeTest()
-    }
-  }
-
-  func test__given_data__conveniences() throws {
+  @Test func test__given_data__conveniences() throws {
     let url = URL(static: "https://example.com/failure")
     let data = "Hello World".data(using: .utf8) ?? Data()
-    let networkingError = StubbedNetworkError(
-      url: url,
-      data: data,
-      status: .badGateway
-    )
-    let error: Error = networkingError
-    XCTAssertNoDifference(error.httpRequest, HTTPRequestData(path: "/failure"))
-    XCTAssertNoDifference(
-      error.httpResponse,
-      try HTTPResponseData(
+    try withTestDependencies {
+      $0.shortID = .constant(ShortID())
+    } operation: {
+      let networkingError = StubbedNetworkError(
+        url: url,
+        data: data,
+        status: .badGateway
+      )
+      let error: Error = networkingError
+      #expect(error.httpRequest == HTTPRequestData(path: "/failure"))
+      let expectedResponseData = try HTTPResponseData(
         request: HTTPRequestData(path: "/failure"),
         data: data,
         urlResponse: HTTPURLResponse(
           url: url,
           statusCode: 504,
           httpVersion: "HTTP/1.1",
-          headerFields: nil)
+          headerFields: nil
+        )
       )
-    )
-    XCTAssertNoDifference(error.httpBodyStringRepresentation, "Hello World")
-    XCTAssertNoDifference(networkingError.bodyStringRepresentation, "Hello World")
+      #expect(error.httpResponse == expectedResponseData)
+      #expect(error.httpBodyStringRepresentation == "Hello World")
+      #expect(networkingError.bodyStringRepresentation == "Hello World")
+    }
   }
 
-  func test__given_empty_data__conveniences() throws {
+  @Test func test__given_empty_data__conveniences() throws {
     let url = URL(static: "https://example.com/failure")
-    let networkingError = StubbedNetworkError(
-      url: url,
-      status: .badGateway
-    )
-    let error: Error = networkingError
-    XCTAssertNoDifference(error.httpBodyStringRepresentation, "empty body")
-    XCTAssertNoDifference(networkingError.bodyStringRepresentation, "empty body")
+    withTestDependencies {
+      let networkingError = StubbedNetworkError(
+        url: url,
+        status: .badGateway
+      )
+      let error: Error = networkingError
+      #expect(error.httpBodyStringRepresentation == "empty body")
+      #expect(networkingError.bodyStringRepresentation == "empty body")
+    }
   }
 }

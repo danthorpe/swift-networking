@@ -8,34 +8,66 @@ import Protected
 // MARK: - OAuth Installed Systems
 
 extension OAuth {
-  struct InstalledSystems: Sendable {
+  struct Container: Sendable {
+    let key: ObjectIdentifier
+    let proxy: AnySendable
+    init<Credentials: OAuthCredentials>(proxy: some OAuthProxy<Credentials>) {
+      self.key = ObjectIdentifier(Credentials.self)
+      self.proxy = AnySendable(proxy)
+    }
+  }
 
-    static func oauth<Credentials: BearerAuthenticatingCredentials>(
-      as credentials: Credentials.Type
-    ) -> OAuth.Proxy<Credentials>? {
-      Self.current.value.get(key: Credentials.self)
+  public struct InstalledSystems: Sendable {
+    var set: @Sendable (_ container: Container) -> Void
+    var get: @Sendable (_ key: ObjectIdentifier) -> Container?
+    var remove: @Sendable (_ key: ObjectIdentifier) -> Void
+    var removeAll: @Sendable () -> Void
+
+    func set<Credentials: OAuthCredentials>(oauth proxy: some OAuthProxy<Credentials>) {
+      self.set(Container(proxy: proxy))
     }
 
-    static func set<Credentials: BearerAuthenticatingCredentials>(
-      oauth proxy: OAuth.Proxy<Credentials>
-    ) {
-      Self.current.withValue {
-        $0.storage[ObjectIdentifier(Credentials.self)] = AnySendable(proxy)
+    func remove<Credentials: OAuthCredentials>(system: Credentials.Type) {
+      remove(ObjectIdentifier(Credentials.self))
+    }
+
+    func oauth<Credentials: OAuthCredentials>(as credentials: Credentials.Type) -> (any OAuthProxy<Credentials>)? {
+      (get(ObjectIdentifier(Credentials.self))?.proxy.base as? any OAuthProxy<Credentials>)
+    }
+  }
+}
+
+extension OAuth.InstalledSystems: DependencyKey {
+  public static var liveValue: OAuth.InstalledSystems = .basic()
+
+  public static func basic() -> Self {
+    let storage = LockIsolated<[ObjectIdentifier: OAuth.Container]>([:])
+    return OAuth.InstalledSystems(
+      set: { container in
+        storage.withValue { value in
+          value[container.key] = container
+        }
+      },
+      get: { key in
+        storage.withValue { value in
+          value[key]
+        }
+      },
+      remove: { key in
+        storage.withValue { value in
+          value[key] = nil
+        }
+      },
+      removeAll: {
+        storage.setValue([:])
       }
-    }
+    )
+  }
+}
 
-    static var current = LockIsolated(Self())
-
-    private var storage: [ObjectIdentifier: AnySendable] = [:]
-
-    private func get<Credentials: BearerAuthenticatingCredentials>(
-      key: Credentials.Type
-    ) -> OAuth.Proxy<Credentials>? {
-      guard
-        let base = self.storage[ObjectIdentifier(key)]?.base,
-        let value = base as? OAuth.Proxy<Credentials>
-      else { return nil }
-      return value
-    }
+extension DependencyValues {
+  public var oauthSystems: OAuth.InstalledSystems {
+    get { self[OAuth.InstalledSystems.self] }
+    set { self[OAuth.InstalledSystems.self] = newValue }
   }
 }

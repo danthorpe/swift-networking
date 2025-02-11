@@ -3,68 +3,74 @@ import CustomDump
 import Dependencies
 import Foundation
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class CachedTests: NetworkingTestCase {
+@Suite(.tags(.components))
+struct CachedTests: TestableNetwork {
 
-  override func invokeTest() {
-    withTestDependencies {
-      $0.date = .constant(Date())
-    } operation: {
-      super.invokeTest()
-    }
-  }
+  let now = Date()
 
-  func test__basics() async throws {
+  @Test func test__basics() async throws {
     let reporter = TestReporter()
-    let request = HTTPRequestData(id: "1", path: "message")
-
-    let data = try XCTUnwrap("Hello".data(using: .utf8))
+    let data = try #require("Hello".data(using: .utf8))
     let cache = Cache<HTTPRequestData, HTTPResponseData>(limit: 3)
+    let request = HTTPRequestData(id: "1", path: "message")
     let network = TerminalNetworkingComponent()
       .mocked(request, stub: .ok(data: data))
       .reported(by: reporter)
       .cached(in: cache)
 
-    var response = try await network.data(request)
-    XCTAssertFalse(response.isCached)
-    XCTAssertNil(response.cachedOriginalRequest?.id)
-    XCTAssertNoDifference(String(data: response.data, encoding: .utf8), "Hello")
+    var response = try await withTestDependencies {
+      $0.date = .constant(now)
+    } operation: {
+      try await network.data(request)
+    }
+    #expect(response.isCached == false)
+    #expect(response.cachedOriginalRequest?.id == nil)
+    #expect(String(data: response.data, encoding: .utf8) == "Hello")
 
-    response = try await network.data(request)
-    XCTAssertTrue(response.isCached)
-    XCTAssertEqual(response.cachedOriginalRequest?.id, "1")
-    XCTAssertNoDifference(String(data: response.data, encoding: .utf8), "Hello")
+    response = try await withTestDependencies {
+      $0.date = .constant(now)
+    } operation: {
+      try await network.data(request)
+    }
+    #expect(response.isCached)
+    #expect(response.cachedOriginalRequest?.id == "1")
+    #expect(String(data: response.data, encoding: .utf8) == "Hello")
   }
 
-  func test__never_cache() async throws {
+  @Test func test__never_cache() async throws {
     let reporter = TestReporter()
     var request = HTTPRequestData(id: "1", path: "message")
     request.cacheOption = .never
 
-    let data = try XCTUnwrap("Hello".data(using: .utf8))
+    let data = try #require("Hello".data(using: .utf8))
     let cache = Cache<HTTPRequestData, HTTPResponseData>(limit: 3)
     let network = TerminalNetworkingComponent()
       .mocked(request, stub: .ok(data: data))
       .reported(by: reporter)
       .cached(in: cache)
 
-    let response1 = try await network.data(request)
-    XCTAssertFalse(response1.isCached)
-    XCTAssertNil(response1.cachedOriginalRequest?.id)
-    XCTAssertNoDifference(String(data: response1.data, encoding: .utf8), "Hello")
+    let response1 = try await withTestDependencies {
+      try await network.data(request)
+    }
+    #expect(response1.isCached == false)
+    #expect(response1.cachedOriginalRequest?.id == nil)
+    #expect(String(data: response1.data, encoding: .utf8) == "Hello")
 
-    let response2 = try await network.data(request)
-    XCTAssertFalse(response2.isCached)
-    XCTAssertNil(response2.cachedOriginalRequest?.id)
-    XCTAssertNoDifference(String(data: response1.data, encoding: .utf8), "Hello")
+    let response2 = try await withTestDependencies {
+      try await network.data(request)
+    }
+    #expect(response2.isCached == false)
+    #expect(response2.cachedOriginalRequest?.id == nil)
+    #expect(String(data: response2.data, encoding: .utf8) == "Hello")
 
-    XCTAssertNoDifference(response1.request, response2.request)
-    XCTAssertNoDifference(response1, response2)
+    #expect(response1.request == response2.request)
+    #expect(response1 == response2)
 
     let executedRequestsCount = await reporter.requests.count
-    XCTAssertEqual(executedRequestsCount, 2)
+    #expect(executedRequestsCount == 2)
   }
 }

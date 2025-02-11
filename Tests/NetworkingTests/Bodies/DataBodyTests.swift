@@ -1,36 +1,35 @@
+import Dependencies
 import Foundation
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class DataBodyTests: NetworkingTestCase {
+@Suite(.tags(.basics))
+struct DataBodyTests {
 
-  override func invokeTest() {
-    withTestDependencies {
-      super.invokeTest()
-    }
-  }
-
-  func test__empty_data() throws {
+  @Test func emptyDataBody() async throws {
     let body = DataBody(
       data: Data(),
       additionalHeaders: [:]
     )
-    XCTAssertTrue(body.isEmpty)
+    #expect(body.isEmpty)
     let encoded = try body.encode()
-    XCTAssertEqual(encoded, Data())
+    #expect(encoded == Data())
   }
 
-  func test__additional_headers() throws {
+  @Test func additionalHeaders() async throws {
     let body = DataBody(
-      data: try XCTUnwrap("secret message".data(using: .utf8)),
+      data: try #require("secret message".data(using: .utf8)),
       additionalHeaders: [.cookie: "secret cookie"]
     )
-    let request = try HTTPRequestData(headerFields: [.accept: "application/json"], body: body)
-    XCTAssertEqual(
-      request.headerFields,
-      [
+    let request = try withDependencies {
+      $0.shortID = .incrementing
+    } operation: {
+      try HTTPRequestData(headerFields: [.accept: "application/json"], body: body)
+    }
+    #expect(
+      request.headerFields == [
         .accept: "application/json",
         .cookie: "secret cookie",
       ])

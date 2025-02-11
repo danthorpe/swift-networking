@@ -1,14 +1,15 @@
 import Foundation
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class EmptyBodyTests: XCTestCase {
+@Suite(.tags(.basics))
+struct EmptyBodyTests {
 
-  func test__basics() async throws {
+  @Test func basics() async throws {
     let body = EmptyBody()
-    XCTAssertTrue(body.isEmpty)
+    #expect(body.isEmpty)
     let encoded = try body.encode()
-    XCTAssertEqual(encoded, Data())
+    #expect(encoded == Data())
   }
 }

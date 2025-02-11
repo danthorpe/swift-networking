@@ -2,9 +2,10 @@ import Dependencies
 import Foundation
 import Networking
 import TestSupport
-import XCTest
+import Testing
 
-final class NumberedTests: XCTestCase {
+@Suite(.tags(.components))
+struct NumberedTests: TestableNetwork {
 
   actor RequestSequenceReporter: NetworkReportingComponent {
     var numbers: [(identifier: String, number: Int)] = []
@@ -13,13 +14,10 @@ final class NumberedTests: XCTestCase {
     }
   }
 
-  func test__requests_get_incrementing_sequence_numbers() async throws {
+  @Test func test__requests_get_incrementing_sequence_numbers() async throws {
     let reporter = RequestSequenceReporter()
 
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
+    try await withTestDependencies {
       let request1 = HTTPRequestData(authority: "example.com")
       let request2 = HTTPRequestData(authority: "example.co.uk")
       let network = TerminalNetworkingComponent(isFailingTerminal: true)
@@ -34,14 +32,13 @@ final class NumberedTests: XCTestCase {
 
       let numbers = await reporter.numbers
 
-      XCTAssertEqual(
-        numbers.map(\.identifier),
-        [
+      #expect(
+        numbers.map(\.identifier) == [
           request1.identifier,
           request2.identifier,
           request1.identifier,
         ])
-      XCTAssertEqual(numbers.map(\.number), [1, 2, 3])
+      #expect(numbers.map(\.number) == [1, 2, 3])
     }
   }
 }

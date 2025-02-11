@@ -3,13 +3,14 @@ import Dependencies
 import Foundation
 import HTTPTypes
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class ThreadSafeAuthenticationDelegateTests: XCTestCase {
+@Suite(.tags(.authentication))
+struct ThreadSafeAuthenticationDelegateTests {
 
-  func test__given_authorize__delegate_is_triggered() async throws {
+  @Test func test__given_authorize__delegate_is_triggered() async throws {
     var request = HTTPRequestData(id: "1")
     request.authenticationMethod = .bearer
 
@@ -25,12 +26,12 @@ final class ThreadSafeAuthenticationDelegateTests: XCTestCase {
 
     let newRequest = try await authenticator.authorize().apply(to: request)
 
-    XCTAssertEqual(newRequest.headerFields[.authorization], "Bearer some token")
+    #expect(newRequest.headerFields[.authorization] == "Bearer some token")
     let authorizeCount = await delelgate.authorizeCount
-    XCTAssertEqual(authorizeCount, 1)
+    #expect(authorizeCount == 1)
   }
 
-  func test__given_delegate_throws_error() async throws {
+  @Test func test__given_delegate_throws_error() async throws {
     struct CustomError: Error, Equatable {}
 
     var request = HTTPRequestData(id: "1")
@@ -46,13 +47,16 @@ final class ThreadSafeAuthenticationDelegateTests: XCTestCase {
       delegate: delelgate
     )
 
-    await XCTAssertThrowsError(
-      try await authenticator.fetch(for: request),
-      matches: CustomError()
-    )
+    try await #require(
+      performing: {
+        try await authenticator.fetch(for: request)
+      },
+      throws: {
+        $0 is CustomError
+      })
   }
 
-  func test__requests_are_queued_until_delegate_responds() async throws {
+  @Test func test__requests_are_queued_until_delegate_responds() async throws {
 
     let delelgate = TestAuthenticationDelegate(
       authorize: {
@@ -97,10 +101,9 @@ final class ThreadSafeAuthenticationDelegateTests: XCTestCase {
 
         let authorization = Set(requests.compactMap(\.headerFields[.authorization]))
         let authorizeCount = await delelgate.authorizeCount
-        XCTAssertEqual(authorization, ["Bearer some token"])
-        XCTAssertEqual(authorizeCount, 1)
+        #expect(authorization == ["Bearer some token"])
+        #expect(authorizeCount == 1)
       }
     }
   }
-
 }

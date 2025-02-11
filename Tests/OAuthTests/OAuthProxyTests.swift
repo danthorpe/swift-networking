@@ -4,14 +4,15 @@ import Foundation
 import Helpers
 import Networking
 import TestSupport
-import XCTest
+import Testing
 import XCTestDynamicOverlay
 
 @testable import OAuth
 
-final class OAuthProxyTests: OAuthTestCase {
+@Suite
+struct OAuthProxyTests: TestableNetwork {
 
-  func test__proxy() async throws {
+  @Test func test__proxy() async throws {
 
     let existingCredentials = StubOAuthSystem.Credentials(
       accessToken: "existing_access",
@@ -23,11 +24,19 @@ final class OAuthProxyTests: OAuthTestCase {
       refreshToken: "refresh"
     )
 
+    let stub = StubOAuthSystem(
+      authorizationEndpoint: "https://accounts.example.com/authorize",
+      tokenEndpoint: "https://accounts.example.com/api/token",
+      clientId: "some-client-id",
+      redirectURI: "some-redirect-uri://callback",
+      scope: "some-scope"
+    )
+
     let code = "abc123"
 
     try await withTestDependencies {
-      $0.webAuthenticationSession = WebAuthenticationSessionClient { [redirect = stub.redirectURI] state, _, _, _ in
-        URL(string: "\(redirect)?state=\(state)&code=\(code)")!
+      $0.webAuthenticationSession = WebAuthenticationSessionClient { state, _, _, _ in
+        URL(string: "\(stub.redirectURI)?state=\(state)&code=\(code)")!
       }
     } operation: {
 
@@ -44,32 +53,30 @@ final class OAuthProxyTests: OAuthTestCase {
       // Set presentation context
       await proxy.set(presentationContext: DefaultPresentationContext())
       let presentationContext = await oauthDelegate.presentationContext
-      XCTAssertNotNil(presentationContext)
+      #expect(presentationContext != nil)
 
       // Set credentials
       await proxy.set(credentials: existingCredentials)
       var state = await threadSafe.state
-      XCTAssertEqual(state, .authorized(existingCredentials))
+      #expect(state == .authorized(existingCredentials))
 
       // Sign Out
       await proxy.signOut()
       state = await threadSafe.state
-      XCTAssertEqual(state, .idle)
-
-      let exp = expectation(description: "Credentials did change")
+      #expect(state == .idle)
 
       // Subscribe to credential updates
       Task {
-        await proxy.subscribeToCredentialsDidChange { credentials in
-          XCTAssertEqual(credentials, expectedCredentials)
-          exp.fulfill()
+        await confirmation { expectedCredentialsDidChange in
+          await proxy.subscribeToCredentialsDidChange { credentials in
+            #expect(credentials == expectedCredentials)
+            expectedCredentialsDidChange()
+          }
         }
       }
 
       // Sign In
       try await proxy.signIn()
-
-      await fulfillment(of: [exp])
     }
   }
 }

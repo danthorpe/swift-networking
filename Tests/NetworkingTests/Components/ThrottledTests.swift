@@ -2,48 +2,40 @@ import ConcurrencyExtras
 import Dependencies
 import Foundation
 import Networking
+import ShortID
 import TestSupport
-import XCTest
+import Testing
 
-final class ThrottledTests: XCTestCase {
+@Suite(.tags(.components))
+struct ThrottledTests: TestableNetwork {
 
-  override func invokeTest() {
-    withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      withMainSerialExecutor {
-        super.invokeTest()
-      }
-    }
-  }
-
-  func test__basics() async throws {
-    let data = try XCTUnwrap("Hello".data(using: .utf8))
+  @Test func test__basics() async throws {
+    let data = try #require("Hello".data(using: .utf8))
     let reporter = TestReporter()
 
-    let request = HTTPRequestData()
     let network = TerminalNetworkingComponent()
-      .mocked(request, stub: .ok(data: data))
+      .mocked(all: .ok(data: data))
       .reported(by: reporter)
       .throttled(max: 5)
 
-    try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
-      for _ in 0 ..< 100 {
-        group.addTask {
-          try await network.data(HTTPRequestData())
+    let responses = try await withTestDependencies {
+      try await withThrowingTaskGroup(of: HTTPResponseData.self, returning: [HTTPResponseData].self) { group in
+        var responses: [HTTPResponseData] = []
+        for _ in 0 ..< 100 {
+          group.addTask {
+            try await network.data(HTTPRequestData())
+          }
         }
+        for try await response in group {
+          responses.append(response)
+        }
+        return responses
       }
-
-      var responses: [HTTPResponseData] = []
-      for try await response in group {
-        responses.append(response)
-      }
-      XCTAssertEqual(responses.count, 100)
     }
 
-    let peakActiveRequests = await reporter.peakActiveRequests
-    XCTAssertEqual(peakActiveRequests, 5)
+    #expect(responses.count == 100)
 
+    let peakActiveRequests = await reporter.peakActiveRequests
+    #expect(peakActiveRequests == 5)
   }
 }

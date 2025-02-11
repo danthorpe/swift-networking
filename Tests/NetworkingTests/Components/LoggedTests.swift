@@ -3,9 +3,10 @@ import Dependencies
 import Foundation
 import Networking
 import TestSupport
-import XCTest
+import Testing
 
-final class LoggedTests: XCTestCase {
+@Suite(.tags(.basics))
+struct LoggedTests: TestableNetwork {
 
   struct OnSuccess: Equatable {
     let request: HTTPRequestData
@@ -34,17 +35,14 @@ final class LoggedTests: XCTestCase {
     }
   }
 
-  func test__logged_receives_lifecycle() async throws {
+  @Test func test__logged_receives_lifecycle() async throws {
 
     let tester = LoggedTester()
-    let data1 = try XCTUnwrap("Hello".data(using: .utf8))
-    let data2 = try XCTUnwrap("World".data(using: .utf8))
-    let data3 = try XCTUnwrap("Whoops".data(using: .utf8))
+    let data1 = try #require("Hello".data(using: .utf8))
+    let data2 = try #require("World".data(using: .utf8))
+    let data3 = try #require("Whoops".data(using: .utf8))
 
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
+    try await withTestDependencies {
       let request1 = HTTPRequestData(authority: "example.com")
       let request2 = HTTPRequestData(authority: "example.co.uk")
       let request3 = HTTPRequestData(authority: "example.com", path: "error")
@@ -63,20 +61,21 @@ final class LoggedTests: XCTestCase {
       try await network.data(request1)
       try await network.data(request2)
       try await network.data(request1)
-      try await XCTAssertThrowsError(
-        await network.data(request3),
-        matches: StubbedNetworkError(request: request3)
-      )
+
+      await #expect(throws: StubbedNetworkError(request: request3)) {
+        try await network.data(request3)
+      }
 
       let requests = await tester.onSend
-      XCTAssertEqual(requests, [request1, request2, request1, request3])
+      #expect(requests == [request1, request2, request1, request3])
       let datas = await tester.onSuccess.map(\.response.data)
-      XCTAssertEqual(datas, [data1, data2, data1])
+      #expect(datas == [data1, data2, data1])
       let failureRequests = await tester.onFailure.map(\.request)
-      XCTAssertEqual(failureRequests, [request3])
+      #expect(failureRequests == [request3])
       let failureErrors = await tester.onFailure.map(\.error)
-      XCTAssertEqual(
-        failureErrors.compactMap { $0 as? StubbedNetworkError }, [StubbedNetworkError(request: request3)])
+      #expect(
+        failureErrors.compactMap { $0 as? StubbedNetworkError } == [StubbedNetworkError(request: request3)]
+      )
     }
   }
 }

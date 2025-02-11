@@ -53,7 +53,7 @@ extension OAuthSystem {
       let value = callback.extractValueForQueryParameterNamed(queryName)
     else {
       throw ErrorMessage(
-        message: "Missing query parameter \(queryName): \(callback)"
+        message: "Missing query parameter '\(queryName)': \(callback)"
       )
     }
     return value

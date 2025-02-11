@@ -3,22 +3,12 @@ import Dependencies
 import Foundation
 import HTTPTypes
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class CheckedStatusCodeTests: XCTestCase {
-
-  override func invokeTest() {
-    withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      withMainSerialExecutor {
-        super.invokeTest()
-      }
-    }
-  }
+@Suite(.tags(.components))
+struct CheckedStatusCodeTests: TestableNetwork {
 
   func configureNetwork(
     for status: HTTPResponse.Status
@@ -31,24 +21,28 @@ final class CheckedStatusCodeTests: XCTestCase {
     return (network, stubbed.expectedResponse(request))
   }
 
-  func test__ok() async throws {
-    let (network, expectedResponse) = configureNetwork(for: .ok)
-    try await network.data(expectedResponse.request)
+  @Test func test__ok() async throws {
+    try await withTestDependencies {
+      let (network, expectedResponse) = configureNetwork(for: .ok)
+      try await network.data(expectedResponse.request)
+    }
   }
 
-  func test__internal_server_error() async throws {
-    let (network, expectedResponse) = configureNetwork(for: .internalServerError)
-    await XCTAssertThrowsError(
-      try await network.data(expectedResponse.request),
-      matches: StackError(statusCode: expectedResponse)
-    )
+  @Test func test__internal_server_error() async throws {
+    try await withTestDependencies {
+      let (network, expectedResponse) = configureNetwork(for: .internalServerError)
+      try await #expect(throws: StackError(statusCode: expectedResponse)) {
+        try await network.data(expectedResponse.request)
+      }
+    }
   }
 
-  func test__unauthorized() async throws {
-    let (network, expectedResponse) = configureNetwork(for: .unauthorized)
-    await XCTAssertThrowsError(
-      try await network.data(expectedResponse.request),
-      matches: StackError(unauthorized: expectedResponse)
-    )
+  @Test func test__unauthorized() async throws {
+    try await withTestDependencies {
+      let (network, expectedResponse) = configureNetwork(for: .unauthorized)
+      try await #expect(throws: StackError(unauthorized: expectedResponse)) {
+        try await network.data(expectedResponse.request)
+      }
+    }
   }
 }

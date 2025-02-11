@@ -19,7 +19,9 @@ extension NetworkingComponent {
         )
       )
     )
-    OAuth.InstalledSystems.set(
+    @Dependency(OAuth.InstalledSystems.self) var systems
+
+    systems.set(
       oauth: OAuth.Proxy(delegate: delegate)
     )
     return server(authenticationMethod: Credentials.method)
@@ -30,7 +32,8 @@ extension NetworkingComponent {
     of credentialsType: Credentials.Type,
     perform: @MainActor (any OAuthProxy<Credentials>) async throws -> ReturnValue
   ) async throws -> ReturnValue {
-    guard let oauth = OAuth.InstalledSystems.oauth(as: Credentials.self) else {
+    @Dependency(OAuth.InstalledSystems.self) var system
+    guard let oauth = system.oauth(as: Credentials.self) else {
       throw OAuth.Error.oauthNotInstalled
     }
     return try await perform(oauth)

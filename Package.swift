@@ -23,12 +23,15 @@ let TestSupport = "TestSupport"
 // MARK: - 🔑 Builders
 
 let 📦 = Module.builder(
-  withDefaults: .init(
+  withDefaults: Module(
     name: "Basic Module",
     defaultWith: [
       .dependencies,
       .dependenciesMacros,
       .concurrencyExtras,
+    ],
+    unitTestsWith: [
+      .dependenciesTestSupport
     ],
     swiftSettings: .concurrency
   )
@@ -97,6 +100,7 @@ OAuth
     $0.unitTestsWith = [
       .assertionExtras,
       .concurrencyExtras,
+      .numerics,
     ]
   }
 
@@ -123,9 +127,10 @@ package.dependencies = [
   .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
   .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
   .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
+  .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
   .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.5.0"),
   .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
-  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.0.0"),
+  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.6.0"),
   .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
 ]
 
@@ -151,6 +156,9 @@ extension Target.Dependency {
   static let dependenciesMacros: Target.Dependency = .product(
     name: "DependenciesMacros", package: "swift-dependencies"
   )
+  static let dependenciesTestSupport: Target.Dependency = .product(
+    name: "DependenciesTestSupport", package: "swift-dependencies"
+  )
   static let deque: Target.Dependency = .product(
     name: "DequeModule", package: "swift-collections"
   )
@@ -162,6 +170,9 @@ extension Target.Dependency {
   )
   static let httpTypesFoundation: Target.Dependency = .product(
     name: "HTTPTypesFoundation", package: "swift-http-types"
+  )
+  static let numerics: Target.Dependency = .product(
+    name: "Numerics", package: "swift-numerics"
   )
   static let protected: Target.Dependency = .product(
     name: "Protected", package: "swift-utilities"

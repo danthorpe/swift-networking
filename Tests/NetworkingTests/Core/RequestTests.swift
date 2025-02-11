@@ -3,33 +3,43 @@ import Foundation
 import Networking
 import ShortID
 import TestSupport
-import XCTest
+import Testing
 
-final class RequestTests: XCTestCase {
+@Suite(.tags(.basics))
+struct RequestTests: TestableNetwork {
+  let json =
+    """
+    {"value":"Hello World"}
+    """
 
-  func test__decoder_basics() async throws {
-    let json =
-      """
-      {"value":"Hello World"}
-      """
-    let data = try XCTUnwrap(json.data(using: .utf8))
+  @Test func test__decoder_basics_with_request() async throws {
+    let data = try #require(json.data(using: .utf8))
 
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      let http = HTTPRequestData(authority: "example.com")
-      let network = TerminalNetworkingComponent()
-        .mocked(http, stub: .ok(data: data))
+    let network = TerminalNetworkingComponent()
+      .mocked(all: .ok(data: data))
 
-      var (message, response) = try await network.value(Request<Message>(http: http))
-      XCTAssertEqual(message.value, "Hello World")
-      XCTAssertEqual(response.status, .ok)
-
-      (message, response) = try await network.value(http, as: Message.self, decoder: JSONDecoder())
-      XCTAssertEqual(message.value, "Hello World")
-      XCTAssertEqual(response.status, .ok)
+    let (message, response) = try await withTestDependencies {
+      let request = HTTPRequestData(authority: "example.com")
+      return try await network.value(Request<Message>(http: request))
     }
+
+    #expect(message.value == "Hello World")
+    #expect(response.status == .ok)
+  }
+
+  @Test func test__decoder_basics_with_decoder() async throws {
+    let data = try #require(json.data(using: .utf8))
+
+    let network = TerminalNetworkingComponent()
+      .mocked(all: .ok(data: data))
+
+    let (message, response) = try await withTestDependencies {
+      let request = HTTPRequestData(authority: "example.com")
+      return try await network.value(request, as: Message.self, decoder: JSONDecoder())
+    }
+
+    #expect(message.value == "Hello World")
+    #expect(response.status == .ok)
   }
 }
 

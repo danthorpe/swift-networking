@@ -3,65 +3,57 @@ import Dependencies
 import Foundation
 import Networking
 import TestSupport
-import XCTest
+import Testing
 
-final class DuplicatesRemovedTests: XCTestCase {
+@Suite(.tags(.components))
+struct DuplicatesRemovedTests: TestableNetwork {
 
-  override func invokeTest() {
-    withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
-      withMainSerialExecutor {
-        super.invokeTest()
-      }
-    }
-  }
-
-  func test__duplicates_removed() async throws {
-    let data1 = try XCTUnwrap("Hello".data(using: .utf8))
-    let data2 = try XCTUnwrap("World".data(using: .utf8))
-    let data3 = try XCTUnwrap("Whoops".data(using: .utf8))
+  @Test func test__duplicates_removed() async throws {
+    let data1 = try #require("Hello".data(using: .utf8))
+    let data2 = try #require("World".data(using: .utf8))
+    let data3 = try #require("Whoops".data(using: .utf8))
 
     let reporter = TestReporter()
 
-    let request1 = HTTPRequestData(authority: "example.com")
-    let request2 = HTTPRequestData(authority: "example.co.uk")
-    let request3 = HTTPRequestData(authority: "example.com", path: "/error")
-    let request4 = HTTPRequestData(authority: "example.com")  // actually the same endpoint as request 1
+    try await withTestDependencies {
+      let request1 = HTTPRequestData(authority: "example.com")
+      let request2 = HTTPRequestData(authority: "example.co.uk")
+      let request3 = HTTPRequestData(authority: "example.com", path: "/error")
+      let request4 = HTTPRequestData(authority: "example.com")  // actually the same endpoint as request 1
 
-    let network = TerminalNetworkingComponent()
-      .mocked(request1, stub: .ok(data: data1))
-      .mocked(request2, stub: .ok(data: data2))
-      .mocked(request3, stub: .ok(data: data3))
-      .mocked(request4, stub: .ok(data: data1))
-      .reported(by: reporter)
-      .duplicatesRemoved()
+      let network = TerminalNetworkingComponent()
+        .mocked(request1, stub: .ok(data: data1))
+        .mocked(request2, stub: .ok(data: data2))
+        .mocked(request3, stub: .ok(data: data3))
+        .mocked(request4, stub: .ok(data: data1))
+        .reported(by: reporter)
+        .duplicatesRemoved()
 
-    try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
-      for _ in 0 ..< 4 {
-        group.addTask {
-          try await network.data(request1)
+      try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
+        for _ in 0 ..< 4 {
+          group.addTask {
+            try await network.data(request1)
+          }
+          group.addTask {
+            try await network.data(request2)
+          }
+          group.addTask {
+            try await network.data(request3)
+          }
+          group.addTask {
+            try await network.data(request4)
+          }
         }
-        group.addTask {
-          try await network.data(request2)
+
+        var responses: [HTTPResponseData] = []
+        for try await response in group {
+          responses.append(response)
         }
-        group.addTask {
-          try await network.data(request3)
-        }
-        group.addTask {
-          try await network.data(request4)
-        }
+        #expect(responses.count == 16)
       }
-
-      var responses: [HTTPResponseData] = []
-      for try await response in group {
-        responses.append(response)
-      }
-      XCTAssertEqual(responses.count, 16)
     }
 
     let reportedRequests = await reporter.requests
-    XCTAssertEqual(reportedRequests.count, 3)
+    #expect(reportedRequests.count == 3)
   }
 }

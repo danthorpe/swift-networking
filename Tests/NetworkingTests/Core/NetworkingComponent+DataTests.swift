@@ -4,36 +4,31 @@ import Foundation
 import Helpers
 import ShortID
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class NetworkingComponentDataTests: XCTestCase {
+@Suite(.tags(.basics))
+struct NetworkingComponentDataTests: TestableNetwork {
 
-  func test__basic_data() async throws {
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
+  @Test func test__basic_data() async throws {
+    try await withTestDependencies {
       let request = HTTPRequestData(authority: "example.com")
-      let data = try XCTUnwrap("Hello World".data(using: .utf8))
+      let data = try #require("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
-
       let response = try await network.data(request)
-
-      XCTAssertEqual(response.data, data)
+      #expect(response.data == data)
     }
   }
 
-  func test__basic_data__timeout() async throws {
+  @Test func test__basic_data__timeout() async throws {
     let clock = TestClock()
-    try await withDependencies {
-      $0.shortID = .incrementing
+    try await withTestDependencies {
       $0.continuousClock = clock
     } operation: {
       let request = HTTPRequestData(authority: "example.com")
-      let data = try XCTUnwrap("Hello World".data(using: .utf8))
+      let data = try #require("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
 
@@ -41,16 +36,16 @@ final class NetworkingComponentDataTests: XCTestCase {
       await clock.advance(by: .seconds(3))
       do {
         _ = try await response.data
-        XCTFail("Expected an error to be thrown.")
+        Issue.record("Expected an error to be thrown.")
       } catch let error as StackError {
-        XCTAssertEqual(error, StackError(timeout: request))
+        #expect(error == StackError(timeout: request))
       } catch {
-        XCTFail("Unexpected error \(error)")
+        Issue.record("Unexpected error \(error)")
       }
     }
   }
 
-  func test__basic_data_progress() async throws {
+  @Test func test__basic_data_progress() async throws {
     actor UpdateProgress {
       var bytesReceived: [BytesReceived] = []
       func update(_ bytesReceived: BytesReceived) {
@@ -58,29 +53,24 @@ final class NetworkingComponentDataTests: XCTestCase {
       }
     }
     let progress = UpdateProgress()
-    let progressExpectation = expectation(description: "Update progress")
-    progressExpectation.assertForOverFulfill = true
-    progressExpectation.expectedFulfillmentCount = 5
 
-    try await withDependencies {
-      $0.shortID = .incrementing
-      $0.continuousClock = TestClock()
-    } operation: {
+    try await withTestDependencies {
       let request = HTTPRequestData(authority: "example.com")
-      let data = try XCTUnwrap("Hello World".data(using: .utf8))
+      let data = try #require("Hello World".data(using: .utf8))
       let network = TerminalNetworkingComponent()
         .mocked(request, stub: .ok(data: data))
 
-      let response = try await network.data(request) { bytesReceived in
-        progressExpectation.fulfill()
-        await progress.update(bytesReceived)
+      try await confirmation(expectedCount: 5) { confirmation in
+        let response = try await network.data(request) { bytesReceived in
+          confirmation()
+          await progress.update(bytesReceived)
+        }
+        #expect(response.data == data)
       }
-      XCTAssertEqual(response.data, data)
-      await fulfillment(of: [progressExpectation])
+
       let bytesReceived = await progress.bytesReceived
-      XCTAssertEqual(
-        bytesReceived,
-        [
+      #expect(
+        bytesReceived == [
           BytesReceived(received: 2, expected: 11),
           BytesReceived(received: 4, expected: 11),
           BytesReceived(received: 6, expected: 11),
@@ -88,6 +78,5 @@ final class NetworkingComponentDataTests: XCTestCase {
           BytesReceived(received: 11, expected: 11),
         ])
     }
-
   }
 }

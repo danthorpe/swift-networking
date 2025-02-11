@@ -1,15 +1,17 @@
 import Dependencies
 import Foundation
 import TestSupport
-import XCTest
+import Testing
 
 @testable import Networking
 
-final class ExpectedContentLengthOptionTests: XCTestCase {
-  func test__expected_content_length_option() {
+@Suite(.tags(.basics))
+struct ExpectedContentLengthOptionTests {
+
+  @Test func test__expected_content_length_option() {
     var request = HTTPRequestData(id: .init("1"), authority: "example.com")
-    XCTAssertNil(request.expectedContentLength)
+    #expect(request.expectedContentLength == nil)
     request.expectedContentLength = 100
-    XCTAssertEqual(request.expectedContentLength, 100)
+    #expect(request.expectedContentLength == 100)
   }
 }
