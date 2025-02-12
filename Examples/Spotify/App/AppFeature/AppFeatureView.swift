@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 
 @ViewAction(for: AppFeature.self)
-struct AppFeatureView {
+struct AppFeatureView: View {
   let store: StoreOf<AppFeature>
   init(store: StoreOf<AppFeature>) {
     self.store = store
@@ -14,9 +14,7 @@ struct AppFeatureView {
       ) { AppFeature() }
     )
   }
-}
 
-extension AppFeatureView: View {
   var body: some View {
     contentView
       .task { await send(.onTask).finish() }
