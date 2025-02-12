@@ -101,10 +101,13 @@ extension Spotify.Client: DependencyKey {
       }
     },
     signIn: { context in
-      try await Spotify.api.spotify {
-        if let context {
-          await $0.set(presentationContext: context)
+      if let context {
+        let sendable = UncheckedSendable(context)
+        try await Spotify.api.spotify {
+          await $0.set(presentationContext: sendable.value)
         }
+      }
+      try await Spotify.api.spotify {
         try await $0.signIn()
       }
     },
