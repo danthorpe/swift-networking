@@ -22,7 +22,7 @@ extension ArtistsView: View {
     }
   }
 
-  @ViewBuilder
+  @ViewBuilder @MainActor
   private var contentView: some View {
     switch store.case {
     case .empty:
