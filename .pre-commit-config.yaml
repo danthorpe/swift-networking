@@ -15,7 +15,7 @@ repos:
     hooks:
       - id: swiftlint
         entry: swiftlint --fix
-  - repo: https://github.com/swiftlang/swift-format
-    rev: swift-6.1-DEVELOPMENT-SNAPSHOT-2024-11-21-a
-    hooks:
-      - id: swift-format
+  # - repo: https://github.com/swiftlang/swift-format
+  #   rev: swift-6.1-DEVELOPMENT-SNAPSHOT-2024-11-21-a
+  #   hooks:
+  #     - id: swift-format
