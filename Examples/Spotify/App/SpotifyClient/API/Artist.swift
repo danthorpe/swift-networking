@@ -29,7 +29,7 @@ struct Artists: Sendable, Equatable, Codable {
   let artists: PagedList<Artist>
 }
 
-extension Request where Body == Artists {
+extension Request where Response == Artists {
   static func followedArtists(after: String? = nil, limit: Int? = nil) -> Self {
     var http = HTTPRequestData(path: "me/following")
     http.type = "artist"

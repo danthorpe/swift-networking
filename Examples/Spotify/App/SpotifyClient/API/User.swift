@@ -8,7 +8,7 @@ struct User: Sendable, Equatable, Codable, Identifiable {
   let uri: String
 }
 
-extension Request where Body == User {
+extension Request where Response == User {
   static var me: Self {
     Request(http: HTTPRequestData(path: "me"), decoder: Spotify.decoder)
   }

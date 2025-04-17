@@ -84,16 +84,15 @@ extension Spotify.Client: DependencyKey {
     },
     followedArtists: { after, limit in
       try await Spotify.api
-        .value(
+        .request(
           .followedArtists(
             after: after,
             limit: limit
           )
         )
-        .body
     },
     me: {
-      try await Spotify.api.value(.me).body
+      try await Spotify.api.request(.me)
     },
     setExistingCredentials: { existingCredentials in
       try await Spotify.api.spotify {

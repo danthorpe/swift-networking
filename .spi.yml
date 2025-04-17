@@ -1,4 +1,4 @@
 version: 1
 builder:
   configs:
-    - documentation_targets: [Networking]
+    - documentation_targets: [Networking,NetworkClient,NetworkClientLive,OAuth]
