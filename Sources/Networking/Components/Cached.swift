@@ -1,10 +1,11 @@
-import Cache
 import Dependencies
 import Foundation
 
 extension NetworkingComponent {
-  public func cached(in cache: Cache<HTTPRequestData, HTTPResponseData>) -> some NetworkingComponent {
-    modified(Cached(cache: cache))
+  public func cached(in cache: Cache<AnyHashable, HTTPResponseData>) -> some NetworkingComponent {
+    modified(Cached()).networkEnvironment(\.cache) {
+      CacheClient<AnyHashable, HTTPResponseData>.liveValue(with: cache)
+    }
   }
 }
 
@@ -22,44 +23,51 @@ extension HTTPRequestData {
 }
 
 private struct Cached: NetworkingModifier {
-  var cache: Cache<HTTPRequestData, HTTPResponseData>
+  @NetworkEnvironment(\.cache) var cache
   @NetworkEnvironment(\.logger) var logger
+
   func send(upstream: some NetworkingComponent, request: HTTPRequestData) -> ResponseStream<HTTPResponseData> {
+    guard let cache else {
+      fatalError("Network Cache was not set correctly")
+    }
     guard case let .always(timeToLive) = request.cacheOption else {
       return upstream.send(request)
     }
 
     let (stream, continuation) = ResponseStream<HTTPResponseData>.makeStream()
     Task {
-      if let cachedValue = await cache.value(forKey: request) {
+      if let cachedValue = cache.value(forKey: request) {
         var copy = cachedValue
         copy.set(request: request)
         copy.cachedMetadata = CachedMetadata(
           originalRequest: cachedValue.request
         )
-        logger?.debug("🎯 Cached from \(cachedValue.request.prettyPrintedIdentifier)")
+        logger?.info(
+          """
+          🎯 <\(cachedValue.request.prettyPrintedIdentifier, privacy: .public)>
+          \(request.debugDescription, privacy: .public)
+          """
+        )
         continuation.yield(.value(copy, BytesReceived(data: cachedValue.data)))
         continuation.finish()
         return
       }
 
       upstream.send(request)
-        .redirect(
-          into: continuation,
-          onElement: { element in
-            if !Task.isCancelled, case let .value(response, _) = element {
-              await cache.insert(response, forKey: request, cost: response.cacheCost, duration: timeToLive)
-            }
+        .map { partial in
+          partial.onValue { response in
+            cache.insert(value: response, forKey: request, cost: response.cacheCost, duration: timeToLive)
           }
-        )
+        }
+        .redirect(into: continuation)
     }
     return stream
   }
 }
 
 extension HTTPResponseData {
-  var cacheCost: UInt64 {
-    UInt64(data.count)
+  var cacheCost: Int {
+    data.count
   }
 }
 

@@ -27,7 +27,7 @@ private struct NetworkEnvironmentWritingModifier: NetworkingModifier {
   }
 }
 
-public protocol NetworkEnvironmentKey {
+public protocol NetworkEnvironmentKey: Sendable {
   associatedtype Value: Sendable = Self
 }
 
