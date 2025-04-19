@@ -100,4 +100,21 @@ struct CacheTests {
       }
     }
   }
+
+  @Test func removeAll() {
+    withDependencies {
+      $0.date = .constant(Date())
+    } operation: {
+      cache.insert("hello", forKey: 0)
+      cache.insert("world", forKey: 1)
+      cache.insert("Swift rocks", forKey: 2)
+      cache.removeValue(forKey: 0)
+      #expect(cache.value(forKey: 0) == nil)
+      #expect(cache.value(forKey: 1) == "world")
+      #expect(cache.value(forKey: 2) == "Swift rocks")
+      cache.removeAll()
+      #expect(cache.value(forKey: 1) == nil)
+      #expect(cache.value(forKey: 2) == nil)
+    }
+  }
 }
