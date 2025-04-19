@@ -4,7 +4,7 @@ import Networking
 public protocol OAuthProxy<Credentials>: Actor {
   associatedtype Credentials: OAuthCredentials, Sendable
 
-  func set(presentationContext: any ASWebAuthenticationPresentationContextProviding) async
+  func set(presentationContext: any ASWebAuthenticationPresentationContextProviding & Sendable) async
   func set(credentials: Credentials) async
   func signIn() async throws
   func signOut() async
@@ -27,7 +27,7 @@ extension OAuth {
       await delegate.set(credentials: credentials)
     }
 
-    func set(presentationContext: any ASWebAuthenticationPresentationContextProviding) async {
+    func set(presentationContext: any ASWebAuthenticationPresentationContextProviding & Sendable) async {
       await delegate.delegate.delegate.set(presentationContext: presentationContext)
     }
 

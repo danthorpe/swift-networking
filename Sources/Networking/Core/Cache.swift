@@ -3,7 +3,7 @@ import Dependencies
 import DependenciesMacros
 import Foundation
 
-public final class Cache<Key: Hashable, Value> {
+public final class Cache<Key: Hashable & Sendable, Value> {
   private let _cache = NSCache<CacheKey, CacheObject>()
   private let keyAccess = KeyAccess()
 
@@ -11,6 +11,8 @@ public final class Cache<Key: Hashable, Value> {
     _cache.delegate = keyAccess
   }
 }
+
+extension Cache: @unchecked Sendable where Value: Sendable { }
 
 extension Cache {
   public var countLimit: Int {
@@ -80,7 +82,7 @@ private extension Cache {
 }
 
 extension Cache {
-  final class CacheKey: NSObject {
+  final class CacheKey: NSObject, Sendable {
     let key: Key
     override var hash: Int { key.hashValue }
     init(key: Key) {
@@ -91,7 +93,7 @@ extension Cache {
       return other.key == key
     }
   }
-  final class CacheObject {
+  final class CacheObject: NSObject {
     let cost: Int
     let key: Key
     let value: Value
@@ -103,7 +105,7 @@ extension Cache {
       self.expiresAt = expiresAt
     }
   }
-  final class KeyAccess: NSObject, NSCacheDelegate {
+  final class KeyAccess: NSObject, NSCacheDelegate, Sendable {
     let keys = LockIsolated<Set<Key>>([])
 
     func insert(_ key: Key) {
@@ -160,7 +162,7 @@ extension Cache: Codable where Key: Codable, Value: Codable {
 }
 
 @DependencyClient
-struct CacheClient<Key: Hashable, Value>: Sendable {
+struct CacheClient<Key: Hashable & Sendable, Value: Sendable>: Sendable {
   var insert: @Sendable (_ value: Value, _ forKey: Key, _ cost: Int, _ duration: TimeInterval?) -> Void
   var removeAll: @Sendable () -> Void
   var removeValue: @Sendable (_ forKey: Key) -> Void
@@ -185,11 +187,13 @@ extension CacheClient {
   }
 }
 
-extension CacheClient: NetworkEnvironmentKey where Key == AnyHashable, Value == HTTPResponseData {}
+typealias NetworkCacheClient = CacheClient<HTTPRequestData, HTTPResponseData>
+
+extension NetworkCacheClient: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
-  var cache: CacheClient<AnyHashable, HTTPResponseData>? {
-    get { self[CacheClient<AnyHashable, HTTPResponseData>.self] }
-    set { self[CacheClient<AnyHashable, HTTPResponseData>.self] = newValue }
+  var cache: NetworkCacheClient? {
+    get { self[NetworkCacheClient.self] }
+    set { self[NetworkCacheClient.self] = newValue }
   }
 }

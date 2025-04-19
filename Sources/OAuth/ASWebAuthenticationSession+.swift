@@ -43,7 +43,7 @@ extension ASWebAuthenticationSession {
   }
 }
 
-@MainActor public final class DefaultPresentationContext: NSObject, ASWebAuthenticationPresentationContextProviding {
+@MainActor public final class DefaultPresentationContext: NSObject, ASWebAuthenticationPresentationContextProviding, @unchecked Sendable {
   public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
     #if os(macOS)
     ASPresentationAnchor()

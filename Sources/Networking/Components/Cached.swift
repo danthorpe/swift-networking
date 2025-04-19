@@ -2,9 +2,9 @@ import Dependencies
 import Foundation
 
 extension NetworkingComponent {
-  public func cached(in cache: Cache<AnyHashable, HTTPResponseData>) -> some NetworkingComponent {
+  public func cached(in cache: Cache<HTTPRequestData, HTTPResponseData>) -> some NetworkingComponent {
     modified(Cached()).networkEnvironment(\.cache) {
-      CacheClient<AnyHashable, HTTPResponseData>.liveValue(with: cache)
+      NetworkCacheClient.liveValue(with: cache)
     }
   }
 }

@@ -20,7 +20,7 @@ struct StubOAuthSystem: StandardOAuthSystem {
 }
 
 extension NetworkingComponent {
-  func stubOAuthSystem<ReturnValue>(
+  func stubOAuthSystem<ReturnValue: Sendable>(
     perform: @MainActor (any OAuthProxy<StubOAuthSystem.Credentials>) async throws -> ReturnValue
   ) async throws -> ReturnValue {
     try await oauth(of: StubOAuthSystem.Credentials.self, perform: perform)

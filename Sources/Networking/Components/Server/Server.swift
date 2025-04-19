@@ -14,11 +14,12 @@ extension NetworkingComponent {
   ///   optional Logger if it's configured.
   /// - Returns: some ``NetworkingComponent``
   public func server<Value: Sendable>(
-    mutate keyPath: WritableKeyPath<HTTPRequestData, Value>,
+    mutate _keyPath: WritableKeyPath<HTTPRequestData, Value>,
     with transform: @escaping @Sendable (Value) -> Value,
     log: @escaping @Sendable (Logger?, HTTPRequestData) -> Void
   ) -> some NetworkingComponent {
-    server { request in
+    let keyPath: _SendableWritableKeyPath<HTTPRequestData, Value> = _keyPath.unsafeSendable()
+    return server { request in
       @NetworkEnvironment(\.logger) var logger
       let oldValue = request[keyPath: keyPath]
       let newValue = transform(oldValue)
