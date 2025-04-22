@@ -1,0 +1,664 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6521BF2D2C89873D00FF1968 /* SpotifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6521BF2C2C89873D00FF1968 /* SpotifyApp.swift */; };
+		654631002C91FDDA00A4088E /* SignedOutFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630EF2C91FDDA00A4088E /* SignedOutFeature.swift */; };
+		654631012C91FDDA00A4088E /* SignedOutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F02C91FDDA00A4088E /* SignedOutView.swift */; };
+		654631022C91FDDA00A4088E /* AppFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F22C91FDDA00A4088E /* AppFeature.swift */; };
+		654631032C91FDDA00A4088E /* AppFeatureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F32C91FDDA00A4088E /* AppFeatureView.swift */; };
+		654631042C91FDDA00A4088E /* ArtistsFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F52C91FDDA00A4088E /* ArtistsFeature.swift */; };
+		654631062C91FDDA00A4088E /* SignedInFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F72C91FDDA00A4088E /* SignedInFeature.swift */; };
+		654631072C91FDDA00A4088E /* SignedInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F82C91FDDA00A4088E /* SignedInView.swift */; };
+		654631082C91FDDA00A4088E /* SpotifyClient+PaginatingArtists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630F92C91FDDA00A4088E /* SpotifyClient+PaginatingArtists.swift */; };
+		654631092C91FDDA00A4088E /* Artist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630FB2C91FDDA00A4088E /* Artist.swift */; };
+		6546310A2C91FDDA00A4088E /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630FC2C91FDDA00A4088E /* User.swift */; };
+		6546310B2C91FDDA00A4088E /* SpotifyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654630FE2C91FDDA00A4088E /* SpotifyClient.swift */; };
+		6546310E2C91FE1B00A4088E /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 6546310D2C91FE1B00A4088E /* ComposableArchitecture */; };
+		654631142C91FF7400A4088E /* NetworkClient in Frameworks */ = {isa = PBXBuildFile; productRef = 654631132C91FF7400A4088E /* NetworkClient */; };
+		654631162C91FF7400A4088E /* NetworkClientLive in Frameworks */ = {isa = PBXBuildFile; productRef = 654631152C91FF7400A4088E /* NetworkClientLive */; };
+		654631182C91FF7400A4088E /* Networking in Frameworks */ = {isa = PBXBuildFile; productRef = 654631172C91FF7400A4088E /* Networking */; };
+		6546311A2C91FF7400A4088E /* OAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 654631192C91FF7400A4088E /* OAuth */; };
+		6546311E2C9200F800A4088E /* ArtistsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6546311D2C9200F800A4088E /* ArtistsView.swift */; };
+		6546312B2C94C80F00A4088E /* AppFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6546312A2C94C80F00A4088E /* AppFeatureTests.swift */; };
+		654631332C94CBA700A4088E /* ComposableLoadable in Frameworks */ = {isa = PBXBuildFile; productRef = 654631322C94CBA700A4088E /* ComposableLoadable */; };
+		654631352C94E3ED00A4088E /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631342C94E3ED00A4088E /* TestHelpers.swift */; };
+		654631372C94E72900A4088E /* SignedOutFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631362C94E72900A4088E /* SignedOutFeatureTests.swift */; };
+		654631392C94E97400A4088E /* SignedInFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631382C94E97400A4088E /* SignedInFeatureTests.swift */; };
+		654B89CB2D65BF5C00946F54 /* TestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 654B89CA2D65BF5C00946F54 /* TestSupport */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6546312C2C94C80F00A4088E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6521BF212C89873D00FF1968 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6521BF282C89873D00FF1968;
+			remoteInfo = Spotify;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6521BF292C89873D00FF1968 /* Spotify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spotify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6521BF2C2C89873D00FF1968 /* SpotifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyApp.swift; sourceTree = "<group>"; };
+		6521BF322C89873E00FF1968 /* Spotify.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Spotify.entitlements; sourceTree = "<group>"; };
+		654630EF2C91FDDA00A4088E /* SignedOutFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignedOutFeature.swift; sourceTree = "<group>"; };
+		654630F02C91FDDA00A4088E /* SignedOutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignedOutView.swift; sourceTree = "<group>"; };
+		654630F22C91FDDA00A4088E /* AppFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppFeature.swift; sourceTree = "<group>"; };
+		654630F32C91FDDA00A4088E /* AppFeatureView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppFeatureView.swift; sourceTree = "<group>"; };
+		654630F52C91FDDA00A4088E /* ArtistsFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArtistsFeature.swift; sourceTree = "<group>"; };
+		654630F72C91FDDA00A4088E /* SignedInFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignedInFeature.swift; sourceTree = "<group>"; };
+		654630F82C91FDDA00A4088E /* SignedInView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignedInView.swift; sourceTree = "<group>"; };
+		654630F92C91FDDA00A4088E /* SpotifyClient+PaginatingArtists.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SpotifyClient+PaginatingArtists.swift"; sourceTree = "<group>"; };
+		654630FB2C91FDDA00A4088E /* Artist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Artist.swift; sourceTree = "<group>"; };
+		654630FC2C91FDDA00A4088E /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		654630FE2C91FDDA00A4088E /* SpotifyClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyClient.swift; sourceTree = "<group>"; };
+		654631122C91FF2E00A4088E /* swift-networking */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "swift-networking"; path = ../..; sourceTree = "<group>"; };
+		6546311D2C9200F800A4088E /* ArtistsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtistsView.swift; sourceTree = "<group>"; };
+		654631282C94C80F00A4088E /* SpotifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SpotifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6546312A2C94C80F00A4088E /* AppFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFeatureTests.swift; sourceTree = "<group>"; };
+		654631342C94E3ED00A4088E /* TestHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestHelpers.swift; sourceTree = "<group>"; };
+		654631362C94E72900A4088E /* SignedOutFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedOutFeatureTests.swift; sourceTree = "<group>"; };
+		654631382C94E97400A4088E /* SignedInFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignedInFeatureTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6521BF262C89873D00FF1968 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6546311A2C91FF7400A4088E /* OAuth in Frameworks */,
+				654631332C94CBA700A4088E /* ComposableLoadable in Frameworks */,
+				6546310E2C91FE1B00A4088E /* ComposableArchitecture in Frameworks */,
+				654631162C91FF7400A4088E /* NetworkClientLive in Frameworks */,
+				654631182C91FF7400A4088E /* Networking in Frameworks */,
+				654631142C91FF7400A4088E /* NetworkClient in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		654631252C94C80F00A4088E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				654B89CB2D65BF5C00946F54 /* TestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6521BF202C89873D00FF1968 = {
+			isa = PBXGroup;
+			children = (
+				654631122C91FF2E00A4088E /* swift-networking */,
+				6521BF2B2C89873D00FF1968 /* App */,
+				654631292C94C80F00A4088E /* SpotifyTests */,
+				6568A02A2C898F2400942DF2 /* Frameworks */,
+				6521BF2A2C89873D00FF1968 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6521BF2A2C89873D00FF1968 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6521BF292C89873D00FF1968 /* Spotify.app */,
+				654631282C94C80F00A4088E /* SpotifyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6521BF2B2C89873D00FF1968 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				6546311B2C9200CC00A4088E /* Artists */,
+				654630FA2C91FDDA00A4088E /* SignedIn */,
+				654630F12C91FDDA00A4088E /* SignedOut */,
+				654630FF2C91FDDA00A4088E /* SpotifyClient */,
+				654630F42C91FDDA00A4088E /* AppFeature */,
+				6521BF2C2C89873D00FF1968 /* SpotifyApp.swift */,
+				6521BF322C89873E00FF1968 /* Spotify.entitlements */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		654630F12C91FDDA00A4088E /* SignedOut */ = {
+			isa = PBXGroup;
+			children = (
+				654630EF2C91FDDA00A4088E /* SignedOutFeature.swift */,
+				654630F02C91FDDA00A4088E /* SignedOutView.swift */,
+			);
+			path = SignedOut;
+			sourceTree = "<group>";
+		};
+		654630F42C91FDDA00A4088E /* AppFeature */ = {
+			isa = PBXGroup;
+			children = (
+				654630F22C91FDDA00A4088E /* AppFeature.swift */,
+				654630F32C91FDDA00A4088E /* AppFeatureView.swift */,
+			);
+			path = AppFeature;
+			sourceTree = "<group>";
+		};
+		654630FA2C91FDDA00A4088E /* SignedIn */ = {
+			isa = PBXGroup;
+			children = (
+				654630F72C91FDDA00A4088E /* SignedInFeature.swift */,
+				654630F82C91FDDA00A4088E /* SignedInView.swift */,
+			);
+			path = SignedIn;
+			sourceTree = "<group>";
+		};
+		654630FD2C91FDDA00A4088E /* API */ = {
+			isa = PBXGroup;
+			children = (
+				654630FB2C91FDDA00A4088E /* Artist.swift */,
+				654630FC2C91FDDA00A4088E /* User.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		654630FF2C91FDDA00A4088E /* SpotifyClient */ = {
+			isa = PBXGroup;
+			children = (
+				654630FD2C91FDDA00A4088E /* API */,
+				654630FE2C91FDDA00A4088E /* SpotifyClient.swift */,
+			);
+			path = SpotifyClient;
+			sourceTree = "<group>";
+		};
+		6546311B2C9200CC00A4088E /* Artists */ = {
+			isa = PBXGroup;
+			children = (
+				654630F92C91FDDA00A4088E /* SpotifyClient+PaginatingArtists.swift */,
+				654630F52C91FDDA00A4088E /* ArtistsFeature.swift */,
+				6546311D2C9200F800A4088E /* ArtistsView.swift */,
+			);
+			path = Artists;
+			sourceTree = "<group>";
+		};
+		654631292C94C80F00A4088E /* SpotifyTests */ = {
+			isa = PBXGroup;
+			children = (
+				6546312A2C94C80F00A4088E /* AppFeatureTests.swift */,
+				654631342C94E3ED00A4088E /* TestHelpers.swift */,
+				654631362C94E72900A4088E /* SignedOutFeatureTests.swift */,
+				654631382C94E97400A4088E /* SignedInFeatureTests.swift */,
+			);
+			path = SpotifyTests;
+			sourceTree = "<group>";
+		};
+		6568A02A2C898F2400942DF2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6521BF282C89873D00FF1968 /* Spotify */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6521BF382C89873E00FF1968 /* Build configuration list for PBXNativeTarget "Spotify" */;
+			buildPhases = (
+				6521BF252C89873D00FF1968 /* Sources */,
+				6521BF262C89873D00FF1968 /* Frameworks */,
+				6521BF272C89873D00FF1968 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Spotify;
+			packageProductDependencies = (
+				6546310D2C91FE1B00A4088E /* ComposableArchitecture */,
+				654631132C91FF7400A4088E /* NetworkClient */,
+				654631152C91FF7400A4088E /* NetworkClientLive */,
+				654631172C91FF7400A4088E /* Networking */,
+				654631192C91FF7400A4088E /* OAuth */,
+				654631322C94CBA700A4088E /* ComposableLoadable */,
+			);
+			productName = Spotify;
+			productReference = 6521BF292C89873D00FF1968 /* Spotify.app */;
+			productType = "com.apple.product-type.application";
+		};
+		654631272C94C80F00A4088E /* SpotifyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6546312E2C94C80F00A4088E /* Build configuration list for PBXNativeTarget "SpotifyTests" */;
+			buildPhases = (
+				654631242C94C80F00A4088E /* Sources */,
+				654631252C94C80F00A4088E /* Frameworks */,
+				654631262C94C80F00A4088E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6546312D2C94C80F00A4088E /* PBXTargetDependency */,
+			);
+			name = SpotifyTests;
+			productName = SpotifyTests;
+			productReference = 654631282C94C80F00A4088E /* SpotifyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6521BF212C89873D00FF1968 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+				TargetAttributes = {
+					6521BF282C89873D00FF1968 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					654631272C94C80F00A4088E = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = 6521BF282C89873D00FF1968;
+					};
+				};
+			};
+			buildConfigurationList = 6521BF242C89873D00FF1968 /* Build configuration list for PBXProject "Spotify" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6521BF202C89873D00FF1968;
+			packageReferences = (
+				6546310C2C91FE1B00A4088E /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				6597A2722CA3346A0008C7E9 /* XCRemoteSwiftPackageReference "swift-composable-loadable" */,
+			);
+			productRefGroup = 6521BF2A2C89873D00FF1968 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6521BF282C89873D00FF1968 /* Spotify */,
+				654631272C94C80F00A4088E /* SpotifyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6521BF272C89873D00FF1968 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		654631262C94C80F00A4088E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6521BF252C89873D00FF1968 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6546311E2C9200F800A4088E /* ArtistsView.swift in Sources */,
+				654631022C91FDDA00A4088E /* AppFeature.swift in Sources */,
+				6521BF2D2C89873D00FF1968 /* SpotifyApp.swift in Sources */,
+				654631072C91FDDA00A4088E /* SignedInView.swift in Sources */,
+				654631082C91FDDA00A4088E /* SpotifyClient+PaginatingArtists.swift in Sources */,
+				654631012C91FDDA00A4088E /* SignedOutView.swift in Sources */,
+				654631032C91FDDA00A4088E /* AppFeatureView.swift in Sources */,
+				654631062C91FDDA00A4088E /* SignedInFeature.swift in Sources */,
+				6546310A2C91FDDA00A4088E /* User.swift in Sources */,
+				654631002C91FDDA00A4088E /* SignedOutFeature.swift in Sources */,
+				6546310B2C91FDDA00A4088E /* SpotifyClient.swift in Sources */,
+				654631042C91FDDA00A4088E /* ArtistsFeature.swift in Sources */,
+				654631092C91FDDA00A4088E /* Artist.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		654631242C94C80F00A4088E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6546312B2C94C80F00A4088E /* AppFeatureTests.swift in Sources */,
+				654631392C94E97400A4088E /* SignedInFeatureTests.swift in Sources */,
+				654631372C94E72900A4088E /* SignedOutFeatureTests.swift in Sources */,
+				654631352C94E3ED00A4088E /* TestHelpers.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6546312D2C94C80F00A4088E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6521BF282C89873D00FF1968 /* Spotify */;
+			targetProxy = 6546312C2C94C80F00A4088E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		6521BF362C89873E00FF1968 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		6521BF372C89873E00FF1968 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		6521BF392C89873E00FF1968 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Spotify.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = works.dan.networking.examples.Spotify;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6521BF3A2C89873E00FF1968 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = App/Spotify.entitlements;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = works.dan.networking.examples.Spotify;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6546312F2C94C80F00A4088E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = works.dan.networking.examples.SpotifyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Spotify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Spotify";
+			};
+			name = Debug;
+		};
+		654631302C94C80F00A4088E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MACOSX_DEPLOYMENT_TARGET = 14.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = works.dan.networking.examples.SpotifyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Spotify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Spotify";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6521BF242C89873D00FF1968 /* Build configuration list for PBXProject "Spotify" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6521BF362C89873E00FF1968 /* Debug */,
+				6521BF372C89873E00FF1968 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6521BF382C89873E00FF1968 /* Build configuration list for PBXNativeTarget "Spotify" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6521BF392C89873E00FF1968 /* Debug */,
+				6521BF3A2C89873E00FF1968 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6546312E2C94C80F00A4088E /* Build configuration list for PBXNativeTarget "SpotifyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6546312F2C94C80F00A4088E /* Debug */,
+				654631302C94C80F00A4088E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6546310C2C91FE1B00A4088E /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.16.0;
+			};
+		};
+		6597A2722CA3346A0008C7E9 /* XCRemoteSwiftPackageReference "swift-composable-loadable" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danthorpe/swift-composable-loadable";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6546310D2C91FE1B00A4088E /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6546310C2C91FE1B00A4088E /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		654631132C91FF7400A4088E /* NetworkClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NetworkClient;
+		};
+		654631152C91FF7400A4088E /* NetworkClientLive */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NetworkClientLive;
+		};
+		654631172C91FF7400A4088E /* Networking */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Networking;
+		};
+		654631192C91FF7400A4088E /* OAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OAuth;
+		};
+		654631322C94CBA700A4088E /* ComposableLoadable */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ComposableLoadable;
+		};
+		654B89CA2D65BF5C00946F54 /* TestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TestSupport;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 6521BF212C89873D00FF1968 /* Project object */;
+}
