@@ -72,11 +72,11 @@ struct AuthenticationTests: TestableNetwork {
     let network = TerminalNetworkingComponent()
       .authenticated(withBearer: delegate)
 
-    try await withTestDependencies {
+    await withTestDependencies {
       var request = HTTPRequestData(authority: "example.com")
       request.authenticationMethod = .bearer
 
-      try await #expect(throws: AuthenticationError.fetchCredentialsFailed(request, .bearer, CustomError())) {
+      await #expect(throws: AuthenticationError.fetchCredentialsFailed(request, .bearer, CustomError())) {
         try await network.data(request)
       }
     }

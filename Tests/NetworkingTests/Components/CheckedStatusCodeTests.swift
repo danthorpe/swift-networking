@@ -28,19 +28,19 @@ struct CheckedStatusCodeTests: TestableNetwork {
     }
   }
 
-  @Test func test__internal_server_error() async throws {
-    try await withTestDependencies {
+  @Test func test__internal_server_error() async {
+    await withTestDependencies {
       let (network, expectedResponse) = configureNetwork(for: .internalServerError)
-      try await #expect(throws: StackError(statusCode: expectedResponse)) {
+      await #expect(throws: StackError(statusCode: expectedResponse)) {
         try await network.data(expectedResponse.request)
       }
     }
   }
 
-  @Test func test__unauthorized() async throws {
-    try await withTestDependencies {
+  @Test func test__unauthorized() async {
+    await withTestDependencies {
       let (network, expectedResponse) = configureNetwork(for: .unauthorized)
-      try await #expect(throws: StackError(unauthorized: expectedResponse)) {
+      await #expect(throws: StackError(unauthorized: expectedResponse)) {
         try await network.data(expectedResponse.request)
       }
     }

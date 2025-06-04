@@ -34,16 +34,14 @@ package struct Mutex<Value: ~Copyable>: ~Copyable, Sendable {
       os_unfair_lock_trylock(_lock)
     }
   }
-  let storage: Storage
-}
+  internal let storage: Storage
 
-package extension Mutex {
-  init(_ initialValue: consuming sending Value) {
+  package init(_ initialValue: consuming sending Value) {
     storage = Storage(initialValue: initialValue)
   }
 
   @discardableResult
-  borrowing func withLock<Result, E: Error>(
+  package borrowing func withLock<Result, E: Error>(
     _ body: (inout sending Value) throws(E) -> sending Result
   ) throws(E) -> sending Result {
     storage.lock()
@@ -52,7 +50,7 @@ package extension Mutex {
   }
 
   @discardableResult
-  borrowing func withLockIfAvailable<Result, E: Error>(
+  package borrowing func withLockIfAvailable<Result, E: Error>(
     _ body: (inout sending Value) throws(E) -> sending Result
   ) throws(E) -> sending Result? {
     guard storage.tryLock() else { return nil }

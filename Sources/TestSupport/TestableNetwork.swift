@@ -33,6 +33,7 @@ extension TestableNetwork {
     }
   }
 
+  @discardableResult
   public func withTestDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) -> Void = { _ in },
     operation: () async throws -> R
