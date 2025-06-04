@@ -4,7 +4,6 @@
 var package = Package(
   name: "swift-networking",
   swiftLanguageModes: [
-    .v5,
     .version("6"),
   ]
 )
@@ -47,7 +46,9 @@ let 📦 = Module.builder(
 
 Helpers
   <+ 📦 {
-    $0.createUnitTests = false
+    $0.unitTestsDependsOn = [
+      TestSupport
+    ]
   }
 
 NetworkClient
@@ -115,7 +116,6 @@ TestSupport
     $0.createProduct = .library(nil)
     $0.dependsOn = [
       Networking,
-      Helpers,
     ]
   }
 

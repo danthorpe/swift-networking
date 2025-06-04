@@ -1,89 +1,64 @@
 import Foundation
 
 extension AsyncSequence where Self: Sendable, Self.Element: Sendable {
-
   public func shared() -> SharedAsyncSequence<Self> {
     SharedAsyncSequence(self)
   }
 }
 
-public struct SharedAsyncSequence<Base: AsyncSequence>: Sendable where Base: Sendable, Base.Element: Sendable {
-
+public final class SharedAsyncSequence<Base: AsyncSequence>: Sendable where Base: Sendable, Base.Element: Sendable {
   fileprivate typealias Stream = AsyncThrowingStream<Base.Element, Error>
+  private typealias Continuations = [String: Stream.Continuation]
+  private typealias Subscription = Task<Void, Never>
 
-  fileprivate actor Coordinator {
-    var base: Base
-    var continuations: [String: Stream.Continuation] = [:]
-    var subscription: Task<Void, Never>?
-
-    init(_ base: Base) {
-      self.base = base
-    }
-
-    deinit {
-      self.subscription?.cancel()
-    }
-
-    func add(id: String, continuation: Stream.Continuation) {
-      self.continuations[id] = continuation
-      self.subscribe()
-    }
-
-    func remove(id: String) {
-      continuations.removeValue(forKey: id)
-    }
-
-    func subscribe() {
-      guard subscription == nil else { return }
-      subscription = Task {
-        func isCancelled() -> Bool {
-          if Task.isCancelled {
-            continuations.values.forEach {
-              $0.finish(throwing: CancellationError())
-            }
-            return true
-          }
-          return false
-        }
-
-        guard false == isCancelled() else { return }
-
-        do {
-          for try await value in base {
-            continuations.values.forEach { $0.yield(value) }
-            try Task.checkCancellation()
-          }
-          if false == isCancelled() {
-            continuations.values.forEach { $0.finish() }
-          }
-        } catch {
-          continuations.values.forEach { $0.finish(throwing: error) }
-        }
-      }
-    }
-
-    nonisolated func makeAsyncIterator() -> Stream.AsyncIterator {
-      let id = UUID().uuidString
-      let sequence = Stream { continuation in
-        continuation.onTermination = { @Sendable _ in
-          Task {
-            await self.remove(id: id)
-          }
-        }
-        Task {
-          await self.add(id: id, continuation: continuation)
-        }
-      }
-      return sequence.makeAsyncIterator()
-    }
+  private struct Storage: Sendable {
+    var continuations: Continuations = [:]
+    var subscription: Subscription?
   }
 
-  private var base: Base
-  fileprivate var coordinator: Coordinator
+  private let base: Base
+  private let storage = Mutex(Storage())
 
   init(_ base: Base) {
     self.base = base
-    self.coordinator = Coordinator(base)
+  }
+
+  private func remove(id key: String) {
+    storage.withLock { $0.continuations.removeValue(forKey: key) }
+  }
+
+  private func add(id key: String, continuation: Stream.Continuation) {
+    storage.withLock {
+      $0.continuations[key] = continuation
+      if $0.subscription == nil {
+        $0.subscription = createSubscription()
+      }
+    }
+  }
+
+  private func createSubscription() -> Subscription {
+    Subscription {
+      func forEachContinuation(perform operation: (Stream.Continuation) -> Void) {
+        storage.withLock { $0.continuations.values }.forEach(operation)
+      }
+      func isCancelled() -> Bool {
+        guard Task.isCancelled else { return false }
+        forEachContinuation { $0.finish(throwing: CancellationError()) }
+        return true
+      }
+      guard !isCancelled() else { return }
+      do {
+        for try await element in base {
+          forEachContinuation { $0.yield(element) }
+          try Task.checkCancellation()
+        }
+        if !isCancelled() {
+          forEachContinuation { $0.finish() }
+        }
+      } catch {
+        forEachContinuation { $0.finish(throwing: error) }
+      }
+    }
   }
 }
 
@@ -92,6 +67,13 @@ extension SharedAsyncSequence: AsyncSequence {
   public typealias Element = Base.Element
 
   public func makeAsyncIterator() -> AsyncThrowingStream<Base.Element, Error>.Iterator {
-    coordinator.makeAsyncIterator()
+    let id = UUID().uuidString
+    let (stream, continuation) = Stream.makeStream()
+    continuation.onTermination = { [weak self] reason in
+      guard case .cancelled = reason else { return }
+      self?.remove(id: id)
+    }
+    add(id: id, continuation: continuation)
+    return stream.makeAsyncIterator()
   }
 }

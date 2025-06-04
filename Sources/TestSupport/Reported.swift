@@ -1,4 +1,3 @@
-import Helpers
 import Networking
 
 public protocol NetworkReportingComponent: Actor {

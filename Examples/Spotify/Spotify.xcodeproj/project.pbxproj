@@ -30,7 +30,6 @@
 		654631352C94E3ED00A4088E /* TestHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631342C94E3ED00A4088E /* TestHelpers.swift */; };
 		654631372C94E72900A4088E /* SignedOutFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631362C94E72900A4088E /* SignedOutFeatureTests.swift */; };
 		654631392C94E97400A4088E /* SignedInFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654631382C94E97400A4088E /* SignedInFeatureTests.swift */; };
-		654B89CB2D65BF5C00946F54 /* TestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 654B89CA2D65BF5C00946F54 /* TestSupport */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,7 +84,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				654B89CB2D65BF5C00946F54 /* TestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -653,10 +651,6 @@
 		654631322C94CBA700A4088E /* ComposableLoadable */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = ComposableLoadable;
-		};
-		654B89CA2D65BF5C00946F54 /* TestSupport */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = TestSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

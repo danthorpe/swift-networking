@@ -39,7 +39,7 @@ extension OAuth {
   }
 }
 
-extension OAuth.InstalledSystems: TestDependencyKey {
+extension OAuth.InstalledSystems: DependencyKey {
   public static let testValue = OAuth.InstalledSystems()
 
   public static func basic() -> Self {
@@ -65,6 +65,8 @@ extension OAuth.InstalledSystems: TestDependencyKey {
       }
     )
   }
+
+  public static let liveValue = OAuth.InstalledSystems.basic()
 }
 
 extension DependencyValues {

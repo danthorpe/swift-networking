@@ -52,3 +52,14 @@ extension ASWebAuthenticationSession {
     #endif
   }
 }
+
+@MainActor public final class AnyASWebAuthenticationPresentationContextProviding: NSObject, ASWebAuthenticationPresentationContextProviding, Sendable {
+  let presentationAnchor: (ASWebAuthenticationSession) -> ASPresentationAnchor
+  public init<Base: ASWebAuthenticationPresentationContextProviding>(_ base: Base) {
+    self.presentationAnchor = { base.presentationAnchor(for: $0) }
+  }
+
+  public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+    presentationAnchor(session)
+  }
+}

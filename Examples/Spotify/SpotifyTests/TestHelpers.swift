@@ -53,7 +53,7 @@ extension URL {
   }
 }
 
-extension URL: ExpressibleByStringLiteral {
+extension URL: @retroactive ExpressibleByStringLiteral {
   public init(stringLiteral value: StaticString) {
     self.init(static: value)
   }

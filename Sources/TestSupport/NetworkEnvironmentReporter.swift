@@ -1,4 +1,3 @@
-import Helpers
 import Networking
 
 public actor NetworkEnvironmentReporter<Value: Sendable>: NetworkReportingComponent {
