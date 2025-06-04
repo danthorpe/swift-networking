@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/danthorpe/swift-utilities",
       "state" : {
-        "revision" : "e8a8fda6566e4708ca24b46406fa3c5aa0ac13d0",
-        "version" : "0.5.0"
+        "revision" : "615c4fbf115a584057b978b2c18a4c75198f4d61",
+        "version" : "0.7.0"
       }
     },
     {
