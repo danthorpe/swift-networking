@@ -30,7 +30,7 @@ struct DuplicatesRemovedTests: TestableNetwork {
         .duplicatesRemoved()
 
       try await withThrowingTaskGroup(of: HTTPResponseData.self) { group in
-        for _ in 0 ..< 4 {
+        for _ in 0 ..< 40 {
           group.addTask {
             try await network.data(request1)
           }
@@ -49,7 +49,7 @@ struct DuplicatesRemovedTests: TestableNetwork {
         for try await response in group {
           responses.append(response)
         }
-        #expect(responses.count == 16)
+        #expect(responses.count == 160)
       }
     }
 

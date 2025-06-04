@@ -47,7 +47,7 @@ final class AppFeatureTests: XCTestCase {
     }
     // Configure successful sign in
     store.dependencies.spotify.signIn = { @Sendable context in
-      XCTAssertNil(context)
+      XCTAssertNotNil(context)
       await self.credentialsDidChangeChannel.send(.mock)
     }
     await store.send(.signedOut(.view(.signInButtonTapped)))

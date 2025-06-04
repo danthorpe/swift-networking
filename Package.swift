@@ -4,7 +4,6 @@
 var package = Package(
   name: "swift-networking",
   swiftLanguageModes: [
-    .v5,
     .version("6"),
   ]
 )

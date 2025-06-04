@@ -17,8 +17,9 @@ struct Spotify {
     var followedArtists: @Sendable (_ after: String?, _ limit: Int?) async throws -> Artists
     var me: @Sendable () async throws -> User
     var setExistingCredentials: @Sendable (Credentials) async throws -> Void
-    var signIn:
-      @Sendable (_ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?) async throws -> Void
+    var signIn: @MainActor (
+      _ presentationContext: (any ASWebAuthenticationPresentationContextProviding)?
+    ) async throws -> Void
     var signOut: @Sendable () async throws -> Void
 
     func followedArtists(after cursor: String? = nil) async throws -> Artists {
@@ -101,9 +102,9 @@ extension Spotify.Client: DependencyKey {
     },
     signIn: { context in
       if let context {
-        let sendable = UncheckedSendable(context)
+        let context = AnyASWebAuthenticationPresentationContextProviding(context)
         try await Spotify.api.spotify {
-          await $0.set(presentationContext: sendable.value)
+          await $0.set(presentationContext: context)
         }
       }
       try await Spotify.api.spotify {

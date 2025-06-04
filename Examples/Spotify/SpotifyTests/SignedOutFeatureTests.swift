@@ -13,7 +13,7 @@ final class SignedOutFeatureTests: XCTestCase {
       SignedOutFeature()
     } withDependencies: {
       $0.spotify.signIn = { @Sendable context in
-        XCTAssertNil(context)
+        XCTAssertNotNil(context)
       }
     }
     await store.send(.view(.signInButtonTapped))
@@ -28,7 +28,7 @@ final class SignedOutFeatureTests: XCTestCase {
       SignedOutFeature()
     } withDependencies: {
       $0.spotify.signIn = { @Sendable context in
-        XCTAssertNil(context)
+        XCTAssertNotNil(context)
         throw DummyError.signInFailed
       }
     }

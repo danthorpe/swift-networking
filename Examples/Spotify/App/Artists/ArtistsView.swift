@@ -2,7 +2,7 @@ import ComposableArchitecture
 import ComposableLoadable
 import SwiftUI
 
-struct ArtistsView {
+struct ArtistsView: View {
   let store: StoreOf<ArtistsFeature>
 
   #if os(macOS)
@@ -12,9 +12,6 @@ struct ArtistsView {
   #else
   let columns = Array(repeating: GridItem(.fixed(120), spacing: 0), count: 3)
   #endif
-}
-
-extension ArtistsView: View {
 
   var body: some View {
     WithPerceptionTracking {

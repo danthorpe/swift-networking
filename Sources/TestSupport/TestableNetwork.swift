@@ -33,7 +33,6 @@ extension TestableNetwork {
     }
   }
 
-  @discardableResult
   public func withTestDependencies<R>(
     _ updateValuesForOperation: (inout DependencyValues) -> Void = { _ in },
     operation: () async throws -> R
@@ -44,6 +43,21 @@ extension TestableNetwork {
       updateValuesForOperation(&$0)
     } operation: {
       try await operation()
+    }
+  }
+
+  public func withTestDependencies(
+    _ updateValuesForOperation: (inout DependencyValues) -> Void = { _ in },
+    operation: @Sendable () async throws -> Void
+  ) async rethrows -> Void {
+    try await withDependencies {
+      $0.shortID = .incrementing
+      $0.continuousClock = TestClock()
+      updateValuesForOperation(&$0)
+    } operation: {
+      try await withMainSerialExecutor {
+        try await operation()
+      }
     }
   }
 }
