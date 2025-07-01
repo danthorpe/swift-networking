@@ -1,5 +1,5 @@
 {
-  "originHash" : "27928314ceb0ccb467ecf2e8d15a351f36d0e07470b20ce63492f5995e93e585",
+  "originHash" : "948465db7c9d5ea2c82c45a2da2bb2f18ca73fb32f61f8b80d3f2c78b5e20c88",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-docc-plugin",
       "state" : {
-        "revision" : "85e4bb4e1cd62cec64a4b8e769dcefdf0c5b9d64",
-        "version" : "1.4.3"
+        "revision" : "3e4f133a77e644a5812911a0513aeb7288b07d06",
+        "version" : "1.4.5"
       }
     },
     {
