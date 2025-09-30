@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics",
       "state" : {
-        "revision" : "e0ec0f5f3af6f3e4d5e7a19d2af26b481acb6ba8",
-        "version" : "1.0.3"
+        "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
+        "version" : "1.1.1"
       }
     },
     {
