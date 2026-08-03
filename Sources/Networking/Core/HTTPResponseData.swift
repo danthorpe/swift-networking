@@ -130,7 +130,7 @@ extension HTTPResponseData {
   }
 
   public var prettyPrintedBody: String {
-    data.prettyPrintedData
+    data.prettyPrintedData()
   }
 }
 
