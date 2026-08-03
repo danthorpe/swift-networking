@@ -175,6 +175,7 @@ extension OAuth.AvailableSystems {
       }
 
       http.serverMutations = .disabled
+      http.redactedBodyFields = OAuth.redactedBodyFields
 
       return try await upstream.value(http, as: Credentials.self, decoder: JSONDecoder()).body
     }
