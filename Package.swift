@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.1
 @preconcurrency import PackageDescription
 
 var package = Package(
@@ -127,15 +127,15 @@ TestSupport
 // MARK: - 👜 3rd Party Dependencies
 
 package.dependencies = [
-  .package(url: "https://github.com/apple/swift-algorithms", from: "1.0.0"),
-  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.2.2"),
-  .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
-  .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
-  .package(url: "https://github.com/apple/swift-http-types", from: "1.0.0"),
-  .package(url: "https://github.com/apple/swift-numerics", from: "1.0.0"),
-  .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.5.0"),
-  .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.0.0"),
-  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.6.0"),
+  .package(url: "https://github.com/apple/swift-algorithms", from: "1.2.0"),
+  .package(url: "https://github.com/apple/swift-argument-parser", from: "1.8.0"),
+  .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.1.0"),
+  .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.5.0"),
+  .package(url: "https://github.com/apple/swift-http-types", from: "1.6.0"),
+  .package(url: "https://github.com/apple/swift-numerics", from: "1.1.0"),
+  .package(url: "https://github.com/danthorpe/swift-utilities", from: "0.7.0"),
+  .package(url: "https://github.com/pointfreeco/swift-concurrency-extras", from: "1.4.0"),
+  .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.14.0"),
   .package(url: "https://github.com/pointfreeco/swift-tagged", from: "0.10.0"),
 ]
 
