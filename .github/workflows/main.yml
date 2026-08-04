@@ -22,9 +22,9 @@ jobs:
         {
           "include": [
             {
-              "os": "macos-15",
-              "swift": "6.0",
-              "xcode": "16.1"
+              "os": "macos-26",
+              "swift": "6.3",
+              "xcode": "26.6"
             }
           ]
         }

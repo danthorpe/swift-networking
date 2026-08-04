@@ -44,7 +44,7 @@ extension NetworkingComponent {
   }
 }
 
-extension Logger: @unchecked Sendable, NetworkEnvironmentKey {}
+extension Logger: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var logger: Logger? {
@@ -53,7 +53,7 @@ extension NetworkEnvironmentValues {
   }
 }
 
-extension OSSignposter: @unchecked Sendable, NetworkEnvironmentKey {}
+extension OSSignposter: NetworkEnvironmentKey {}
 
 extension NetworkEnvironmentValues {
   public var signposter: OSSignposter? {
