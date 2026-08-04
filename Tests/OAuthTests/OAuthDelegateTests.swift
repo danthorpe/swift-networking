@@ -131,7 +131,7 @@ struct OAuthDelegateTests: TestableNetwork {
     } operation: {
 
       @Sendable func checkForRefresh(in request: HTTPRequestData) -> Bool {
-        request.prettyPrintedBody.contains(
+        String(decoding: request.body ?? Data(), as: UTF8.self).contains(
           "grant_type=refresh_token&refresh_token=\(expired.refreshToken)"
         )
       }
