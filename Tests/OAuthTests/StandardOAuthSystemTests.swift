@@ -64,7 +64,7 @@ struct StandardOAuthSystemTests: TestableNetwork {
       let network = try TerminalNetworkingComponent()
         .mocked(.ok(body: JSONBody(expectedCredentials))) { request in
           // Check the POST body
-          request.prettyPrintedBody
+          String(decoding: request.body ?? Data(), as: UTF8.self)
             == "grant_type=authorization_code&code=\(code)&redirect_uri=\(redirectURI)&client_id=\(clientId)&code_verifier=\(codeVerifier)"
         }
         // Note that this is not the token endpoint, to simulate an API client
@@ -105,7 +105,7 @@ struct StandardOAuthSystemTests: TestableNetwork {
       let network = try TerminalNetworkingComponent()
         .mocked(.ok(body: JSONBody(expectedCredentials))) { request in
           // Check the POST body
-          request.prettyPrintedBody
+          String(decoding: request.body ?? Data(), as: UTF8.self)
             == "grant_type=refresh_token&refresh_token=\(expiredCredentials.refreshToken)&client_id=\(clientId)"
         }
         // Note that this is not the token endpoint, to simulate an API client

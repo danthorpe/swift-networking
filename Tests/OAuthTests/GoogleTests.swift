@@ -103,7 +103,7 @@ struct GoogleTests: TestableNetwork {
     } operation: {
       let network = try TerminalNetworkingComponent()
         .mocked(.ok(body: JSONBody(responseBody))) { request in
-          request.prettyPrintedBody
+          String(decoding: request.body ?? Data(), as: UTF8.self)
             == "grant_type=authorization_code&code=\(code)&redirect_uri=\(redirectURI)&client_id=\(clientId)&code_verifier=\(codeVerifier)"
         }
         .server(authority: "www.googleapis.com")
@@ -135,7 +135,7 @@ struct GoogleTests: TestableNetwork {
     } operation: {
       let network = try TerminalNetworkingComponent()
         .mocked(.ok(body: JSONBody(responseBody))) { request in
-          request.prettyPrintedBody
+          String(decoding: request.body ?? Data(), as: UTF8.self)
             == "grant_type=refresh_token&refresh_token=\(expired.refreshToken)&client_id=\(clientId)"
         }
         .server(authority: "www.googleapis.com")
