@@ -121,6 +121,7 @@ struct GoogleTests: TestableNetwork {
   }
 
   @Test func test__refresh_credentials_carries_prior_refresh_token() async throws {
+    let reporter = TestReporter()
     let clientId = system.clientId
     let expired = OAuth.AvailableSystems.Google.Credentials(
       accessToken: "expired_access", expiresIn: 0, refreshToken: "the_refresh_token",
@@ -138,12 +139,19 @@ struct GoogleTests: TestableNetwork {
           String(decoding: request.body ?? Data(), as: UTF8.self)
             == "grant_type=refresh_token&refresh_token=\(expired.refreshToken)&client_id=\(clientId)"
         }
-        .server(authority: "www.googleapis.com")
+        // Note that this is not the token endpoint, to simulate an API client
+        .server(authority: "photoslibrary.googleapis.com")
+        .reported(by: reporter)
 
       let refreshed = try await system.refreshCredentials(expired, using: network)
 
       #expect(refreshed.accessToken == "updated_access")
       #expect(refreshed.refreshToken == "the_refresh_token")  // carried forward
+
+      // The refresh POST must reach Google's token endpoint even though the enclosing stack
+      // targets the API host — `post` sends an absolute URL with server mutations disabled.
+      let requests = await reporter.requests.compactMap(\.url?.absoluteString)
+      #expect(requests == [system.tokenEndpoint])
     }
   }
 
