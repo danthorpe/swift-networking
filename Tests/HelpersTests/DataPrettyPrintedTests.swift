@@ -55,4 +55,56 @@ struct DataPrettyPrintedTests {
     let body = data("just a plain log line, no structure")
     #expect(body.prettyPrintedData(redacting: ["access_token"]) == "just a plain log line, no structure")
   }
+
+  // MARK: - Content type & size
+
+  @Test func binaryBodyIsSummarisedNotDecoded() {
+    let body = Data(repeating: 0xFF, count: 4096)
+    let out = body.prettyPrintedData(contentType: "application/octet-stream")
+    #expect(out == "<4096 bytes of application/octet-stream>")
+  }
+
+  @Test func imageBodyIsSummarised() {
+    let body = Data(repeating: 0x00, count: 10)
+    #expect(body.prettyPrintedData(contentType: "image/heic") == "<10 bytes of image/heic>")
+  }
+
+  @Test func textualBodyWithParametersIsStillDecoded() {
+    let body = data(#"{"a":1}"#)
+    #expect(body.prettyPrintedData(contentType: "application/json; charset=utf-8") == #"{"a":1}"#)
+  }
+
+  @Test func vendorJSONSuffixIsTextual() {
+    let body = data(#"{"a":1}"#)
+    #expect(body.prettyPrintedData(contentType: "application/vnd.api+json") == #"{"a":1}"#)
+  }
+
+  @Test func unknownContentTypeIsTreatedAsTextual() {
+    let body = data("hello")
+    #expect(body.prettyPrintedData() == "hello")
+  }
+
+  @Test func oversizedTextualBodyIsSummarised() {
+    let body = Data(repeating: UInt8(ascii: "a"), count: Data.prettyPrintedByteLimit + 1)
+    let out = body.prettyPrintedData(contentType: "text/plain")
+    #expect(out == "<8193 bytes, too large to log>")
+  }
+
+  @Test func bodyAtTheLimitIsStillDecoded() {
+    let body = Data(repeating: UInt8(ascii: "a"), count: Data.prettyPrintedByteLimit)
+    #expect(body.prettyPrintedData(contentType: "text/plain").count == Data.prettyPrintedByteLimit)
+  }
+
+  @Test func redactionStillAppliesWithinTheLimit() {
+    let body = data(#"{"access_token":"secret"}"#)
+    let out = body.prettyPrintedData(redacting: ["access_token"], contentType: "application/json")
+    #expect(out.contains("<redacted>"))
+    #expect(!out.contains("secret"))
+  }
+
+  @Test func binaryBodyIsNotDecodedEvenWhenRedacting() {
+    let body = Data(repeating: 0xFF, count: 32)
+    let out = body.prettyPrintedData(redacting: ["access_token"], contentType: "application/octet-stream")
+    #expect(out == "<32 bytes of application/octet-stream>")
+  }
 }

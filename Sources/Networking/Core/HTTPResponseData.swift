@@ -130,7 +130,10 @@ extension HTTPResponseData {
   }
 
   public var prettyPrintedBody: String {
-    data.prettyPrintedData(redacting: request.redactedBodyFields)
+    data.prettyPrintedData(
+      redacting: request.redactedBodyFields,
+      contentType: http.headerFields[.contentType]
+    )
   }
 }
 
