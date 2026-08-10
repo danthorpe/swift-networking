@@ -294,7 +294,10 @@ extension HTTPRequestData {
   }
 
   public var prettyPrintedBody: String {
-    body?.prettyPrintedData(redacting: redactedBodyFields) ?? "No data"
+    body?.prettyPrintedData(
+      redacting: redactedBodyFields,
+      contentType: headerFields[.contentType]
+    ) ?? "No data"
   }
 }
 
