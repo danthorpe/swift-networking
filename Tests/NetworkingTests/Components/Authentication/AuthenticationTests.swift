@@ -123,4 +123,62 @@ struct AuthenticationTests: TestableNetwork {
     #expect(authorizeCount == 1)
     #expect(refreshCount == 1)
   }
+
+  /// A failure which is not a 401 has no refresh to attempt, so it must be reported to the caller.
+  /// Leaving the response stream unfinished instead strands the request until its timeout.
+  @Test func test__authentication__non_unauthorized_failure_throws() async throws {
+    let delegate = TestAuthenticationDelegate(
+      authorize: {
+        BearerCredentials(token: "token")
+      }
+    )
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.status(.forbidden), check: { _ in true })
+      .authenticated(withBearer: delegate)
+
+    await withTestDependencies {
+      var request = HTTPRequestData(authority: "example.com")
+      request.authenticationMethod = .bearer
+
+      do {
+        try await network.data(request)
+        Issue.record("Expected the forbidden status code to be thrown")
+      } catch {
+        #expect((error as? any NetworkingError)?.response?.status == .forbidden)
+      }
+    }
+  }
+
+  /// The live failure mode: an expired access token gets a 401, and the refresh which follows is
+  /// itself rejected (Google answers `invalid_grant` when the refresh token has been revoked). The
+  /// refresh error must reach the caller rather than stranding the request.
+  @Test func test__authentication__refresh_failure_throws() async throws {
+    struct CustomError: Error, Hashable {}
+
+    let delegate = TestAuthenticationDelegate(
+      authorize: {
+        BearerCredentials(token: "token")
+      },
+      refresh: { _, _ in
+        throw CustomError()
+      }
+    )
+
+    let network = TerminalNetworkingComponent()
+      .mocked(.status(.unauthorized), check: { _ in true })
+      .authenticated(withBearer: delegate)
+
+    await withTestDependencies {
+      var request = HTTPRequestData(authority: "example.com")
+      request.authenticationMethod = .bearer
+
+      do {
+        try await network.data(request)
+        Issue.record("Expected the refresh failure to be thrown")
+      } catch {
+        #expect(error is AuthenticationError)
+      }
+    }
+  }
 }

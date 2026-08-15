@@ -46,20 +46,29 @@ struct Authentication<Delegate: AuthenticationDelegate>: NetworkingModifier {
             continuation.yield(event)
           }
           continuation.finish()
-        } catch let error as NetworkingError {
-          guard let response = error.isUnauthorizedResponse else {
-            throw error
+        } catch {
+          // Only an unauthorized response can be recovered from, by refreshing the credentials.
+          // Every other failure belongs to the caller.
+          guard
+            let response = (error as? any NetworkingError)?.isUnauthorizedResponse
+          else {
+            continuation.finish(throwing: error)
+            return
           }
 
-          let newRequest = try await refresh(
-            unauthorized: &credentials,
-            response: response,
-            continuation: continuation
-          )
+          do {
+            let retriedRequest = try await refresh(
+              unauthorized: &credentials,
+              response: response,
+              continuation: continuation
+            )
 
-          upstream.send(newRequest).redirect(into: continuation)
-        } catch {
-          continuation.finish(throwing: error)
+            upstream.send(retriedRequest).redirect(into: continuation)
+          } catch {
+            // A refresh which itself fails - an expired or revoked refresh token, say - leaves
+            // nothing to retry. Reporting it is what stops the request hanging until it times out.
+            continuation.finish(throwing: error)
+          }
         }
       }
     }
