@@ -126,7 +126,10 @@ extension HTTPResponseData: CustomDebugStringConvertible {
 
 extension HTTPResponseData {
   public var prettyPrintedHeaders: String {
-    http.headerFields.prettyPrintedDescription(title: "📬 Response Headers")
+    http.headerFields.prettyPrintedDescription(
+      title: "📬 Response Headers",
+      redacting: request.redactedHeaderFields
+    )
   }
 
   public var prettyPrintedBody: String {

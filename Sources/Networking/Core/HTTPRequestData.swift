@@ -290,7 +290,10 @@ extension HTTPRequestData {
   }
 
   public var prettyPrintedHeaders: String {
-    headerFields.prettyPrintedDescription(title: "📮 Request Headers")
+    headerFields.prettyPrintedDescription(
+      title: "📮 Request Headers",
+      redacting: redactedHeaderFields
+    )
   }
 
   public var prettyPrintedBody: String {
